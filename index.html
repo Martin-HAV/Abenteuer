@@ -61,7 +61,7 @@
     </div>
 
     <script>
-        // EINGEBAUTE STANDARD-STORY (Falls abenteuer.txt nicht geladen werden kann)
+        // EINGEBAUTE STANDARD-STORY (Falls abenteuer.json nicht geladen werden kann)
         const defaultAdventure = {
             "1": {
                 "title": "Der Eingangsbereich_backup",
@@ -190,15 +190,15 @@
             }
         };
 
-        // Lädt die abenteuer.txt dynamisch und rendert den Raum sofort nach Erfolg
+        // Lädt die abenteuer.json dynamisch und rendert den Raum sofort nach Erfolg
         async function loadAdventureFile() {
             try {
-                const url = currentAdventureFolder + '/abenteuer.txt';
+                const url = currentAdventureFolder + '/abenteuer.json';
                 const response = await fetch(url, { cache: "no-store" });
                 if (response.ok) {
                     const textData = await response.text();
                     adventureData = JSON.parse(textData);
-                    console.log(currentAdventureFolder + "/abenteuer.txt erfolgreich gelesen.");
+                    console.log(currentAdventureFolder + "/abenteuer.json erfolgreich gelesen.");
                 } else {
                     console.log("Ordner oder Datei nicht gefunden (HTTP " + response.status + "). Nutze Backup-Skript.");
                     adventureData = defaultAdventure;

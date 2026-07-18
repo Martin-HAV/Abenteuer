@@ -1,0 +1,132 @@
+{
+  "1": {
+    "title": "Abenteuer",
+    "text": "Jetzt geht es los!",
+    "image": "erde.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Los geht's!", "target": "5" }      
+    ]
+  },
+
+  "2": {
+    "title": "Zur Sonne?",
+    "text": "Nein, das wird jetzt viel zu heiß. Flieg lieber wieder zurück.",
+    "image": "sonne.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Merkur fliegen", "target": "3" }
+    ]
+  },
+
+ "3": {
+    "title": "der Merkur",
+    "text": "Ein wirklich heißer Planet.",
+    "image": "merkur.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zur Sonne fliegen", "target": "2" },
+	{ "text": "Zur Venus fliegen", "target": "4" }
+    ]
+  },
+
+"4": {
+    "title": "die Venus",
+    "text": "Ein heißer Planet, auf dem es Säure regnet.",
+    "image": "venus.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Merkur fliegen.", "target": "3" },
+	{ "text": "Zur Erde fliegen.", "target": "5" }
+    ]
+  },
+
+"5": {
+    "title": "die Erde",
+    "text": "Das ist ein gemütlicher Planet. Wunderbar!",
+    "image": "erde.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zur Venus fliegen.", "target": "4" },
+	{ "text": "Zum Mars fliegen.", "target": "6" }
+    ]
+  },
+
+"6": {
+    "title": "der Mars",
+    "text": "Der rote Planet!",
+    "image": "mars.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zur Erde fliegen.", "target": "5" },
+	{ "text": "Zum Jupiter fliegen.", "target": "7" }
+    ]
+  },
+
+"7": {
+    "title": "der Jupiter",
+    "text": "Wahnsinn, ist der groß!",
+    "image": "jupiter.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Mars fliegen.", "target": "6" },
+	{ "text": "Zum Saturn fliegen.", "target": "8" }
+    ]
+  },
+
+"8": {
+    "title": "der Saturn",
+    "text": "Das gibt es ja nicht. Der Planet spielt Hula Hupp!",
+    "image": "saturn.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Jupiter fliegen.", "target": "7" },
+	{ "text": "Zum Uranus fliegen.", "target": "9" }
+    ]
+  },
+
+"9": {
+    "title": "der Uranus",
+    "text": "der Uranus",
+    "image": "uranus.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Saturn fliegen.", "target": "8" },
+	{ "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  },
+
+"10": {
+    "title": "der Neptun",
+    "text": "der Neptun",
+    "image": "neptun.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Uranus fliegen.", "target": "9" },
+	{ "text": "Zum Pluto fliegen.", "target": "11" }
+    ]
+  },
+
+"11": {
+    "title": "ein Schild",
+    "text": "Wieso ist hier ein Schild im Weltall?",
+    "image": "schild.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zurück zum Neptun fliegen.", "target": "10" },
+	{ "text": "Weiter zum Plutofliegen.", "target": "12" }
+    ]
+  },
+
+"12": {
+    "title": "der Pluto",
+    "text": "Ui ist der klein!",
+    "image": "pluto.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  }
+
+
+}
