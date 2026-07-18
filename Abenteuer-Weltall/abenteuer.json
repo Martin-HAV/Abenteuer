@@ -160,7 +160,7 @@
     "text": "Beim Aufräumen findest du unter dem Bett eine Sonnenbrille!",
     "target": "item_sonnenbrille",
     "requiredItemNot": "sonnenbrille"
-      }
+      }],
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
     ]
@@ -174,7 +174,7 @@
       {"id": "proviant",
     "text": "Ein leckeres Schinkenbrot!",
     "target": "item_proviant",
-    "requiredItemNot": "proviant"},
+    "requiredItemNot": "proviant"}],
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
     ]
