@@ -137,6 +137,65 @@
     "choices": [
       { "text": "Zurück in's Marsorbit fliegen.", "target": "6" }
     ]
+  },
+
+  "14": {
+    "title": "Das unordentlich Kinderzimmer",
+    "text": "Ein sehr unaufgeräumtes Kinderzimmer",
+    "image": "kinderzimmer1.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Das Zimmer aufräumen.", "setFlag":{"name": "aufräumen", "value": 1}, "target": "15" },
+      { "text": "In das Esszimmer gehen.", "target": "16" }
+    ]
+  },
+
+  "15": {
+    "title": "Ein schönes Kinderzimmer",
+    "text": "Das aufgeräumte Kinderzimmer.",
+    
+    "image": "kinderzimmer2.jpg",
+    "items": ["id": "sonnenbrille",
+    "text": "Beim Aufräumen findest du unter dem Bett eine Sonnenbrille!",
+    "target": "item_sonnenbrille",
+    "requiredItemNot": "sonnenbrille"],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  },
+
+  "16": {
+    "title": "Das Esszimmer",
+    "text": "Im Esszimmer liegt etwas zu Essen.",
+    "image": "esszimmer.jpg",
+    "items": [
+      "id": "proviant",
+    "text": "Ein leckeres Schinkenbrot!",
+    "target": "item_proviant",
+    "requiredItemNot": "proviant"],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  },
+
+  "17": {
+    "title": "Der vergessene Pluto",
+    "text": "Ganz am dunklen Rand, wo die Sonne nur noch wie ein kleiner Stern funkelt, haust der winzige Zwergplanet Pluto. Früher gehörte er stolz zu den großen neun Planeten-Geschwistern, bis die Astronomen ihm seinen großen Titel wegnahmen – ein echtes Unrecht, wie viele Weltraum-Fans finden! Trotz der bitteren Kälte trägt er eine wunderschöne, riesige Ebene aus Stickstoff-Eis auf seinem Bauch, die genau die Form eines großen Herzens hat.",
+    "image": "pluto.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  },
+
+  "18": {
+    "title": "Der vergessene Pluto",
+    "text": "Ganz am dunklen Rand, wo die Sonne nur noch wie ein kleiner Stern funkelt, haust der winzige Zwergplanet Pluto. Früher gehörte er stolz zu den großen neun Planeten-Geschwistern, bis die Astronomen ihm seinen großen Titel wegnahmen – ein echtes Unrecht, wie viele Weltraum-Fans finden! Trotz der bitteren Kälte trägt er eine wunderschöne, riesige Ebene aus Stickstoff-Eis auf seinem Bauch, die genau die Form eines großen Herzens hat.",
+    "image": "pluto.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
   }
 
 
