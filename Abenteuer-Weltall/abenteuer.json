@@ -162,13 +162,13 @@
     "requiredItemNot": "sonnenbrille"
       }],
     "choices": [
-      { "text": "Zum Neptun fliegen.", "target": "10" }
+      { "text": "In das Esszimmer gehen.", "target": "16" }
     ]
   },
 
   "16": {
     "title": "Das Esszimmer",
-    "text": "Im Esszimmer liegt etwas zu Essen.",
+    "text": "Im Esszimmer liegt etwas zu Essen. Und ein Werbeprospekt.",
     "image": "esszimmer.jpg",
     "items": [
       {"id": "proviant",
@@ -176,14 +176,18 @@
     "target": "item_proviant",
     "requiredItemNot": "proviant"}],
     "choices": [
-      { "text": "Zum Neptun fliegen.", "target": "10" }
+      { "text": "In das Kinderzimmer gehen.",  "requiredFlag": { "name": "aufräumen", "value": 0 } "target": "14" },
+      { "text": "In das Kinderzimmer gehen.",  "requiredFlag": { "name": "aufräumen", "value": 1 } "target": "15" },
+      { "text": "Das Werbeprospekt anschauen.", "target": "17" },
+      { "text": "Zum Neukauf gehen.", "target": "18" },
+      { "text": "Mit dem Taxi zum Flughafen fahren.", "target": "19" }
     ]
   },
 
   "17": {
-    "title": "Der vergessene Pluto",
-    "text": "Ganz am dunklen Rand, wo die Sonne nur noch wie ein kleiner Stern funkelt, haust der winzige Zwergplanet Pluto. Früher gehörte er stolz zu den großen neun Planeten-Geschwistern, bis die Astronomen ihm seinen großen Titel wegnahmen – ein echtes Unrecht, wie viele Weltraum-Fans finden! Trotz der bitteren Kälte trägt er eine wunderschöne, riesige Ebene aus Stickstoff-Eis auf seinem Bauch, die genau die Form eines großen Herzens hat.",
-    "image": "pluto.jpg",
+    "title": "Das Werbeprospekt",
+    "text": "Wow, der 1000ste Besucher heute bekommt einen echten Raumanzug geschenkt!",
+    "image": "prospekt.jpg",
     "items": [],
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
@@ -191,8 +195,18 @@
   },
 
   "18": {
-    "title": "Der vergessene Pluto",
-    "text": "Ganz am dunklen Rand, wo die Sonne nur noch wie ein kleiner Stern funkelt, haust der winzige Zwergplanet Pluto. Früher gehörte er stolz zu den großen neun Planeten-Geschwistern, bis die Astronomen ihm seinen großen Titel wegnahmen – ein echtes Unrecht, wie viele Weltraum-Fans finden! Trotz der bitteren Kälte trägt er eine wunderschöne, riesige Ebene aus Stickstoff-Eis auf seinem Bauch, die genau die Form eines großen Herzens hat.",
+    "title": "Beim Neukauf",
+    "text": "Herzlichen Glückwunsch, sie sind der 1000ste Besucher! Sie bekommen einen Raumanzaug geschenkt.",
+    "image": "pluto.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  },
+
+  "19": {
+    "title": "Am Flughafen",
+    "text": "Nach einer langen Taxifahrt kommst du an den Flughafen. Heute gibt es nur einen Flug und zwar zum Guiana Space Center in Französisch-Guayana!",
     "image": "pluto.jpg",
     "items": [],
     "choices": [
