@@ -155,10 +155,12 @@
     "text": "Das aufgeräumte Kinderzimmer.",
     
     "image": "kinderzimmer2.jpg",
-    "items": ["id": "sonnenbrille",
+    "items": [
+      {"id": "sonnenbrille",
     "text": "Beim Aufräumen findest du unter dem Bett eine Sonnenbrille!",
     "target": "item_sonnenbrille",
-    "requiredItemNot": "sonnenbrille"],
+    "requiredItemNot": "sonnenbrille"
+      }
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
     ]
@@ -169,10 +171,10 @@
     "text": "Im Esszimmer liegt etwas zu Essen.",
     "image": "esszimmer.jpg",
     "items": [
-      "id": "proviant",
+      {"id": "proviant",
     "text": "Ein leckeres Schinkenbrot!",
     "target": "item_proviant",
-    "requiredItemNot": "proviant"],
+    "requiredItemNot": "proviant"},
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
     ]
