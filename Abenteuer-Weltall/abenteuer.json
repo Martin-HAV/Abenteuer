@@ -141,7 +141,7 @@
 
   "14": {
     "title": "Das unordentlich Kinderzimmer",
-    "text": "Ein sehr unaufgeräumtes Kinderzimmer",
+    "text": "Ein gewaltiges Chaos beherrscht diesen Raum, als hätte ein wilder Bergtroll darin mit Socken und Spielzeug geworfen! Überall liegen bunte Bausteine wie kleine, fiese Stolperfallen verstreut, und die Decken liegen kreuz und quer auf dem Boden. Es sieht fast so aus, als bräuchte man einen mächtigen Sortier-Zauber, um das Bett überhaupt wiederzufinden. Wählst du den fleißigen Weg des Aufräumens oder flüchtest du lieber schnell durch die Tür?",
     "image": "kinderzimmer1.jpg",
     "items": [],
     "choices": [
@@ -152,12 +152,11 @@
 
   "15": {
     "title": "Ein schönes Kinderzimmer",
-    "text": "Das aufgeräumte Kinderzimmer.",
-    
+    "text": "Hokuspokus, der Spuk ist vorbei! Das Zimmer erstrahlt jetzt in einem so sauberen Glanz, dass selbst die strengsten Zauberer-Lehrer begeistert wären. Alles steht ordentlich in den Regalen, und der Boden ist frei von Stolpersteinen.",    
     "image": "kinderzimmer2.jpg",
     "items": [
       {"id": "sonnenbrille",
-    "text": "Beim Aufräumen findest du unter dem Bett eine Sonnenbrille!",
+    "text": "Doch was ist das? Beim Brav-Sein hast du eine Entdeckung gemacht: Tief unter dem Bett funkeln die dunklen Gläser einer coolen Sonnenbrille, die dort im Staub versteckt lag!",
     "target": "item_sonnenbrille",
     "requiredItemNot": "sonnenbrille"
       }],
@@ -168,16 +167,16 @@
 
   "16": {
     "title": "Das Esszimmer",
-    "text": "Im Esszimmer liegt etwas zu Essen. Und ein Werbeprospekt.",
+    "text": "Du betrittst das Esszimmer, wo ein herrlicher Duft deine Nase umschmeichelt, als wärst du gerade mitten in ein Festmahl in der großen Halle hineingestolpert. Auf dem massiven Holztisch liegt ein buntes, etwas zerknittertes Werbeprospekt, das im Windhauch der offenen Tür leise raschelt.",
     "image": "esszimmer.jpg",
     "items": [
       {"id": "proviant",
-    "text": "Ein leckeres Schinkenbrot!",
+    "text": "Daneben wartet eine echte Stärkung auf dich: Ein meisterhaft geschmiertes Schinkenbrot, das nur darauf wartet, von hungrigen Abenteurern verspeist zu werden.",
     "target": "item_proviant",
     "requiredItemNot": "proviant"}],
     "choices": [
-      { "text": "In das Kinderzimmer gehen.",  "requiredFlag": { "name": "aufräumen", "value": 0 } "target": "14" },
-      { "text": "In das Kinderzimmer gehen.",  "requiredFlag": { "name": "aufräumen", "value": 1 } "target": "15" },
+      { "text": "In das Kinderzimmer gehen.",  "requiredFlag": { "name": "aufräumen", "value": 0 }, "target": "14" },
+      { "text": "In das Kinderzimmer gehen.",  "requiredFlag": { "name": "aufräumen", "value": 1 }, "target": "15" },
       { "text": "Das Werbeprospekt anschauen.", "target": "17" },
       { "text": "Zum Neukauf gehen.", "target": "18" },
       { "text": "Mit dem Taxi zum Flughafen fahren.", "target": "19" }
@@ -186,7 +185,7 @@
 
   "17": {
     "title": "Das Werbeprospekt",
-    "text": "Wow, der 1000ste Besucher heute bekommt einen echten Raumanzug geschenkt!",
+    "text": "Du entfaltest das raschelnde Papier und deine Augen werden so groß wie Untertassen! Die Buchstaben auf der Werbung scheinen fast vor magischer Energie zu tanzen: 'Achtung, Weltraum-Ritter! Der 1000. Besucher des heutigen Tages gewinnt den ultimativen Hauptpreis – einen echten, funkelnden Raumanzug!' Das klingt nach einem Abenteuer, das selbst die mutigsten Entdecker nicht ausschlagen würden!",
     "image": "prospekt.jpg",
     "items": [],
     "choices": [
@@ -196,7 +195,7 @@
 
   "18": {
     "title": "Beim Neukauf",
-    "text": "Herzlichen Glückwunsch, sie sind der 1000ste Besucher! Sie bekommen einen Raumanzaug geschenkt.",
+    "text": "Kaum hast du den Laden betreten, explodiert die Luft förmlich vor buntem Konfetti, und Tröten ertönen aus allen Ecken! Ein fröhlicher Verkäufer strahlt dich an, als hättest du gerade den goldenen Schnatz gefangen: 'Herzlichen Glückwunsch, junger Abenteurer! Du hast das unendliche Glück gepachtet und bist exakt unser 1000. Gast des Tages!' Zum Beweis überreicht er dir feierlich einen schweren, silbern glänzenden Raumanzug, der dich vor jeder Gefahr beschützt.",
     "image": "pluto.jpg",
     "items": [],
     "choices": [
@@ -206,7 +205,7 @@
 
   "19": {
     "title": "Am Flughafen",
-    "text": "Nach einer langen Taxifahrt kommst du an den Flughafen. Heute gibt es nur einen Flug und zwar zum Guiana Space Center in Französisch-Guayana!",
+    "text": "Nach einer wilden, rasanten Fahrt im gelben Taxi stehst du inmitten einer riesigen, trubeligen Halle, in der Menschen wie emsige Ameisen durcheinanderwuseln. Die große Anzeigetafel rattert lautstark und zeigt für heute nur einen einzigen, streng geheimen Sonderflug an. Das Ziel lässt dein Herz höherschlagen: Es geht direkt zum berühmten Guiana Space Center in Südamerika, wo gigantische Raketen in den Himmel ragen!",
     "image": "pluto.jpg",
     "items": [],
     "choices": [
