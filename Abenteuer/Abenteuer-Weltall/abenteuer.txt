@@ -37,7 +37,7 @@
     "items": [],
     "choices": [
       { "text": "Zum Merkur fliegen.", "target": "3" },
-	{ "text": "Zur Erde fliegen.", "target": "3" }
+	{ "text": "Zur Erde fliegen.", "target": "5" }
     ]
   },
 
@@ -87,7 +87,7 @@
 
 "9": {
     "title": "der Uranus",
-    "text": der Uranus",
+    "text": "der Uranus",
     "image": "uranus.jpg",
     "items": [],
     "choices": [
@@ -118,15 +118,15 @@
     ]
   },
 
-"6": {
+"12": {
     "title": "der Pluto",
     "text": "Ui ist der klein!",
-    "image": "pluto",
+    "image": "pluto.jpg",
     "items": [],
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
     ]
-  },
+  }
 
 
 }
