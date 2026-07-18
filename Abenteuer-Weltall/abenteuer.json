@@ -2,7 +2,7 @@
   "1": {
     "title": "Abenteuer",
     "text": "Jetzt geht es los!",
-    "image": "erde.jpg",
+    "image": "start.jpg",
     "items": [],
     "choices": [
       { "text": "Los geht's!", "target": "5" }      
@@ -58,6 +58,7 @@
     "image": "mars.jpg",
     "items": [],
     "choices": [
+      { "text": "Auf dem Mars landen.", "target": "13" },
       { "text": "Zur Erde fliegen.", "target": "5" },
 	{ "text": "Zum Jupiter fliegen.", "target": "7" }
     ]
@@ -125,6 +126,16 @@
     "items": [],
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" }
+    ]
+  }
+
+"13": {
+    "title": "die Marsoberfläche",
+    "text": "Du bist auf der Marsoberfläche gelandet. Vor dir steht ein Außerirdischer. 'Hallo, ich heiße Marsin.' sagt er. Du versuchst mit ihm zu sprechen, aber sonst sagt er nichts.",
+    "image": "marsin.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zurück in's Marsorbit fliegen.", "target": "6" }
     ]
   }
 
