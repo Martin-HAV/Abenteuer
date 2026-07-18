@@ -5,7 +5,7 @@
     "image": "start.jpg",
     "items": [],
     "choices": [
-      { "text": "Los geht's!", "target": "5" }      
+      { "text": "Los geht's!", "target": "14" }      
     ]
   },
 
