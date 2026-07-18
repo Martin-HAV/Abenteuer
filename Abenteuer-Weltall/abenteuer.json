@@ -20,8 +20,8 @@
   },
 
  "3": {
-    "title": "der Merkur",
-    "text": "Ein wirklich heißer Planet.",
+    "title": "Der flinke Merkur",
+    "text": "Merkur ist der flitzende Kobold unter den Planeten und rast schneller um die Sonne als jeder andere! Tagsüber kocht er wie ein Hexenkessel im Zaubertrankunterricht, aber nachts friert er blitzartig zu eiskaltem magischen Eis ein. Weil er keine Luft-Rüstung besitzt, sieht seine Haut ganz wild und zerstochen aus – genau wie die Kraterlandschaft eines uralten Zauberer-Mondes.",
     "image": "merkur.jpg",
     "items": [],
     "choices": [
@@ -31,8 +31,8 @@
   },
 
 "4": {
-    "title": "die Venus",
-    "text": "Ein heißer Planet, auf dem es Säure regnet.",
+    "title": "Die neblige Venus",
+    "text": "Lass dich nicht von ihrem wunderschönen, hellen Glanz täuschen, denn die Venus verbirgt ein giftiges Geheimnis! Sie ist in einen dicken Schleier aus gelben Wolken gehüllt, als hätte ein schelmischer Zauberer eine gigantische Rauchbombe gezündet. Darunter ist es so mörderisch heiß, dass sogar Blei wie Butter schmelzen würde, und es regnet echte Säure vom Himmel!",
     "image": "venus.jpg",
     "items": [],
     "choices": [
@@ -42,8 +42,8 @@
   },
 
 "5": {
-    "title": "die Erde",
-    "text": "Das ist ein gemütlicher Planet. Wunderbar!",
+    "title": "Die lebendige Erde",
+    "text": "Das ist unsere Heimat, die wie ein wunderschöner, saphirblauer Edelstein im dunklen Samt des Universums schwebt! Sie ist der einzige bekannte Ort, auf dem das größte Wunder überhaupt existiert: Echtes Leben, von plätschernden Meeren bis zu dichten Zauberwäldern. Ihre Atmosphäre beschützt uns wie ein mächtiger Schutzzauber vor den Gefahren des kalten Weltalls.",
     "image": "erde.jpg",
     "items": [],
     "choices": [
@@ -53,8 +53,8 @@
   },
 
 "6": {
-    "title": "der Mars",
-    "text": "Der rote Planet!",
+    "title": "Der rostig-rote Mars",
+    "text": "Der Mars sieht aus, als wäre er komplett aus magischem, rötlichen Rost und staubigem Wüstensand erbaut worden. Hier schläft der 'Olympus Mons', der absolut größte Vulkan des ganzen Sonnensystems, der dreimal so hoch in den Himmel ragt wie der Mount Everest! Wissenschaftler schicken eiserne Roboter-Entdecker dorthin, um im roten Sand nach den Spuren von uraltem, verstecktem Wasser zu graben.",
     "image": "mars.jpg",
     "items": [],
     "choices": [
@@ -65,8 +65,8 @@
   },
 
 "7": {
-    "title": "der Jupiter",
-    "text": "Wahnsinn, ist der groß!",
+    "title": "Der riesige Jupiter",
+    "text": "Tritt ein in das Reich des unangefochtenen Königs der Planeten – Jupiter ist so riesig, dass alle anderen Planeten zusammen bequem in seinen Bauch passen würden! Er ist ein wirbelnder Riese aus bunten Gasen und hat keine feste Oberfläche, auf der man landen könnte. Sein berühmter 'Großer Rote Fleck' ist in Wahrheit ein gigantischer Monster-Sturm, der schon seit hunderten von Jahren wütet und niemals schläft",
     "image": "jupiter.jpg",
     "items": [],
     "choices": [
@@ -76,8 +76,8 @@
   },
 
 "8": {
-    "title": "der Saturn",
-    "text": "Das gibt es ja nicht. Der Planet spielt Hula Hupp!",
+    "title": "Der beringte Saturn",
+    "text": "Saturn ist das absolute Prachtstück des Sonnensystems und trägt eine funkelnde Krone aus Milliarden von glitzernden Eis- und Gesteinsbrocken. Seine Ringe sehen aus wie die magischen Spuren eines rasanten Besenrennens im Weltall! Obwohl er so riesig ist, besteht er aus so leichtem Gas, dass er in einer gigantischen Badewanne wie eine gigantische Quietscheente an der Oberfläche schwimmen würde",
     "image": "saturn.jpg",
     "items": [],
     "choices": [
@@ -87,8 +87,8 @@
   },
 
 "9": {
-    "title": "der Uranus",
-    "text": "der Uranus",
+    "title": "Der eisige Uranus",
+    "text": "Hier draußen wird es unheimlich frostig und dunkel, denn der Uranus ist ein blassblauer Eisriese. Das Verrückteste an ihm ist seine Achse: Er kreist nicht aufrecht wie ein Kreisel, sondern rollt wie eine magische Bowlingkugel auf der Seite liegend um die Sonne! Wenn du seine Gase riechen könntest, würdest du dir die Nase zuhalten müssen – dort stinkt es nämlich nach faulen Eiern.",
     "image": "uranus.jpg",
     "items": [],
     "choices": [
@@ -98,8 +98,8 @@
   },
 
 "10": {
-    "title": "der Neptun",
-    "text": "der Neptun",
+    "title": "Der stürmische Neptun",
+    "text": "Neptun leuchtet in einem tiefen, magischen Ozeanblau und ist der windigste Ort im ganzen Universum. Hier peitschen eisige Orkane durch die Luft, die dreimal so schnell jagen wie die schnellsten Düsenjets auf der Erde! Er ist so unendlich weit von der Sonne entfernt, dass ein Jahr auf Neptun fast 165 Jahre auf der Erde dauert – eine Ewigkeit!",
     "image": "neptun.jpg",
     "items": [],
     "choices": [
@@ -115,13 +115,13 @@
     "items": [],
     "choices": [
       { "text": "Zurück zum Neptun fliegen.", "target": "10" },
-	{ "text": "Weiter zum Plutofliegen.", "target": "12" }
+	{ "text": "Weiter zum Pluto fliegen.", "target": "12" }
     ]
   },
 
 "12": {
-    "title": "der Pluto",
-    "text": "Ui ist der klein!",
+    "title": "Der vergessene Pluto",
+    "text": "Ganz am dunklen Rand, wo die Sonne nur noch wie ein kleiner Stern funkelt, haust der winzige Zwergplanet Pluto. Früher gehörte er stolz zu den großen neun Planeten-Geschwistern, bis die Astronomen ihm seinen großen Titel wegnahmen – ein echtes Unrecht, wie viele Weltraum-Fans finden! Trotz der bitteren Kälte trägt er eine wunderschöne, riesige Ebene aus Stickstoff-Eis auf seinem Bauch, die genau die Form eines großen Herzens hat.",
     "image": "pluto.jpg",
     "items": [],
     "choices": [
