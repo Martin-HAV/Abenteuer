@@ -65,7 +65,7 @@
       { "text": "Auf dem Mars landen.", "target": "13", "requiredFlag": { "name": "schalter", "value": 0 } },
       { "text": "Auf dem Mars landen.", "target": "29", "requiredFlag": { "name": "schalter", "value": 0 } },
       { "text": "Zur Erde fliegen.", "target": "5" },
-	{ "text": "Zum Jupiter fliegen.", "target": "7" }
+	{ "text": "Zum Jupiter fliegen.", "target": "38" }
     ]
   },
 
@@ -378,7 +378,7 @@
       { "text": "'Nein, ich gehe zurück!'", "target": "32" }
     ]
   },
-  
+
 
 "34": {
     "title": "Guiana Space Center",
@@ -422,7 +422,20 @@
       { "text": "Das Gebäude und den Pluto verlassen.", "target": "12" }
     ]
   },
-
+   "38": {
+    "title": "Trixaner!",
+    "text": "Oh nein, als du den Mars verlässt rauscht eine Horde Trixaner mit viel zu hoher Geschwindigkeit an dir vorbei. Links, rechts, oben, unten. Du musst mit deine Rakete ausweichen und verlierst die Orientierung. Du musst dein Wissen einsetzen, um das Raumschiff wieder auf Kurs zu bringen. Beantworte die Frage: 'Welcher ist der größte Planet in unserem Sonnensystem?'.",
+    "image": "trixaner.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Die Sonne natürlich", "target": "6" },
+      { "text": "Ganz klar die Erde.", "target": "6" },
+      { "text": "Der Jupiter, ist doch logisch.", "target": "7" },
+      { "text": "Der Saturn, wer sonst?", "target": "6" },
+      { "text": "Der Neptun, weil er so weit weg ist.", "target": "6" },
+      { "text": "Lödl, lödl, lödl.", "target": "6" }
+    ]
+  },
 
 
 
