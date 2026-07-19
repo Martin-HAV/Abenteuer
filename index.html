@@ -365,32 +365,28 @@
                 choicesContainer.innerHTML = "";
                 const choices = room.choices || [];
 
-                choices.forEach(function (choice) {
-                    const button = document.createElement("button");
-                    button.className = "btn-choice";
+                const visibleChoices = choices.filter(function (choice) {
+    return checkConditions(choice).met;
+});
 
-                    const check = checkConditions(choice);
-                    if (!check.met) {
-                        button.disabled = true;
-                        button.innerText = choice.text + " (" + check.reasons.join(", ") + ")";
-                    } else {
-                        button.innerText = choice.text;
-                    }
+visibleChoices.forEach(function (choice) {
+    const button = document.createElement("button");
+    button.className = "btn-choice";
+    button.innerText = choice.text;
 
-                    button.onclick = function () {
-                        applyActions(choice);
-                        saveGame();
-                        if (choice.target) {
-                            window.goToRoom(choice.target);
-                        } else {
-                            saveGame();
-                            renderRoom();
-                        }
-                    };
-                    choicesContainer.appendChild(button);
-                });
+    button.onclick = function () {
+        applyActions(choice);
+        saveGame();
+        if (choice.target) {
+            window.goToRoom(choice.target);
+        } else {
+            renderRoom();
+        }
+    };
+    choicesContainer.appendChild(button);
+});
 
-                if (choices.length === 0) {
+if (visibleChoices.length === 0) {
                     const hint = document.createElement("p");
                     hint.className = "no-choices-hint";
                     hint.textContent = "Es gibt hier nichts weiter zu tun.";
