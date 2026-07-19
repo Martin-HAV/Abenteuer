@@ -25,6 +25,8 @@
     "image": "merkur.jpg",
     "items": [],
     "choices": [
+      { "text": "Auf dem Merkur landen.", "target": "23", "requiredFlag": { "name": "schalter", "value": 0 } },
+      { "text": "Auf dem Merkur landen.", "target": "35", "requiredFlag": { "name": "schalter", "value": 1 } },
       { "text": "Zur Sonne fliegen", "target": "2" },
 	{ "text": "Zur Venus fliegen", "target": "4" }
     ]
@@ -47,7 +49,9 @@
     "image": "erde.jpg",
     "items": [],
     "choices": [
-      { "text": "Zur Venus fliegen.", "target": "4" },
+      { "text": "Auf der Erde landen.", "target": "34", "requiredFlag": { "name": "schalter", "value": 0 } },
+      { "text": "Auf der Erde landen.", "target": "32", "requiredFlag": { "name": "schalter", "value": 1 } },
+       { "text": "Zur Venus fliegen.", "target": "4" },
 	{ "text": "Zum Mars fliegen.", "target": "6" }
     ]
   },
@@ -58,7 +62,8 @@
     "image": "mars.jpg",
     "items": [],
     "choices": [
-      { "text": "Auf dem Mars landen.", "target": "13" },
+      { "text": "Auf dem Mars landen.", "target": "13", "requiredFlag": { "name": "schalter", "value": 0 } },
+      { "text": "Auf dem Mars landen.", "target": "29", "requiredFlag": { "name": "schalter", "value": 0 } },
       { "text": "Zur Erde fliegen.", "target": "5" },
 	{ "text": "Zum Jupiter fliegen.", "target": "7" }
     ]
@@ -104,7 +109,8 @@
     "items": [],
     "choices": [
       { "text": "Zum Uranus fliegen.", "target": "9" },
-	{ "text": "Zum Pluto fliegen.", "target": "11" }
+	{ "text": "Zum Pluto fliegen.", "requiredFlag": { "name": "schalter", "value": 0 },"target": "11" },
+  { "text": "Zum Pluto fliegen.", "requiredFlag": { "name": "schalter", "value": 1 },"target": "12" }
     ]
   },
 
@@ -125,7 +131,8 @@
     "image": "pluto.jpg",
     "items": [],
     "choices": [
-      { "text": "Zum Neptun fliegen.", "target": "10" }
+      { "text": "Zum Neptun fliegen.", "target": "10" },
+      { "text": "Auf dem Pluto landen.", "target": "36" }
     ]
   },
 
@@ -213,7 +220,8 @@
     "choices": [
       { "text": "Nach Hause gehen.",  "requiredFlag": { "name": "aufräumen", "value": 0 }, "target": "14" },
       { "text": "Nach Hause gehen.",  "requiredFlag": { "name": "aufräumen", "value": 1 }, "target": "15" },
-      { "text": "Ein Ticket kaufen und zum Guiana Space Center fliegen.", "target": "20" }
+      { "text": "Ein Ticket kaufen und zum Guiana Space Center fliegen.", "target": "20", "requiredFlag": { "name": "weltall", "value": 0 } },
+      { "text": "Ein Ticket kaufen und zum Guiana Space Center fliegen.", "target": "34", "requiredFlag": { "name": "weltall", "value": 1 } }
     ]
   },
 
@@ -225,7 +233,7 @@
     "choices": [
       { "text": "'Nein, das klingt mir zu gefährlich.'", "target": "21" },
       { "text": "'Nein, ich muss erst noch etwas besorgen.'", "target": "21" },
-      { "text": "'Natürlich komme ich mit. Ich habe sogar einen Raumanzug!'", "target": "21", "requiredItem": "raumanzug" }
+      { "text": "'Natürlich komme ich mit. Ich habe sogar einen Raumanzug!'", "target": "22", "requiredItem": "raumanzug" }
     ]
   },
 
@@ -239,12 +247,181 @@
     ]
   },
 
+ "22": {
+    "title": "3...2...1... Take off!",
+    "text": "Nach dem Countdown vibriert die Rakete, es dröhnt laut und dann wirst du in den Sitz gepresst. Du fühlst dich schwer wie ein Brachiosaurus mit Übergewicht. Es ist schon sehr anstrengend gerade sitzen zu bleiben. Es knallt als die Trägerrakete abgesprengt wird. Gerade, als du denkst, du kannst nicht mehr wird es plötzlich mucksmäschenstill und du wirst leicht wie eine Feder mit Schwebezauberspruch.",
+    "image": "rakete2.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Ja und was passiert dann?", "target": "5",  "setFlag": { "name": "weltall", "value": 1 } }
+    ]
+  },
 
+   "23": {
+    "title": "Der Zauberer",
+    "text": "Das gibt es nicht! Kobolde, Hexenkessel, Zaubertrankunterricht... Jetzt steht auch noch ein Zauberer vor dir. Ein echter Zauberer! 'Hallo. Mein Name ist Marlin. Ich bin von Beruf Zauberer. Echter Zauberer um genau zu sein. Soll ich dir einen Zauberspruch beibringen?'",
+    "image": "marlin.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Ja natürlich. Ich wollte schon immer zaubern können!", "target": "24" },
+      { "text": "Nein. Zaubern ist doch was für Jungs mit Brille und Blitznarbe.", "target": "25" },
+      { "text": "Zauberer sind verdächtig. Ich fliege lieber zurück in's Merkurorbit.", "target": "3" }
+    ]
+  },
 
+   "24": {
+    "title": "Einen Zauber lernen",
+    "text": "'Ich würde dir gerne einen Zauber beibringen, aber leider ist das bei dem Computerspiel noch nicht eingebaut. Jemand muss sich den Zauber ausdenken, beschreiben und malen.'",
+    "image": "marlin.jpg",
+    "items": [],
+    "choices": [
+      { "text": "'Das kann ich machen!'", "target": "26" },
+      { "text": "'Das kann mein Papa machen!'", "target": "27" },
+      { "text": "Schnell zurück in's Weltall fliegen.", "target": "3" }
+    ]
+  },
 
+   "25": {
+    "title": "Marlin der Zauberer",
+    "text": "'Welche Jungs mit Blitznarbe?' Ist das so eine moderne Comicfigur? Ich schlage vor die fliegst dann wieder in's Weltall, bevor dir vauf dem schnell drehenden Merkur noch schwindelig wird'",
+    "image": "marlin.jpg",
+    "items": [],
+    "choices": [
+      { "text": "'Das ist eine sehr gute Idee.'", "target": "3" }
+    ]
+  },
 
+  
+   "26": {
+    "title": "Der Zauber",
+    "text": "'Das ist eine wahrlich sehr gute Idee. Vergiss nicht zu überlegen, wo du den Zauber einsetzen kannst oder was sich dadurch verändern soll.'",
+    "image": "zauber.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Wahrscheinlich ist es am besten, in's Weltall zu fliegen, zurück zur Erde und dich gleich an die Arbeit zu machen.", "target": "3" }
+    ]
+  },
+   "27": {
+    "title": "Der Zauber",
+    "text": "'Muss dein Papa nicht arbeiten? Kann der überhaupt Zaubern? Ich glaube der weiß nicht mal wie Petronella Apfelschmuß mit Nachnamen heißt. Zauber machen ist was für Profis, weißt du?'",
+    "image": "marlin-boese.jpg",
+    "items": [],
+    "choices": [
+      { "text": "'Profis? Ich gehe zur Schule! Besser ich mache das.'", "target": "26" },
+      { "text": "'Dann machen wir halt keinen Zauber. Tschüss, ich fliege zurück!'", "target": "3" },
+      { "text": "Schnell zurück in's Weltall fliegen.", "target": "3" }
+    ]
+  },
+  
 
+    "28": {
+    "title": "Das Gebäude",
+    "text": "Der Hund bringt dich zu einem Gebäude. Du gehst hinein um geschützt vor den Stürmen zu sein. Es ist ein wahrlich merkwürdiges Gebäude. Innen gibt es nur einen Raum. Er ist sehr groß und wo das Licht her kommt kannst du nicht sehen. Es gibt nur einen Schalter im Raum. ",
+    "image": "schalter-gezogen.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Den Schalter wegdrücken", "target": "27", "setFlag": { "name": "schalter", "value": 0 } },
+      { "text": "Das Gebäude und den Pluto verlassen.", "target": "31" }
+    ]
+  },
 
+  "29": {
+    "title": "die Marsoberfläche",
+    "text": "Du bist auf der Marsoberfläche gelandet. Vor dir steht ein kleiner Außerirdischer. 'Guggu gagga' sagt er. Entweder ist es Marsianisch oder Babysprache. So oder so kannst du nicht mit ihm sprechen.",
+    "image": "marsin.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zurück in's Marsorbit fliegen.", "target": "6" }
+    ]
+  },
+
+   "30": {
+    "title": "zu hell",
+    "text": "Um zur Venus zu fliegen musst du Richtung Sonne. Allerdings ist das sehr, sehr hell. Du siehst nicht wo es hin geht. Was willst du machen?",
+    "image": "zuhell.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zurück zur Erde fliegen?", "target": "5" },
+      { "text": "Augen zu, geradeaus fliegen und schauen, wo ich raus komme.", "target": "7" }
+    ]
+  },
+
+"31": {
+    "title": "Der vergessene Pluto",
+    "text": "Was war das denn? War das das Geheimnis von dem die Wissenschaftler gesprochen haben? Ich sollte sie fragen.",
+    "image": "pluto.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Zum Neptun fliegen.", "target": "10" },
+      { "text": "Auf dem Pluto landen.", "target": "26" }
+    ]
+  },
+
+   "32": {
+    "title": "Auf der Erde",
+    "text": "Als du auf der Erde landest wunderst du dich schon im Anflug. Sie sieht anders aus. Nur ein einziger, großer Kontinent. Was ist hier los? Du landest auch in keinem Space Center, sondern im Urwald. Vor dem Raumschiff laufen Dinosaurier! Bist du etwa in die Vergangenheit gereist?",
+    "image": "dinos1.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Den Urwald erkunden", "target": "33" },
+      { "text": "Schnell wieder in das Weltall fliegen.", "target": "5" }
+    ]
+  },
+   "33": {
+    "title": "Die Dinosaurier",
+    "text": "Du gehst tiefer in den Urwald und kommst an einen Sumpf. Kleine Blasen fliegen durch die Luft. Vor dir liegt ein großes Abenteuer. Nur dieses Abenteuer hat sich noch niemand ausgedacht. Kannst du dir das Abenteuer ausdenken?",
+    "image": "dinos2g.jpg",
+    "items": [],
+    "choices": [
+      { "text": "'Ja, ich gehe gleich zurück!'", "target": "32" },
+      { "text": "'Vielleicht, ich gehe erst einmal zurück!'", "target": "32" },
+      { "text": "'Nein, ich gehe zurück!'", "target": "32" }
+    ]
+  },
+  
+
+"34": {
+    "title": "Guiana Space Center",
+    "text": "Du landest im Guiana Space Center. Wo magst du hin?",
+    "image": "rakete.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Ein Flugticket nach Hause kaufen.", "target": "21" },
+      { "text": "In's Weltall fliegen.", "target": "22", "requiredItem": "raumanzug" }
+    ]
+  },
+
+   "35": {
+    "title": "der Junge",
+    "text": "Du triffst auf einen kleinen Jungen. Er rennt mit einem kleinen Stecken herum und ruft 'peng' und 'piu' und 'hex höx'. Als er dich bemerkt sagt er nur 'Hallo. Ich heiße Marlin. Ich muss fleißig üben, damit ich ein großer Magier werde.'.",
+    "image": "marlin-jung.jpg",
+    "items": [],
+    "choices": [
+      { "text": "'Verrückter Jung.' Zurück fliegen.", "target": "3" }
+    ]
+  },
+
+ "36": {
+    "title": "Ein Hund",
+    "text": "Als du auf dem Pluto landest, kommt durch den Wind ein gefährlicher Hund auf dich zugestürmt. Er bellt dich und du zuckst zusammen. Du versuchst dich vor dem Biest in Sicherheit zu bringen, als du merkst, dass er gar nicht so gefährlich ist. Eigentlich scheint er freundlich zu sein. Und nett. Was machst du nun?",
+    "image": "pluto-hund.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Ich bringe mich in meiner Rakete in Sicherheit und fliege zurück in's Weltall.", "target": "12" },
+      { "text": "Ich folge dem netten Hund.", "target": "37", "requiredFlag": { "name": "schalter", "value": 0 } },
+      { "text": "Ich folge dem netten Hund.", "target": "28", "requiredFlag": { "name": "schalter", "value": 1 } }
+    ]
+  },
+   "37": {
+    "title": "Das Gebäude",
+    "text": "Der Hund bringt dich zu einem Gebäude. Du gehst hinein um geschützt vor den Stürmen zu sein. Es ist ein wahrlich merkwürdiges Gebäude. Innen gibt es nur einen Raum. Er ist sehr groß und wo das Licht her kommt kannst du nicht sehen. Es gibt nur einen Schalter im Raum. ",
+    "image": "schalter-gedrueckt.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Den Schalter zu dir hinziehen", "target": "28", "setFlag": { "name": "schalter", "value": 1 } },
+      { "text": "Das Gebäude und den Pluto verlassen.", "target": "12" }
+    ]
+  },
 
 
 
