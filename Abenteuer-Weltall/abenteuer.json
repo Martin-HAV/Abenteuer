@@ -64,7 +64,7 @@
     "items": [],
     "choices": [
       { "text": "Auf dem Mars landen.", "target": "13", "requiredFlag": { "name": "schalter", "value": 0 } },
-      { "text": "Auf dem Mars landen.", "target": "29", "requiredFlag": { "name": "schalter", "value": 0 } },
+      { "text": "Auf dem Mars landen.", "target": "29", "requiredFlag": { "name": "schalter", "value": 1 } },
       { "text": "Zur Erde fliegen.", "target": "5" },
 	{ "text": "Zum Jupiter fliegen.", "target": "38" }
     ]
@@ -371,7 +371,7 @@
    "33": {
     "title": "Die Dinosaurier",
     "text": "Du gehst tiefer in den Urwald und kommst an einen Sumpf. Kleine Blasen fliegen durch die Luft. Vor dir liegt ein großes Abenteuer. Nur dieses Abenteuer hat sich noch niemand ausgedacht. Kannst du dir das Abenteuer ausdenken?",
-    "image": "dinos2g.jpg",
+    "image": "dinos2.jpg",
     "items": [],
     "choices": [
       { "text": "'Ja, ich gehe gleich zurück!'", "target": "32" },
@@ -398,7 +398,7 @@
     "image": "marlin-jung.jpg",
     "items": [],
     "choices": [
-      { "text": "'Verrückter Jung.' Zurück fliegen.", "target": "3" }
+      { "text": "'Verrückter Junge.' Zurück fliegen.", "target": "3" }
     ]
   },
 
