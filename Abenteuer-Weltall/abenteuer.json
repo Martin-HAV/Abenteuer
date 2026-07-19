@@ -51,7 +51,8 @@
     "choices": [
       { "text": "Auf der Erde landen.", "target": "34", "requiredFlag": { "name": "schalter", "value": 0 } },
       { "text": "Auf der Erde landen.", "target": "32", "requiredFlag": { "name": "schalter", "value": 1 } },
-       { "text": "Zur Venus fliegen.", "target": "4" },
+       { "text": "Zur Venus fliegen.", "target": "4", "requiredItem": "sonnenbrille"},
+       { "text": "Zur Venus fliegen.", "target": "30", "requiredItemNot": "sonnenbrille"},
 	{ "text": "Zum Mars fliegen.", "target": "6" }
     ]
   },
@@ -353,7 +354,7 @@
     "items": [],
     "choices": [
       { "text": "Zum Neptun fliegen.", "target": "10" },
-      { "text": "Auf dem Pluto landen.", "target": "26" }
+      { "text": "Auf dem Pluto landen.", "target": "36" }
     ]
   },
 
