@@ -189,27 +189,101 @@
     "image": "prospekt.jpg",
     "items": [],
     "choices": [
-      { "text": "Zum Neptun fliegen.", "target": "10" }
+      { "text": "Fertig mit dem Prospekt lesen.", "target": "16" }
     ]
   },
 
   "18": {
     "title": "Beim Neukauf",
-    "text": "Kaum hast du den Laden betreten, explodiert die Luft förmlich vor buntem Konfetti, und Tröten ertönen aus allen Ecken! Ein fröhlicher Verkäufer strahlt dich an, als hättest du gerade den goldenen Schnatz gefangen: 'Herzlichen Glückwunsch, junger Abenteurer! Du hast das unendliche Glück gepachtet und bist exakt unser 1000. Gast des Tages!' Zum Beweis überreicht er dir feierlich einen schweren, silbern glänzenden Raumanzug, der dich vor jeder Gefahr beschützt.",
-    "image": "pluto.jpg",
+    "text": "Kaum hast du den Laden betreten, explodiert die Luft förmlich vor buntem Konfetti, und Tröten ertönen aus allen Ecken! Ein fröhlicher Verkäufer strahlt dich an, als hättest du gerade den goldenen Schnatz gefangen: 'Herzlichen Glückwunsch, junger Abenteurer! Du hast das unendliche Glück gepachtet und bist exakt unser 1000. Gast des Tages!' Zum Beweis überreicht er dir feierlich einen schweren, silbern glänzenden Raumanzug, der dich vor jeder Gefahr beschützt. Was willst du jetzt tun?",
+    "image": "neukauf.jpg",
     "items": [],
     "choices": [
-      { "text": "Zum Neptun fliegen.", "target": "10" }
+      { "text": "Nach Hause gehen.",  "requiredFlag": { "name": "aufräumen", "value": 0 }, "target": "14", "addItem": "raumanzug" },
+      { "text": "Nach Hause gehen.",  "requiredFlag": { "name": "aufräumen", "value": 1 }, "target": "15", "addItem": "raumanzug" },
+      { "text": "Zum Flughafen gehen. Vielleicht kannst du irgendwie den Raumanzug ausprobieren.", "target": "19", "addItem": "raumanzug" }
     ]
   },
 
   "19": {
     "title": "Am Flughafen",
     "text": "Nach einer wilden, rasanten Fahrt im gelben Taxi stehst du inmitten einer riesigen, trubeligen Halle, in der Menschen wie emsige Ameisen durcheinanderwuseln. Die große Anzeigetafel rattert lautstark und zeigt für heute nur einen einzigen, streng geheimen Sonderflug an. Das Ziel lässt dein Herz höherschlagen: Es geht direkt zum berühmten Guiana Space Center in Südamerika, wo gigantische Raketen in den Himmel ragen!",
-    "image": "pluto.jpg",
+    "image": "flughafen.jpg",
     "items": [],
     "choices": [
-      { "text": "Zum Neptun fliegen.", "target": "10" }
+      { "text": "Nach Hause gehen.",  "requiredFlag": { "name": "aufräumen", "value": 0 }, "target": "14" },
+      { "text": "Nach Hause gehen.",  "requiredFlag": { "name": "aufräumen", "value": 1 }, "target": "15" },
+      { "text": "Ein Ticket kaufen und zum Guiana Space Center fliegen.", "target": "20" }
+    ]
+  },
+
+    "20": {
+    "title": "Guiana Space Center",
+    "text": "Am Guiana Space Center angekommen, wirst du direkt von einem aufgeregten Wissenschaftler angesprochen: 'Wir sollten eine Rakete in's Weltall schicken, aber unser Kommandant hat immer kein Frühstück gegessen. Er sitzt wütend zu Hause und schimpft nur noch, dass es unfair ist, dass immer er fliegen muss. Kannst du für ihn fliegen?' Wow, das ist eine große Chance. Was sagst du?",
+    "image": "rakete.jpg",
+    "items": [],
+    "choices": [
+      { "text": "'Nein, das klingt mir zu gefährlich.'", "target": "21" },
+      { "text": "'Nein, ich muss erst noch etwas besorgen.'", "target": "21" },
+      { "text": "'Natürlich komme ich mit. Ich habe sogar einen Raumanzug!'", "target": "21", "requiredItem": "raumanzug" }
+    ]
+  },
+
+    "21": {
+    "title": "Nein!",
+    "text": "'Das ist sehr schade. Dann müssen wir warten, dass jemand vorbei kommt, der in's All fliegen will. Aber wenn du nicht zur Crew gehörst, muss ich dich leider weg schicken. Wir sind hier auf sehr geheimer Mission. Wir haben gehört, dass es im Weltall ein paar Geheimnisse gibt.'. Dir bleibt nichts anderes übrig, als zurück zu fliegen.",
+    "image": "rakete.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Dir bleibt nichts anderes übrig, als wieder nach Hause zu fliegen.", "target": "19" }
+    ]
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  "item_sonnenbrille": {
+    "title": "Die Sonnenbrille",
+    "text": "Eine coole, schwarze Sonnenbrille mit spiegelnden Gläsern. Bestimmt praktisch, wenn man mal wieder zu nah an der Sonne vorbeifliegt.",
+    "image": "sonnenbrille.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Aufheben", "addItem": "sonnenbrille", "target": "15" },
+      { "text": "Liegen lassen", "target": "15" }
+    ]
+  },
+
+  "item_proviant": {
+    "title": "Das Schinkenbrot",
+    "text": "Ein frisch geschmiertes Schinkenbrot. Es riecht herrlich und würde bestimmt gut als Proviant für lange Weltraumreisen taugen.",
+    "image": "proviant.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Einpacken", "addItem": "proviant", "target": "16" },
+      { "text": "Liegen lassen", "target": "16" }
+    ]
+  },
+
+  "item_raumanzug": {
+    "title": "Der Raumanzug",
+    "text": "Ein schwerer, silbern glänzender Raumanzug. Er sieht robust genug aus, um dich vor den Gefahren des Weltalls zu schützen.",
+    "image": "raumanzug.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Anziehen", "addItem": "raumanzug", "target": "18" },
+      { "text": "Liegen lassen", "target": "18" }
     ]
   }
 
