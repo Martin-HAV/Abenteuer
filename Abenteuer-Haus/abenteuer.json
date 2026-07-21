@@ -24,7 +24,7 @@
     "image": "Haus.jpg",
     "items": [],
     "choices": [
-      { "text": "Du spielst mit dem Puzzle", "target": "3" }
+      { "text": "Du spielst mit dem Puzzle", "target": "4" }
     ]
   },
   "4": {
