@@ -1,30 +1,69 @@
 {
   "1": {
-    "title": "Der Eingangsbereich",
-    "text": "Du stehst im hellen Flur des Hauses. Von hier aus führen zwei schwere Holztüren in die angrenzenden Räume.",
-    "image": "eingang.jpg",
+    "title": "Die Hexe",
+    "text": "Pass auf, da ist eine Hexe!",
+    "image": "Hexe.jpg",
     "items": [],
     "choices": [
-      { "text": "Gehe in das Wohnzimmer", "target": "2" },
-      { "text": "Gehe in das Esszimmer", "target": "3" }
+      { "text": "Den Apfel nach der Hexe werfen.", "target": "2" },
+      { "text": "Mit dem Apfel zum Apfelbaum fliegen.", "target": "5" }
     ]
   },
   "2": {
-    "title": "Das Wohnzimmer",
-    "text": "Ein gemütlicher Raum mit einem großen Sofa und einem knisternden Kamin. Die einzige Tür führt zurück in den Flur.",
-    "image": "wohnzimmer.jpg",
+    "title": "Der Apfel",
+    "text": "Nachdem du den Apfel nach der Hexe geworfen hast, fällt die Hexe von der Wolke.",
+    "image": "Apfel.jpg",
     "items": [],
     "choices": [
-      { "text": "Zurück zum Eingang", "target": "1" }
+      { "text": "Du baust ein Puzzle", "target": "4" }
     ]
   },
   "3": {
-    "title": "Das Esszimmer",
-    "text": "In der Mitte steht ein massiver Eichentisch, der für ein großes Festmahl gedeckt ist. Du kannst den Raum nur durch den Flur wieder verlassen.",
-    "image": "esszimmer.jpg",
+    "title": "Das Haus",
+    "text": "Das Sturmhaus verschwindet nach dem Sturm.",
+    "image": "Haus.jpg",
     "items": [],
     "choices": [
-      { "text": "Zurück zum Eingang", "target": "1" }
+      { "text": "Du spielst mit dem Puzzle", "target": "3" }
+    ]
+  },
+  "4": {
+    "title": "Das Puzzle",
+    "text": "Als du das Puzzle gebaut hast kommt ein Sturm.",
+    "image": "Puzzle.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Gehe in's Haus.", "target": "3" }
+    ]
+  },
+    "5": {
+    "title": "Der Apfelbaum",
+    "text": "Aus dem Apfel kommt ein Wurm.",
+    "image": "Apfelbaum.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Im Apfel steckt ein Zauberstab fest.", "target": "6" },
+      { "text": "Im Baum ist eine kleine Tür, durch die man hineingehen kann.", "target": "7" }
+    ]
+  },
+
+    "6": {
+    "title": "Der Zauberstab",
+    "text": "Du hast einen Zauberstab in der Hand.",
+    "image": "Zauberstab.jpg",
+    "items": [],
+    "choices": [
+      { "text": "Den Zauberstab der Hexe geben.", "target": "1" }
+    ]
+  },
+     "7": {
+    "title": "Unter der Erde",
+    "text": "Unter der Erde findest du einen Maulwurf. Hinter ihm ist eine Tür.",
+    "image": "",
+    "items": [],
+    "choices": [
+      { "text": "Du gehst durch die Tür.", "target": "1" }
     ]
   }
+ 
 }
