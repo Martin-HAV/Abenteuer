@@ -1,0 +1,45 @@
+{
+  "Kleeblatt": {
+    "name": "das Kleeblatt",
+    "text": "Ein dreiblättriges Kleeblatt.",
+    "image": "Karte.jpg",
+    "strength": 1,
+    "element": "plant"
+  },
+  "Distel": {
+    "name": "die Distel",
+    "text": "Eine stachlige Distel.",
+    "image": "Karte.jpg",
+    "strength": 2,
+    "element": "plant"
+  },
+   "Flaemmchen": {
+    "name": "das Flämmchen",
+    "text": "Eine kleine Flamme.",
+    "image": "Karte.jpg",
+    "strength": 1,
+    "element": "fire"
+  },
+   "Lagerfeuer": {
+    "name": "das Lagerfeuer",
+    "text": "Ein großes Lagerfeuer.",
+    "image": "Karte.jpg",
+    "strength": 3,
+    "element": "fire"
+  },
+   "Tropfen": {
+    "name": "der Tropfen",
+    "text": "Ein Tropfen. Es regnet.",
+    "image": "Karte.jpg",
+    "strength": 1,
+    "element": "water"
+  },
+   "Orca": {
+    "name": "der Orca",
+    "text": "Ein großer Orca.",
+    "image": "Karte.jpg",
+    "strength": 3,
+    "element": "water"
+  }
+ 
+}
