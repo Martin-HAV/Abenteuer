@@ -139,7 +139,7 @@ function renderSpielerHand() {
     const div = document.createElement("div");
     div.className = "karte" + (auswaehlbar ? "" : " disabled");
     div.innerHTML = `
-      <img src="img/${karte.image}" alt="${karte.name}">
+      <img src="${karte.image}" alt="${karte.name}">
       <div class="name">${karte.name}</div>
       <div class="staerke">Stärke: ${karte.strength}</div>
       <div class="element">${ELEMENT_LABEL[karte.element]}</div>
@@ -170,7 +170,7 @@ function erstelleTischKarte(cardId, besitzer) {
   div.className = "karte";
   div.innerHTML = `
     <div class="name">${besitzer}</div>
-    <img src="img/${karte.image}" alt="${karte.name}">
+    <img src="${karte.image}" alt="${karte.name}">
     <div class="name">${karte.name}</div>
     <div class="staerke">Stärke: ${karte.strength}</div>
     <div class="element">${ELEMENT_LABEL[karte.element]}</div>
