@@ -132,7 +132,7 @@ function render() {
 function renderSpielerHand() {
   const container = document.getElementById("player-hand");
   container.innerHTML = "";
-  const auswaehlbar = state.phase === "spielerWaehlt" || state.phase === "krieg";
+  const auswaehlbar = state.phase === "spielerWaehlt" || state.phase === "krieg" || state.phase === "spielerDecktZuerst";
 
   state.player.hand.forEach((cardId, index) => {
     const karte = CARDS[cardId];
