@@ -120,8 +120,18 @@ function initState(decks) {
     vokabelWeiter: null,       // Callback, der nach der Abfrage weiterläuft
     vokabelPunkte: 0,          // Ergebnis der aktuellen Abfrage
     vokabelAusgewertet: false, // ob "Abschicken" schon gedrückt wurde
-    spielerVokabelPunkte: 0    // im Vokabel-Check erreichte Stärke der aktuellen Spielerkarte
+    spielerVokabelPunkte: 0,   // im Vokabel-Check erreichte Stärke der aktuellen Spielerkarte
+    vokabelStatistik: erstelleVokabelStatistik() // pro Vokabel: { richtig, falsch, zuletzt }
   };
+}
+
+// legt für jede Vokabel einen Zähler an: wie oft richtig/falsch, und der letzte Status
+function erstelleVokabelStatistik() {
+  const stat = {};
+  VOKABELN.vokabeln.forEach(wort => {
+    stat[wort] = { richtig: 0, falsch: 0, zuletzt: null }; // zuletzt: null | "richtig" | "falsch"
+  });
+  return stat;
 }
 
 // ---------- Rendering ----------
@@ -339,12 +349,31 @@ function pruefeSpielende() {
   if (hatKeineKarten(state.player)) {
     state.phase = "spielEnde";
     log("Du hast keine Karten mehr. Der Computer gewinnt das Spiel!");
+    zeigeVokabelStatistik();
     render();
   } else if (hatKeineKarten(state.computer)) {
     state.phase = "spielEnde";
     log("Der Computer hat keine Karten mehr. Du gewinnst das Spiel!");
+    zeigeVokabelStatistik();
     render();
   }
+}
+
+// listet am Spielende alle Vokabeln auf, die jedes Mal richtig eingegeben wurden
+function zeigeVokabelStatistik() {
+  const perfekte = Object.entries(state.vokabelStatistik)
+    .filter(([, stat]) => stat.richtig > 0 && stat.falsch === 0)
+    .sort((a, b) => b[1].richtig - a[1].richtig);
+
+  if (perfekte.length === 0) {
+    log("Keine Vokabel wurde durchgehend richtig eingegeben.");
+    return;
+  }
+
+  log("Immer richtig eingegebene Vokabeln:");
+  perfekte.forEach(([wort, stat]) => {
+    log(`  „${wort}“ – ${stat.richtig}x richtig eingegeben`);
+  });
 }
 
 // ---------- Vokabel-Abfrage ----------
@@ -365,18 +394,30 @@ function starteVokabelAbfrage(cardId, weiter) {
 }
 
 // wählt "anzahl" zufällige Vokabeln (mit Wiederholung, falls zu wenige vorhanden sind)
+// wählt "anzahl" Vokabeln aus: zuerst falsch beantwortete oder noch nie gefragte,
+// erst wenn diese aufgebraucht sind, werden bereits richtig beantwortete erneut verwendet
 function ziehVokabelAufgaben(anzahl) {
-  const gesamt = VOKABELN.vokabeln.length;
-  if (gesamt === 0) return [];
+  const alleIndices = VOKABELN.vokabeln.map((_, i) => i);
+  if (alleIndices.length === 0) return [];
 
-  let indices;
-  if (anzahl <= gesamt) {
-    indices = mische(VOKABELN.vokabeln.map((_, i) => i)).slice(0, anzahl);
-  } else {
-    indices = [];
-    for (let i = 0; i < anzahl; i++) {
-      indices.push(Math.floor(Math.random() * gesamt));
+  const prioritaet = alleIndices.filter(i => {
+    const stat = state.vokabelStatistik[VOKABELN.vokabeln[i]];
+    return !stat || stat.zuletzt !== "richtig"; // null (nie gefragt) oder "falsch"
+  });
+  const rest = alleIndices.filter(i => {
+    const stat = state.vokabelStatistik[VOKABELN.vokabeln[i]];
+    return stat && stat.zuletzt === "richtig";
+  });
+
+  let pool = [...mische(prioritaet), ...mische(rest)];
+
+  const indices = [];
+  while (indices.length < anzahl) {
+    if (pool.length === 0) {
+      // mehr Vokabeln nötig als vorhanden sind -> von vorne beginnen
+      pool = mische(alleIndices);
     }
+    indices.push(pool.shift());
   }
 
   return indices.map(i => ({
@@ -474,6 +515,12 @@ function werteVokabelAbfrageAus() {
     const istRichtig = normalisiere(aufgabe.eingabe) === normalisiere(aufgabe.wort);
     aufgabe.status = istRichtig ? "richtig" : "falsch";
     if (istRichtig) richtig++;
+
+    const stat = state.vokabelStatistik[aufgabe.wort];
+    if (stat) {
+      if (istRichtig) stat.richtig++; else stat.falsch++;
+      stat.zuletzt = istRichtig ? "richtig" : "falsch";
+    }
   });
   state.vokabelPunkte = richtig;
   state.vokabelAusgewertet = true;
@@ -482,7 +529,7 @@ function werteVokabelAbfrageAus() {
 }
 
 function normalisiere(text) {
-  return (text || "").trim().toLowerCase();
+  return (text || "").trim();
 }
 
 // liest einen Text per Sprachsynthese des Browsers vor (deutsch)
