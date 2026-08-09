@@ -16,17 +16,20 @@ const ELEMENT_LABEL = { fire: "Feuer", water: "Wasser", plant: "Pflanze" };
 // ---------- Globaler Zustand ----------
 
 let CARDS = {};       // { cardId: {name, text, image, strength, element} }
+let VOKABELN = { woerter: [], audios: [] }; // aus vokabeln/vokabel.json
 let state = null;     // gesamter Spielzustand, siehe initState()
 
 // ---------- Laden ----------
 
 async function ladeDaten() {
-  const [cardsRes, deckRes] = await Promise.all([
+  const [cardsRes, deckRes, vokabelRes] = await Promise.all([
     fetch("cards.json"),
-    fetch("deck.json")
+    fetch("deck.json"),
+    fetch("vokabeln/vokabel.json")
   ]);
   CARDS = await cardsRes.json();
   const decks = await deckRes.json();
+  VOKABELN = await vokabelRes.json();
   return decks;
 }
 
@@ -50,9 +53,10 @@ function log(text) {
 }
 
 // effektive Stärke inkl. Elementbonus gegen ein bestimmtes gegnerisches Element
-function effektiveStaerke(cardId, gegnerElement) {
+// basisUeberschreiben: optionaler Wert statt karte.strength (z.B. die im Vokabel-Check erreichte Punktzahl)
+function effektiveStaerke(cardId, gegnerElement, basisUeberschreiben) {
   const karte = CARDS[cardId];
-  let staerke = karte.strength;
+  let staerke = basisUeberschreiben !== undefined ? basisUeberschreiben : karte.strength;
   if (ELEMENT_STAERKER_ALS[karte.element] === gegnerElement) {
     staerke += ELEMENT_BONUS;
   }
@@ -108,10 +112,15 @@ function initState(decks) {
     player: erstelleSpieler(decks.deck1),
     computer: erstelleSpieler(decks.deck2),
     tisch: [],           // Karten, die aktuell im Kampf liegen (Ablagestapel-Kandidaten)
-    phase: "computerDeckt", // computerDeckt | spielerWaehlt | krieg | spielEnde
+    phase: "computerDeckt", // computerDeckt | spielerWaehlt | krieg | vokabelAbfrage | spielEnde
     naechsterStarter: "computer", // wer als nächstes aufdeckt: "computer" | "player"
     computerOffeneKarte: null,
-    spielerOffeneKarte: null
+    spielerOffeneKarte: null,
+    vokabelAufgaben: null,     // aktuelle Vokabel-Aufgaben während der Abfrage
+    vokabelWeiter: null,       // Callback, der nach der Abfrage weiterläuft
+    vokabelPunkte: 0,          // Ergebnis der aktuellen Abfrage
+    vokabelAusgewertet: false, // ob "Abschicken" schon gedrückt wurde
+    spielerVokabelPunkte: 0    // im Vokabel-Check erreichte Stärke der aktuellen Spielerkarte
   };
 }
 
@@ -212,20 +221,26 @@ function computerDecktAuf() {
 function waehleSpielerKarte(index) {
   if (state.phase === "spielerDecktZuerst") {
     // Spieler deckt zuerst auf (weil er die letzte Runde gewonnen hat)
-    state.spielerOffeneKarte = spieleKarteAusHand(state.player, index);
-    log(`Du deckst auf: ${CARDS[state.spielerOffeneKarte].name}`);
-    state.phase = "computerAntwortet";
-    render();
-    setTimeout(computerAntwortet, 700);
+    const cardId = spieleKarteAusHand(state.player, index);
+    state.spielerOffeneKarte = cardId;
+    log(`Du deckst auf: ${CARDS[cardId].name}`);
+    starteVokabelAbfrage(cardId, () => {
+      state.phase = "computerAntwortet";
+      render();
+      setTimeout(computerAntwortet, 700);
+    });
     return;
   }
 
   if (state.phase !== "spielerWaehlt" && state.phase !== "krieg") return;
 
-  state.spielerOffeneKarte = spieleKarteAusHand(state.player, index);
-  log(`Du wählst: ${CARDS[state.spielerOffeneKarte].name}`);
-  render();
-  setTimeout(werteRundeAus, 500);
+  const cardId = spieleKarteAusHand(state.player, index);
+  state.spielerOffeneKarte = cardId;
+  log(`Du wählst: ${CARDS[cardId].name}`);
+  starteVokabelAbfrage(cardId, () => {
+    render();
+    setTimeout(werteRundeAus, 500);
+  });
 }
 
 // Fall B: Spieler hat zuerst aufgedeckt, jetzt antwortet der Computer
@@ -245,10 +260,10 @@ function werteRundeAus() {
   const spielerKarte = CARDS[state.spielerOffeneKarte];
   const computerKarte = CARDS[state.computerOffeneKarte];
 
-  const spielerStaerke = effektiveStaerke(state.spielerOffeneKarte, computerKarte.element);
+  const spielerStaerke = effektiveStaerke(state.spielerOffeneKarte, computerKarte.element, state.spielerVokabelPunkte);
   const computerStaerke = effektiveStaerke(state.computerOffeneKarte, spielerKarte.element);
 
-  log(`Vergleich: Du ${spielerStaerke} vs. Computer ${computerStaerke}`);
+  log(`Vergleich: Du ${spielerStaerke} (davon ${state.spielerVokabelPunkte} durch Vokabeln) vs. Computer ${computerStaerke}`);
 
   state.tisch.push(state.spielerOffeneKarte, state.computerOffeneKarte);
   state.spielerOffeneKarte = null;
@@ -330,6 +345,171 @@ function pruefeSpielende() {
     log("Der Computer hat keine Karten mehr. Du gewinnst das Spiel!");
     render();
   }
+}
+
+// ---------- Vokabel-Abfrage ----------
+
+// startet die Abfrage für eine gespielte Spielerkarte; ruft "weiter" nach Abschluss auf
+function starteVokabelAbfrage(cardId, weiter) {
+  const karte = CARDS[cardId];
+  const anzahl = karte.strength;
+
+  state.phase = "vokabelAbfrage";
+  state.vokabelAufgaben = ziehVokabelAufgaben(anzahl);
+  state.vokabelWeiter = weiter;
+  state.vokabelPunkte = 0;
+  state.vokabelAusgewertet = false;
+
+  render();
+  renderVokabelAbfrage();
+}
+
+// wählt "anzahl" zufällige Vokabeln (mit Wiederholung, falls zu wenige vorhanden sind)
+function ziehVokabelAufgaben(anzahl) {
+  const gesamt = VOKABELN.vokabeln.length;
+  if (gesamt === 0) return [];
+
+  let indices;
+  if (anzahl <= gesamt) {
+    indices = mische(VOKABELN.vokabeln.map((_, i) => i)).slice(0, anzahl);
+  } else {
+    indices = [];
+    for (let i = 0; i < anzahl; i++) {
+      indices.push(Math.floor(Math.random() * gesamt));
+    }
+  }
+
+  return indices.map(i => ({
+    wort: VOKABELN.vokabeln[i],
+    vorlesetext: VOKABELN.audio[i],
+    eingabe: "",
+    status: null // null | "richtig" | "falsch"
+  }));
+}
+
+// zeigt die Abfrage als Overlay über dem restlichen Spiel an
+function renderVokabelAbfrage() {
+  let overlay = document.getElementById("vokabel-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "vokabel-overlay";
+    overlay.style.cssText =
+      "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);" +
+      "display:flex;align-items:center;justify-content:center;z-index:1000;";
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = "";
+
+  const box = document.createElement("div");
+  box.style.cssText = "background:#222;padding:20px;border-radius:10px;max-width:500px;width:90%;font-family:sans-serif;";
+
+  const titel = document.createElement("h3");
+  titel.textContent = `Vokabel-Check (${state.vokabelAufgaben.length} Wort${state.vokabelAufgaben.length === 1 ? "" : "e"})`;
+  titel.style.color = "#eee";
+  box.appendChild(titel);
+
+  state.vokabelAufgaben.forEach(aufgabe => {
+    const zeile = document.createElement("div");
+    zeile.style.cssText = "display:flex;align-items:center;gap:10px;margin:10px 0;";
+
+    const audioBtn = document.createElement("button");
+    audioBtn.textContent = "🔊";
+    audioBtn.title = "Wort vorlesen";
+    audioBtn.style.cssText =
+      "font-size:1.2em;cursor:pointer;background:#444;border:none;border-radius:6px;color:#fff;padding:6px 10px;";
+    audioBtn.addEventListener("click", () => {
+      sprich(aufgabe.vorlesetext);
+    });
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Wort eingeben";
+    input.value = aufgabe.eingabe;
+    input.disabled = aufgabe.status !== null;
+    input.style.cssText =
+      "flex:1;padding:6px;border-radius:4px;border:1px solid #555;background:#111;color:#eee;";
+    if (aufgabe.status === "richtig") {
+      input.style.borderColor = "#4caf50";
+      input.style.color = "#4caf50";
+    } else if (aufgabe.status === "falsch") {
+      input.style.borderColor = "#e53935";
+      input.style.color = "#e53935";
+    }
+    input.addEventListener("input", (e) => { aufgabe.eingabe = e.target.value; });
+
+    zeile.appendChild(audioBtn);
+    zeile.appendChild(input);
+    box.appendChild(zeile);
+  });
+
+  const submitBtn = document.createElement("button");
+  submitBtn.textContent = state.vokabelAusgewertet
+    ? "Weiter"
+    : "Abschicken";
+  submitBtn.style.cssText =
+    "margin-top:15px;padding:8px 16px;cursor:pointer;background:#7fd;border:none;border-radius:6px;font-weight:bold;";
+  submitBtn.addEventListener("click", () => {
+    if (!state.vokabelAusgewertet) {
+      werteVokabelAbfrageAus();
+    } else {
+      schliesseVokabelAbfrage();
+    }
+  });
+  box.appendChild(submitBtn);
+
+  if (state.vokabelAusgewertet) {
+    const ergebnis = document.createElement("div");
+    ergebnis.style.cssText = "margin-top:10px;color:#ffd166;";
+    ergebnis.textContent = `${state.vokabelPunkte} von ${state.vokabelAufgaben.length} richtig – das zählt als deine Stärke in diesem Kampf.`;
+    box.appendChild(ergebnis);
+  }
+
+  overlay.appendChild(box);
+}
+
+// vergleicht die Eingaben, färbt richtig/falsch ein und zählt die Punkte
+function werteVokabelAbfrageAus() {
+  let richtig = 0;
+  state.vokabelAufgaben.forEach(aufgabe => {
+    const istRichtig = normalisiere(aufgabe.eingabe) === normalisiere(aufgabe.wort);
+    aufgabe.status = istRichtig ? "richtig" : "falsch";
+    if (istRichtig) richtig++;
+  });
+  state.vokabelPunkte = richtig;
+  state.vokabelAusgewertet = true;
+  log(`Vokabel-Check: ${richtig} von ${state.vokabelAufgaben.length} richtig.`);
+  renderVokabelAbfrage();
+}
+
+function normalisiere(text) {
+  return (text || "").trim().toLowerCase();
+}
+
+// liest einen Text per Sprachsynthese des Browsers vor (deutsch)
+function sprich(text) {
+  if (!("speechSynthesis" in window)) {
+    log("Sprachausgabe wird von diesem Browser nicht unterstützt.");
+    return;
+  }
+  speechSynthesis.cancel(); // laufende Ausgabe abbrechen, falls mehrfach geklickt
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "de-DE";
+  speechSynthesis.speak(utterance);
+}
+
+// schließt das Overlay und setzt das eigentliche Spiel fort
+function schliesseVokabelAbfrage() {
+  const overlay = document.getElementById("vokabel-overlay");
+  if (overlay) overlay.remove();
+
+  state.spielerVokabelPunkte = state.vokabelPunkte;
+  const weiter = state.vokabelWeiter;
+
+  state.vokabelAufgaben = null;
+  state.vokabelWeiter = null;
+  state.vokabelAusgewertet = false;
+
+  weiter();
 }
 
 // ---------- Start ----------
