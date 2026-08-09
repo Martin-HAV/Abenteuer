@@ -116,17 +116,12 @@ function spieleKarteAusHand(spieler, index) {
   return cardId;
 }
 
-// wählt für den Computer einen Hand-Index. Meistens die stärkste Karte
-// (ggf. gegen ein bekanntes gegnerisches Element), mit der eingestellten
-// Fehlerquote aber eine zufällige (schlechte) Karte.
+// wählt für den Computer den Index der (nach bekannten Informationen) besten Karte aus der Hand.
+// Die eigentlichen "Fehler" des Computers passieren nicht bei der Auswahl, sondern beim
+// Auswerten der Stärke (siehe wuerfleComputerStaerke) – ganz wie beim Vokabel-Check des Spielers.
 // gegnerElement: Element der Karte, gegen die angetreten wird, oder null wenn unbekannt (z.B. beim Aufdecken)
 function computerWaehleIndex(hand, gegnerElement) {
   if (hand.length === 0) return -1;
-
-  const macheFehler = Math.random() < state.fehlerquote;
-  if (macheFehler) {
-    return Math.floor(Math.random() * hand.length);
-  }
 
   let besterIndex = 0;
   let besteStaerke = -Infinity;
@@ -138,6 +133,18 @@ function computerWaehleIndex(hand, gegnerElement) {
     }
   });
   return besterIndex;
+}
+
+// würfelt für jeden Stärkepunkt einer Computer-Karte einzeln, ob der Computer ihn "trifft".
+// Genau wie beim Vokabel-Check des Spielers zählen nur die getroffenen Punkte.
+function wuerfleComputerStaerke(basisStaerke) {
+  let erreichte = 0;
+  for (let i = 0; i < basisStaerke; i++) {
+    if (Math.random() >= state.fehlerquote) {
+      erreichte++;
+    }
+  }
+  return erreichte;
 }
 
 // ---------- Initialisierung ----------
@@ -377,10 +384,12 @@ function werteRundeAus() {
   const spielerKarte = CARDS[state.spielerOffeneKarte];
   const computerKarte = CARDS[state.computerOffeneKarte];
 
-  const spielerStaerke = effektiveStaerke(state.spielerOffeneKarte, computerKarte.element, state.spielerVokabelPunkte);
-  const computerStaerke = effektiveStaerke(state.computerOffeneKarte, spielerKarte.element);
+  const computerBasisPunkte = wuerfleComputerStaerke(computerKarte.strength);
 
-  log(`Vergleich: Du ${spielerStaerke} (davon ${state.spielerVokabelPunkte} durch Vokabeln) vs. Computer ${computerStaerke}`);
+  const spielerStaerke = effektiveStaerke(state.spielerOffeneKarte, computerKarte.element, state.spielerVokabelPunkte);
+  const computerStaerke = effektiveStaerke(state.computerOffeneKarte, spielerKarte.element, computerBasisPunkte);
+
+  log(`Vergleich: Du ${spielerStaerke} (davon ${state.spielerVokabelPunkte} durch Vokabeln) vs. Computer ${computerStaerke} (davon ${computerBasisPunkte} von ${computerKarte.strength} Punkten getroffen)`);
 
   let gewinner;
   if (spielerStaerke > computerStaerke) gewinner = "player";
@@ -715,7 +724,10 @@ function renderVokabelAbfrage() {
 
   state.vokabelAufgaben.forEach(aufgabe => {
     const zeile = document.createElement("div");
-    zeile.style.cssText = "display:flex;align-items:center;gap:10px;margin:10px 0;";
+    zeile.style.cssText = "margin:10px 0;";
+
+    const reihe = document.createElement("div");
+    reihe.style.cssText = "display:flex;align-items:center;gap:10px;";
 
     const audioBtn = document.createElement("button");
     audioBtn.textContent = "🔊";
@@ -742,8 +754,18 @@ function renderVokabelAbfrage() {
     }
     input.addEventListener("input", (e) => { aufgabe.eingabe = e.target.value; });
 
-    zeile.appendChild(audioBtn);
-    zeile.appendChild(input);
+    reihe.appendChild(audioBtn);
+    reihe.appendChild(input);
+    zeile.appendChild(reihe);
+
+    // bei falscher Eingabe die korrekte Schreibweise direkt darunter anzeigen
+    if (aufgabe.status === "falsch") {
+      const korrektur = document.createElement("div");
+      korrektur.style.cssText = "margin:4px 0 0 44px;color:#4caf50;font-size:0.9em;";
+      korrektur.textContent = `Richtig: ${aufgabe.wort}`;
+      zeile.appendChild(korrektur);
+    }
+
     box.appendChild(zeile);
   });
 
