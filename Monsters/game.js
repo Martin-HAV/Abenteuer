@@ -14,6 +14,16 @@ const ELEMENT_BONUS = 1.5;
 const ELEMENT_LABEL = { fire: "Feuer", water: "Wasser", plant: "Pflanze" };
 const BILD_PFAD = "input/"; // Unterordner, in dem die Kartenbilder liegen
 
+const SCHWIERIGKEITSGRADE = [
+  { name: "Leicht", fehlerquote: 0.60 },
+  { name: "Normal", fehlerquote: 0.45 },
+  { name: "Besser", fehlerquote: 0.30 },
+  { name: "Schwer", fehlerquote: 0.15 },
+  { name: "Sehr schwer", fehlerquote: 0.00 }
+];
+
+const SAVE_KEY = "vokabelkarten_spielstand_v1";
+
 // ---------- Globaler Zustand ----------
 
 let CARDS = {};       // { cardId: {name, text, image, strength, element} }
@@ -106,6 +116,30 @@ function spieleKarteAusHand(spieler, index) {
   return cardId;
 }
 
+// wählt für den Computer einen Hand-Index. Meistens die stärkste Karte
+// (ggf. gegen ein bekanntes gegnerisches Element), mit der eingestellten
+// Fehlerquote aber eine zufällige (schlechte) Karte.
+// gegnerElement: Element der Karte, gegen die angetreten wird, oder null wenn unbekannt (z.B. beim Aufdecken)
+function computerWaehleIndex(hand, gegnerElement) {
+  if (hand.length === 0) return -1;
+
+  const macheFehler = Math.random() < state.fehlerquote;
+  if (macheFehler) {
+    return Math.floor(Math.random() * hand.length);
+  }
+
+  let besterIndex = 0;
+  let besteStaerke = -Infinity;
+  hand.forEach((cardId, i) => {
+    const staerke = effektiveStaerke(cardId, gegnerElement);
+    if (staerke > besteStaerke) {
+      besteStaerke = staerke;
+      besterIndex = i;
+    }
+  });
+  return besterIndex;
+}
+
 // ---------- Initialisierung ----------
 
 function initState(decks) {
@@ -123,7 +157,10 @@ function initState(decks) {
     vokabelPunkte: 0,          // Ergebnis der aktuellen Abfrage
     vokabelAusgewertet: false, // ob "Abschicken" schon gedrückt wurde
     spielerVokabelPunkte: 0,   // im Vokabel-Check erreichte Stärke der aktuellen Spielerkarte
-    vokabelStatistik: erstelleVokabelStatistik() // pro Vokabel: { richtig, falsch, zuletzt }
+    vokabelStatistik: erstelleVokabelStatistik(), // pro Vokabel: { richtig, falsch, zuletzt }
+    rundenZahl: 0,             // wie viele Runden (Stiche) bereits gespielt wurden
+    fehlerquote: 0.45,         // Wahrscheinlichkeit, dass der Computer eine schlechte Karte wählt
+    schwierigkeit: "Normal"    // Anzeigename des gewählten Schwierigkeitsgrads
   };
 }
 
@@ -134,6 +171,66 @@ function erstelleVokabelStatistik() {
     stat[wort] = { richtig: 0, falsch: 0, zuletzt: null }; // zuletzt: null | "richtig" | "falsch"
   });
   return stat;
+}
+
+// baut den State aus einem gespeicherten Spielstand (siehe speichereSpiel) wieder auf
+function stelleStateAusSpeicherstandWiederHer(gespeichert) {
+  state = {
+    player: gespeichert.player,
+    computer: gespeichert.computer,
+    tisch: [],
+    phase: "computerDeckt",
+    naechsterStarter: gespeichert.naechsterStarter || "computer",
+    computerOffeneKarte: null,
+    spielerOffeneKarte: null,
+    rundenErgebnis: null,
+    vokabelAufgaben: null,
+    vokabelWeiter: null,
+    vokabelPunkte: 0,
+    vokabelAusgewertet: false,
+    spielerVokabelPunkte: 0,
+    vokabelStatistik: gespeichert.vokabelStatistik || erstelleVokabelStatistik(),
+    rundenZahl: gespeichert.rundenZahl || 0,
+    fehlerquote: gespeichert.fehlerquote !== undefined ? gespeichert.fehlerquote : 0.45,
+    schwierigkeit: gespeichert.schwierigkeit || "Normal"
+  };
+}
+
+// ---------- Speicherstand ----------
+
+function speichereSpiel() {
+  if (!state) return;
+  try {
+    const daten = {
+      player: state.player,
+      computer: state.computer,
+      naechsterStarter: state.naechsterStarter,
+      rundenZahl: state.rundenZahl,
+      vokabelStatistik: state.vokabelStatistik,
+      fehlerquote: state.fehlerquote,
+      schwierigkeit: state.schwierigkeit
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(daten));
+  } catch (e) {
+    console.warn("Spielstand konnte nicht gespeichert werden.", e);
+  }
+}
+
+function ladeSpielstand() {
+  try {
+    const roh = localStorage.getItem(SAVE_KEY);
+    return roh ? JSON.parse(roh) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function loescheSpielstand() {
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (e) {
+    // ignorieren
+  }
 }
 
 // ---------- Rendering ----------
@@ -231,7 +328,7 @@ function computerDecktAuf() {
     verliertStapel("computer");
     return;
   }
-  const index = Math.floor(Math.random() * state.computer.hand.length);
+  const index = computerWaehleIndex(state.computer.hand, null);
   state.computerOffeneKarte = spieleKarteAusHand(state.computer, index);
   log(`Computer deckt auf: ${CARDS[state.computerOffeneKarte].name} (Stärke ${CARDS[state.computerOffeneKarte].strength}, ${ELEMENT_LABEL[CARDS[state.computerOffeneKarte].element]})`);
   state.phase = "spielerWaehlt";
@@ -269,7 +366,7 @@ function computerAntwortet() {
     verliertStapel("computer");
     return;
   }
-  const index = Math.floor(Math.random() * state.computer.hand.length);
+  const index = computerWaehleIndex(state.computer.hand, CARDS[state.spielerOffeneKarte].element);
   state.computerOffeneKarte = spieleKarteAusHand(state.computer, index);
   log(`Computer antwortet mit: ${CARDS[state.computerOffeneKarte].name}`);
   render();
@@ -408,7 +505,7 @@ function starteKrieg() {
   state.phase = "krieg";
   render();
   setTimeout(() => {
-    const index = Math.floor(Math.random() * state.computer.hand.length);
+    const index = computerWaehleIndex(state.computer.hand, null);
     state.computerOffeneKarte = spieleKarteAusHand(state.computer, index);
     log(`Computer legt für den Krieg: ${CARDS[state.computerOffeneKarte].name}`);
     render();
@@ -437,11 +534,75 @@ function verliertStapel(verlierer) {
 }
 
 function naechsteRundeVorbereiten(gewinner) {
+  state.rundenZahl++;
   pruefeSpielende();
   if (state.phase === "spielEnde") return;
 
   state.naechsterStarter = gewinner || "computer";
-  setTimeout(starteRunde, 900);
+  speichereSpiel();
+
+  if (state.rundenZahl % 5 === 0) {
+    zeigeZwischenstand();
+  } else {
+    setTimeout(starteRunde, 900);
+  }
+}
+
+// zeigt nach jeder 5. Runde den aktuellen Kartenstand, mit der Option aufzuhören
+function zeigeZwischenstand() {
+  const spielerGesamt = state.player.ziehstapel.length + state.player.hand.length + state.player.ablage.length;
+  const computerGesamt = state.computer.ziehstapel.length + state.computer.hand.length + state.computer.ablage.length;
+
+  const overlay = document.createElement("div");
+  overlay.id = "zwischenstand-overlay";
+  overlay.style.cssText =
+    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);" +
+    "display:flex;align-items:center;justify-content:center;z-index:1000;";
+
+  const box = document.createElement("div");
+  box.style.cssText = "background:#222;padding:20px;border-radius:10px;max-width:400px;width:90%;font-family:sans-serif;text-align:center;";
+
+  const titel = document.createElement("h3");
+  titel.textContent = `Zwischenstand nach Runde ${state.rundenZahl}`;
+  titel.style.color = "#eee";
+  box.appendChild(titel);
+
+  const stand = document.createElement("p");
+  stand.style.cssText = "color:#ffd166;font-size:1.1em;";
+  stand.textContent = `Du: ${spielerGesamt} Karten | Computer: ${computerGesamt} Karten`;
+  box.appendChild(stand);
+
+  const weiterBtn = document.createElement("button");
+  weiterBtn.textContent = "Weiter spielen";
+  weiterBtn.style.cssText =
+    "margin:8px;padding:10px 16px;cursor:pointer;background:#7fd;border:none;border-radius:6px;font-weight:bold;";
+  weiterBtn.addEventListener("click", () => {
+    overlay.remove();
+    setTimeout(starteRunde, 300);
+  });
+  box.appendChild(weiterBtn);
+
+  const beendenBtn = document.createElement("button");
+  beendenBtn.textContent = "Beenden";
+  beendenBtn.style.cssText =
+    "margin:8px;padding:10px 16px;cursor:pointer;background:#e53935;color:#fff;border:none;border-radius:6px;font-weight:bold;";
+  beendenBtn.addEventListener("click", () => {
+    overlay.remove();
+    beendeSpielManuell();
+  });
+  box.appendChild(beendenBtn);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+// wird aufgerufen, wenn der Spieler beim Zwischenstand auf "Beenden" klickt
+function beendeSpielManuell() {
+  state.phase = "spielEnde";
+  log(`Spiel nach Runde ${state.rundenZahl} manuell beendet.`);
+  zeigeVokabelStatistik();
+  loescheSpielstand();
+  render();
 }
 
 function pruefeSpielende() {
@@ -451,11 +612,13 @@ function pruefeSpielende() {
     state.phase = "spielEnde";
     log("Du hast keine Karten mehr. Der Computer gewinnt das Spiel!");
     zeigeVokabelStatistik();
+    loescheSpielstand();
     render();
   } else if (hatKeineKarten(state.computer)) {
     state.phase = "spielEnde";
     log("Der Computer hat keine Karten mehr. Du gewinnst das Spiel!");
     zeigeVokabelStatistik();
+    loescheSpielstand();
     render();
   }
 }
@@ -660,14 +823,107 @@ function schliesseVokabelAbfrage() {
   weiter();
 }
 
+// zeigt die Auswahl des Schwierigkeitsgrads; ruft "weiter" mit dem gewählten Grad auf
+function zeigeSchwierigkeitsauswahl(weiter) {
+  const overlay = document.createElement("div");
+  overlay.id = "schwierigkeit-overlay";
+  overlay.style.cssText =
+    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);" +
+    "display:flex;align-items:center;justify-content:center;z-index:1000;";
+
+  const box = document.createElement("div");
+  box.style.cssText = "background:#222;padding:20px;border-radius:10px;max-width:400px;width:90%;font-family:sans-serif;text-align:center;";
+
+  const titel = document.createElement("h3");
+  titel.textContent = "Schwierigkeitsgrad wählen";
+  titel.style.color = "#eee";
+  box.appendChild(titel);
+
+  SCHWIERIGKEITSGRADE.forEach(grad => {
+    const btn = document.createElement("button");
+    btn.textContent = `${grad.name} (${Math.round(grad.fehlerquote * 100)}% Fehler)`;
+    btn.style.cssText =
+      "display:block;width:100%;margin:8px 0;padding:10px;cursor:pointer;background:#444;color:#fff;border:none;border-radius:6px;font-size:1em;";
+    btn.addEventListener("click", () => {
+      overlay.remove();
+      weiter(grad);
+    });
+    box.appendChild(btn);
+  });
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+// zeigt "Fortsetzen" / "Neues Spiel", wenn ein gespeicherter Spielstand existiert
+function zeigeFortsetzenAuswahl(gespeichert, decks) {
+  const overlay = document.createElement("div");
+  overlay.id = "fortsetzen-overlay";
+  overlay.style.cssText =
+    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);" +
+    "display:flex;align-items:center;justify-content:center;z-index:1000;";
+
+  const box = document.createElement("div");
+  box.style.cssText = "background:#222;padding:20px;border-radius:10px;max-width:400px;width:90%;font-family:sans-serif;text-align:center;";
+
+  const titel = document.createElement("h3");
+  titel.textContent = "Gespeicherten Spielstand gefunden";
+  titel.style.color = "#eee";
+  box.appendChild(titel);
+
+  const info = document.createElement("p");
+  info.style.color = "#ccc";
+  info.textContent = `Runde ${gespeichert.rundenZahl || 0}, Schwierigkeit: ${gespeichert.schwierigkeit || "Normal"}`;
+  box.appendChild(info);
+
+  const weiterBtn = document.createElement("button");
+  weiterBtn.textContent = "Fortsetzen";
+  weiterBtn.style.cssText =
+    "margin:8px;padding:10px 16px;cursor:pointer;background:#7fd;border:none;border-radius:6px;font-weight:bold;";
+  weiterBtn.addEventListener("click", () => {
+    overlay.remove();
+    stelleStateAusSpeicherstandWiederHer(gespeichert);
+    log("Gespeicherter Spielstand geladen.");
+    render();
+    starteRunde();
+  });
+  box.appendChild(weiterBtn);
+
+  const neuBtn = document.createElement("button");
+  neuBtn.textContent = "Neues Spiel";
+  neuBtn.style.cssText =
+    "margin:8px;padding:10px 16px;cursor:pointer;background:#e53935;color:#fff;border:none;border-radius:6px;font-weight:bold;";
+  neuBtn.addEventListener("click", () => {
+    overlay.remove();
+    loescheSpielstand();
+    zeigeSchwierigkeitsauswahl(grad => starteNeuesSpiel(decks, grad));
+  });
+  box.appendChild(neuBtn);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function starteNeuesSpiel(decks, grad) {
+  initState(decks);
+  state.fehlerquote = grad.fehlerquote;
+  state.schwierigkeit = grad.name;
+  log(`Spiel gestartet (Schwierigkeit: ${grad.name}).`);
+  render();
+  starteRunde();
+}
+
 // ---------- Start ----------
 
 async function starteSpiel() {
   const decks = await ladeDaten();
-  initState(decks);
-  log("Spiel gestartet.");
-  render();
-  starteRunde();
+
+  const gespeichert = ladeSpielstand();
+  if (gespeichert) {
+    zeigeFortsetzenAuswahl(gespeichert, decks);
+  } else {
+    zeigeSchwierigkeitsauswahl(grad => starteNeuesSpiel(decks, grad));
+  }
 }
 
 starteSpiel();
