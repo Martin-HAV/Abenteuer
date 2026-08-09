@@ -112,10 +112,11 @@ function initState(decks) {
     player: erstelleSpieler(decks.deck1),
     computer: erstelleSpieler(decks.deck2),
     tisch: [],           // Karten, die aktuell im Kampf liegen (Ablagestapel-Kandidaten)
-    phase: "computerDeckt", // computerDeckt | spielerWaehlt | krieg | vokabelAbfrage | spielEnde
+    phase: "computerDeckt", // computerDeckt | spielerWaehlt | krieg | rundenErgebnis | vokabelAbfrage | spielEnde
     naechsterStarter: "computer", // wer als nächstes aufdeckt: "computer" | "player"
     computerOffeneKarte: null,
     spielerOffeneKarte: null,
+    rundenErgebnis: null,      // { spielerStaerke, computerStaerke, gewinner } während der Ergebnisanzeige
     vokabelAufgaben: null,     // aktuelle Vokabel-Aufgaben während der Abfrage
     vokabelWeiter: null,       // Callback, der nach der Abfrage weiterläuft
     vokabelPunkte: 0,          // Ergebnis der aktuellen Abfrage
@@ -203,6 +204,14 @@ function starteRunde() {
   state.computerOffeneKarte = null;
   state.spielerOffeneKarte = null;
 
+  // Sicherstellen, dass beide Hände so weit wie möglich aufgefüllt sind
+  // (löst bei Bedarf auch das Mischen des Ablagestapels zum neuen Nachziehstapel aus),
+  // bevor geprüft wird, ob jemand tatsächlich keine Karten mehr hat.
+  fuelleHand(state.player);
+  fuelleHand(state.computer);
+  pruefeSpielende();
+  if (state.phase === "spielEnde") return;
+
   if (state.naechsterStarter === "computer") {
     state.phase = "computerDeckt";
     render();
@@ -275,13 +284,102 @@ function werteRundeAus() {
 
   log(`Vergleich: Du ${spielerStaerke} (davon ${state.spielerVokabelPunkte} durch Vokabeln) vs. Computer ${computerStaerke}`);
 
+  let gewinner;
+  if (spielerStaerke > computerStaerke) gewinner = "player";
+  else if (computerStaerke > spielerStaerke) gewinner = "computer";
+  else gewinner = null; // Gleichstand -> Krieg
+
+  zeigeRundenErgebnis(spielerStaerke, computerStaerke, gewinner);
+}
+
+// zeigt beide Karten mit Bild an und markiert den Gewinner; wartet auf Klick auf "Weiter"
+function zeigeRundenErgebnis(spielerStaerke, computerStaerke, gewinner) {
+  state.rundenErgebnis = { spielerStaerke, computerStaerke, gewinner };
+  state.phase = "rundenErgebnis";
+  render();
+  renderRundenErgebnis();
+}
+
+function renderRundenErgebnis() {
+  let overlay = document.getElementById("ergebnis-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "ergebnis-overlay";
+    overlay.style.cssText =
+      "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);" +
+      "display:flex;align-items:center;justify-content:center;z-index:1000;";
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = "";
+
+  const { spielerStaerke, computerStaerke, gewinner } = state.rundenErgebnis;
+  let spielerStatus, computerStatus;
+  if (gewinner === "player") {
+    spielerStatus = "gewinner"; computerStatus = "verlierer";
+  } else if (gewinner === "computer") {
+    spielerStatus = "verlierer"; computerStatus = "gewinner";
+  } else {
+    spielerStatus = "unentschieden"; computerStatus = "unentschieden";
+  }
+
+  const box = document.createElement("div");
+  box.style.cssText =
+    "background:#222;padding:20px;border-radius:10px;max-width:600px;width:90%;font-family:sans-serif;text-align:center;";
+
+  const titel = document.createElement("h3");
+  titel.style.color = "#eee";
+  if (gewinner === "player") titel.textContent = "Du gewinnst diese Runde!";
+  else if (gewinner === "computer") titel.textContent = "Computer gewinnt diese Runde!";
+  else titel.textContent = "Unentschieden – es kommt zum Krieg!";
+  box.appendChild(titel);
+
+  const reihe = document.createElement("div");
+  reihe.style.cssText = "display:flex;justify-content:center;gap:30px;margin-top:15px;flex-wrap:wrap;";
+  reihe.appendChild(erstelleErgebnisKarte(state.spielerOffeneKarte, "Du", spielerStaerke, spielerStatus));
+  reihe.appendChild(erstelleErgebnisKarte(state.computerOffeneKarte, "Computer", computerStaerke, computerStatus));
+  box.appendChild(reihe);
+
+  const weiterBtn = document.createElement("button");
+  weiterBtn.textContent = "Weiter";
+  weiterBtn.style.cssText =
+    "margin-top:20px;padding:8px 20px;cursor:pointer;background:#7fd;border:none;border-radius:6px;font-weight:bold;";
+  weiterBtn.addEventListener("click", schliesseRundenErgebnis);
+  box.appendChild(weiterBtn);
+
+  overlay.appendChild(box);
+}
+
+function erstelleErgebnisKarte(cardId, besitzer, staerke, status) {
+  const karte = CARDS[cardId];
+  const farben = { gewinner: "#4caf50", verlierer: "#e53935", unentschieden: "#ffd166" };
+  const rahmenfarbe = farben[status];
+  const div = document.createElement("div");
+  div.style.cssText = `width:150px;background:#333;border:3px solid ${rahmenfarbe};border-radius:8px;padding:10px;`;
+  div.innerHTML = `
+    <div style="font-weight:bold;color:#eee;">${besitzer}${status === "gewinner" ? " 🏆" : ""}</div>
+    <img src="${karte.image}" alt="${karte.name}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;margin:6px 0;">
+    <div style="font-weight:bold;color:#eee;">${karte.name}</div>
+    <div style="color:${rahmenfarbe};font-weight:bold;">Stärke: ${staerke}</div>
+    <div style="color:#9ad;font-size:0.85em;">${ELEMENT_LABEL[karte.element]}</div>
+  `;
+  return div;
+}
+
+// wird nach Klick auf "Weiter" ausgeführt: verteilt die Karten wie zuvor und macht weiter
+function schliesseRundenErgebnis() {
+  const overlay = document.getElementById("ergebnis-overlay");
+  if (overlay) overlay.remove();
+
+  const { gewinner } = state.rundenErgebnis;
+  state.rundenErgebnis = null;
+
   state.tisch.push(state.spielerOffeneKarte, state.computerOffeneKarte);
   state.spielerOffeneKarte = null;
   state.computerOffeneKarte = null;
 
-  if (spielerStaerke > computerStaerke) {
+  if (gewinner === "player") {
     gewinneTisch("player");
-  } else if (computerStaerke > spielerStaerke) {
+  } else if (gewinner === "computer") {
     gewinneTisch("computer");
   } else {
     log("Gleichstand! Es kommt zum Krieg – beide wählen eine weitere Karte.");
@@ -346,6 +444,8 @@ function naechsteRundeVorbereiten(gewinner) {
 }
 
 function pruefeSpielende() {
+  if (state.phase === "spielEnde") return; // schon beendet, nicht doppelt auswerten
+
   if (hatKeineKarten(state.player)) {
     state.phase = "spielEnde";
     log("Du hast keine Karten mehr. Der Computer gewinnt das Spiel!");
