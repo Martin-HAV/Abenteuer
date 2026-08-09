@@ -12,6 +12,7 @@ const ELEMENT_STAERKER_ALS = {
 const ELEMENT_BONUS = 1.5;
 
 const ELEMENT_LABEL = { fire: "Feuer", water: "Wasser", plant: "Pflanze" };
+const BILD_PFAD = "inputs/"; // Unterordner, in dem die Kartenbilder liegen
 
 // ---------- Globaler Zustand ----------
 
@@ -159,7 +160,7 @@ function renderSpielerHand() {
     const div = document.createElement("div");
     div.className = "karte" + (auswaehlbar ? "" : " disabled");
     div.innerHTML = `
-      <img src="${karte.image}" alt="${karte.name}">
+      <img src="${BILD_PFAD}${karte.image}" alt="${karte.name}">
       <div class="name">${karte.name}</div>
       <div class="staerke">Stärke: ${karte.strength}</div>
       <div class="element">${ELEMENT_LABEL[karte.element]}</div>
@@ -190,7 +191,7 @@ function erstelleTischKarte(cardId, besitzer) {
   div.className = "karte";
   div.innerHTML = `
     <div class="name">${besitzer}</div>
-    <img src="${karte.image}" alt="${karte.name}">
+    <img src="${BILD_PFAD}${karte.image}" alt="${karte.name}">
     <div class="name">${karte.name}</div>
     <div class="staerke">Stärke: ${karte.strength}</div>
     <div class="element">${ELEMENT_LABEL[karte.element]}</div>
@@ -357,7 +358,7 @@ function erstelleErgebnisKarte(cardId, besitzer, staerke, status) {
   div.style.cssText = `width:150px;background:#333;border:3px solid ${rahmenfarbe};border-radius:8px;padding:10px;`;
   div.innerHTML = `
     <div style="font-weight:bold;color:#eee;">${besitzer}${status === "gewinner" ? " 🏆" : ""}</div>
-    <img src="${karte.image}" alt="${karte.name}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;margin:6px 0;">
+    <img src="${BILD_PFAD}${karte.image}" alt="${karte.name}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;margin:6px 0;">
     <div style="font-weight:bold;color:#eee;">${karte.name}</div>
     <div style="color:${rahmenfarbe};font-weight:bold;">Stärke: ${staerke}</div>
     <div style="color:#9ad;font-size:0.85em;">${ELEMENT_LABEL[karte.element]}</div>
