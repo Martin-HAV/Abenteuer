@@ -12,7 +12,7 @@ const ELEMENT_STAERKER_ALS = {
 const ELEMENT_BONUS = 1.5;
 
 const ELEMENT_LABEL = { fire: "Feuer", water: "Wasser", plant: "Pflanze" };
-const BILD_PFAD = "inputs/"; // Unterordner, in dem die Kartenbilder liegen
+const BILD_PFAD = "input/"; // Unterordner, in dem die Kartenbilder liegen
 
 // ---------- Globaler Zustand ----------
 
