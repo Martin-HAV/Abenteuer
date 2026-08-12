@@ -1,20 +1,28 @@
 {
   "deck1": {
-  "Kleeblatt",
-  "Distel",
-   "Flaemmchen",
-   "Lagerfeuer",
-   "Tropfen",
-   "Orca"
+  "Bulbasaur",
+  "Venosaur",
+   "Ivysaur",
+   "Charmander",
+   "Charmeleon",
+   "Charizad",
+"Karpador",
+"Karpador",
+"Karpador",
+   "Garados"
   },
  
   
   "deck2": {
-  "Kleeblatt",
-  "Distel",
-   "Flaemmchen",
-   "Lagerfeuer",
-   "Tropfen",
-   "Orca"
-  },
+ "Bulbasaur",
+  "Venosaur",
+   "Ivysaur",
+   "Charmander",
+   "Charmeleon",
+   "Charizad",
+"Karpador",
+"Karpador",
+"Karpador",
+   "Garados" 
+  }
 }
