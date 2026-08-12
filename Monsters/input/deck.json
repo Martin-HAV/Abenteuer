@@ -1,28 +1,26 @@
 {
-  "deck1": {
-  "Bulbasaur",
-  "Venosaur",
-   "Ivysaur",
-   "Charmander",
-   "Charmeleon",
-   "Charizad",
-"Karpador",
-"Karpador",
-"Karpador",
-   "Garados"
-  },
- 
-  
-  "deck2": {
- "Bulbasaur",
-  "Venosaur",
-   "Ivysaur",
-   "Charmander",
-   "Charmeleon",
-   "Charizad",
-"Karpador",
-"Karpador",
-"Karpador",
-   "Garados" 
-  }
+  "deck1": [
+    "Bulbasaur",
+    "Venosaur",
+    "Ivysaur",
+    "Charmander",
+    "Charmeleon",
+    "Charizad",
+    "Karpador",
+    "Karpador",
+    "Karpador",
+    "Garados"
+  ],
+  "deck2": [
+    "Bulbasaur",
+    "Venosaur",
+    "Ivysaur",
+    "Charmander",
+    "Charmeleon",
+    "Charizad",
+    "Karpador",
+    "Karpador",
+    "Karpador",
+    "Garados"
+  ]
 }
