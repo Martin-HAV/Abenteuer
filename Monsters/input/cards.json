@@ -30,7 +30,7 @@
    "Charmeleon": {
     "name": "Charmeleon",
     "text": "Ein starkes Pokémon gegen Pfalnzenpokémon.",
-    "image": "Karte.jpg",
+    "image": "Charmeleon.jpg",
     "strength": 2,
     "element": "fire"
   },
