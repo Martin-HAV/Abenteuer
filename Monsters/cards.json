@@ -1,45 +1,61 @@
 {
-  "Kleeblatt": {
-    "name": "das Kleeblatt",
-    "text": "Ein dreiblättriges Kleeblatt.",
-    "image": "Karte.jpg",
+  "Bulbasaur": {
+    "name": "Bulbasaur",
+    "text": "Ein kleiner, süßer Bulbasaur.",
+    "image": "Bulbasaur.jpg",
     "strength": 1,
     "element": "plant"
   },
-  "Distel": {
-    "name": "die Distel",
-    "text": "Eine stachlige Distel.",
-    "image": "Karte.jpg",
+  "Venosaur": {
+    "name": "Venosaur",
+    "text": "Venosaur ist gefährlich. Vor allem gegen Wasserpokémon.",
+    "image": "Venosaur.jpg",
+    "strength": 3,
+    "element": "plant"
+  },
+   "Ivysaur": {
+    "name": "Ivysaur",
+    "text": "Aus dem Bulbasaur ist ein Ivysaur gewachsen.",
+    "image": "Ivysaur.jpg",
     "strength": 2,
     "element": "plant"
   },
-   "Flaemmchen": {
-    "name": "das Flämmchen",
-    "text": "Eine kleine Flamme.",
-    "image": "Karte.jpg",
+   "Charmander": {
+    "name": "Charmander",
+    "text": "Charmander hat eine Flamme am Schwanz.",
+    "image": "Charmander.jpg",
     "strength": 1,
     "element": "fire"
   },
-   "Lagerfeuer": {
-    "name": "das Lagerfeuer",
-    "text": "Ein großes Lagerfeuer.",
-    "image": "Karte.jpg",
-    "strength": 3,
+   "Charmeleon": {
+    "name": "Charmeleon",
+    "text": "Ein starkes Pokémon gegen Pfalnzenpokémon.",
+    "image": "Charmeleon.jpg",
+    "strength": 2,
     "element": "fire"
   },
-   "Tropfen": {
-    "name": "der Tropfen",
-    "text": "Ein Tropfen. Es regnet.",
-    "image": "Karte.jpg",
+   "Charizad": {
+    "name": "Charizad",
+    "text": "Das stärkste Pokémon!",
+    "image": "Charizad.jpg",
+    "strength": 3,
+    "element": "fire"
+   },
+
+"Karpador": {
+    "name": "Karpador",
+    "text": "Das kleine, häufige Wasserpokémon.",
+    "image": "Karpador.jpg",
     "strength": 1,
     "element": "water"
   },
-   "Orca": {
-    "name": "der Orca",
-    "text": "Ein großer Orca.",
-    "image": "Karte.jpg",
+   "Garados": {
+    "name": "Garados",
+    "text": "Viele Karpadors entwickeln sich zu Garados!",
+    "image": "Garados.jpg",
     "strength": 3,
     "element": "water"
+
   }
  
 }
