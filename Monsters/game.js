@@ -550,14 +550,14 @@ function naechsteRundeVorbereiten(gewinner) {
   state.naechsterStarter = gewinner || "computer";
   speichereSpiel();
 
-  if (state.rundenZahl % 5 === 0) {
+  if (state.rundenZahl % 10 === 0) {
     zeigeZwischenstand();
   } else {
     setTimeout(starteRunde, 900);
   }
 }
 
-// zeigt nach jeder 5. Runde den aktuellen Kartenstand, mit der Option aufzuhören
+// zeigt nach jeder 10. Runde den aktuellen Kartenstand, mit der Option aufzuhören
 function zeigeZwischenstand() {
   const spielerGesamt = state.player.ziehstapel.length + state.player.hand.length + state.player.ablage.length;
   const computerGesamt = state.computer.ziehstapel.length + state.computer.hand.length + state.computer.ablage.length;
