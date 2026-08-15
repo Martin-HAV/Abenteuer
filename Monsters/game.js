@@ -41,6 +41,12 @@ async function ladeDaten() {
   CARDS = await cardsRes.json();
   const decks = await deckRes.json();
   VOKABELN = await vokabelRes.json();
+
+  // Rückwärtskompatibilität: falls das Feld in der Datei noch fehlt, mit Nullen auffüllen
+  if (!Array.isArray(VOKABELN.richtigBeimErstenVersuch)) {
+    VOKABELN.richtigBeimErstenVersuch = VOKABELN.vokabeln.map(() => 0);
+  }
+
   return decks;
 }
 
@@ -60,6 +66,19 @@ function log(text) {
   const zeile = document.createElement("div");
   zeile.textContent = text;
   el.appendChild(zeile);
+  el.scrollTop = el.scrollHeight;
+}
+
+// wie log(), aber in einem <pre>-Block, damit mehrzeiliger/formatierter Text
+// (z.B. zum Copy&Paste in eine JSON-Datei) sauber dargestellt wird
+function logPre(text) {
+  const el = document.getElementById("log");
+  const pre = document.createElement("pre");
+  pre.textContent = text;
+  pre.style.cssText =
+    "white-space:pre-wrap;background:#000;color:#9fd;padding:8px;border-radius:4px;" +
+    "margin:4px 0;font-size:0.8em;user-select:all;";
+  el.appendChild(pre);
   el.scrollTop = el.scrollHeight;
 }
 
@@ -171,11 +190,14 @@ function initState(decks) {
   };
 }
 
-// legt für jede Vokabel einen Zähler an: wie oft richtig/falsch, und der letzte Status
+// legt für jede Vokabel einen Zähler an: wie oft richtig/falsch, der letzte Status,
+// und ob sie beim allerersten Versuch in dieser Session richtig war
 function erstelleVokabelStatistik() {
   const stat = {};
   VOKABELN.vokabeln.forEach(wort => {
-    stat[wort] = { richtig: 0, falsch: 0, zuletzt: null }; // zuletzt: null | "richtig" | "falsch"
+    stat[wort] = { richtig: 0, falsch: 0, zuletzt: null, erstesVersuchRichtig: null };
+    // zuletzt: null | "richtig" | "falsch"
+    // erstesVersuchRichtig: null (noch nicht gefragt) | true | false
   });
   return stat;
 }
@@ -623,16 +645,61 @@ function pruefeSpielende() {
     zeigeVokabelStatistik();
     loescheSpielstand();
     render();
+    zeigeSpielEndeBildschirm(false);
   } else if (hatKeineKarten(state.computer)) {
     state.phase = "spielEnde";
     log("Der Computer hat keine Karten mehr. Du gewinnst das Spiel!");
     zeigeVokabelStatistik();
     loescheSpielstand();
     render();
+    zeigeSpielEndeBildschirm(true);
   }
 }
 
-// listet am Spielende alle Vokabeln auf, die jedes Mal richtig eingegeben wurden
+// großer Sieg-/Niederlage-Bildschirm am Ende des Spiels. Lässt sich schließen,
+// damit die darunterliegende Vokabel-Statistik im Log sichtbar wird.
+function zeigeSpielEndeBildschirm(gewonnen) {
+  const overlay = document.createElement("div");
+  overlay.id = "spielende-overlay";
+  overlay.style.cssText =
+    "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);" +
+    "display:flex;align-items:center;justify-content:center;z-index:2000;";
+
+  const box = document.createElement("div");
+  box.style.cssText = "text-align:center;font-family:sans-serif;padding:20px;max-width:90%;";
+
+  const titel = document.createElement("h1");
+  titel.style.cssText = `font-size:2.8em;margin-bottom:10px;color:${gewonnen ? "#4caf50" : "#e53935"};`;
+  titel.textContent = gewonnen ? "🎉 Du hast gewonnen! 🎉" : "😢 Du hast verloren.";
+  box.appendChild(titel);
+
+  const bild = document.createElement("img");
+  bild.src = `${BILD_PFAD}${gewonnen ? "win.jpg" : "lose.jpg"}`;
+  bild.alt = gewonnen ? "Sieg" : "Niederlage";
+  bild.style.cssText =
+    "max-width:320px;width:80%;border-radius:12px;margin:15px 0;box-shadow:0 0 30px rgba(0,0,0,0.6);";
+  box.appendChild(bild);
+
+  const untertitel = document.createElement("p");
+  untertitel.style.cssText = "color:#ccc;font-size:1.1em;margin-bottom:20px;";
+  untertitel.textContent = gewonnen
+    ? "Herzlichen Glückwunsch, du hast alle Karten gewonnen!"
+    : "Der Computer hat alle Karten gewonnen. Versuch es nochmal!";
+  box.appendChild(untertitel);
+
+  const schliessenBtn = document.createElement("button");
+  schliessenBtn.textContent = "Vokabel-Ergebnisse ansehen";
+  schliessenBtn.style.cssText =
+    "padding:12px 24px;font-size:1.1em;font-weight:bold;cursor:pointer;background:#7fd;border:none;border-radius:8px;";
+  schliessenBtn.addEventListener("click", () => overlay.remove());
+  box.appendChild(schliessenBtn);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+// listet am Spielende alle Vokabeln auf, die jedes Mal richtig eingegeben wurden,
+// und erstellt die aktualisierten Zähler für "richtigBeimErstenVersuch" in vokabel.json
 function zeigeVokabelStatistik() {
   const perfekte = Object.entries(state.vokabelStatistik)
     .filter(([, stat]) => stat.richtig > 0 && stat.falsch === 0)
@@ -640,13 +707,32 @@ function zeigeVokabelStatistik() {
 
   if (perfekte.length === 0) {
     log("Keine Vokabel wurde durchgehend richtig eingegeben.");
-    return;
+  } else {
+    log("Immer richtig eingegebene Vokabeln:");
+    perfekte.forEach(([wort, stat]) => {
+      log(`  „${wort}“ – ${stat.richtig}x richtig eingegeben`);
+    });
   }
 
-  log("Immer richtig eingegebene Vokabeln:");
-  perfekte.forEach(([wort, stat]) => {
-    log(`  „${wort}“ – ${stat.richtig}x richtig eingegeben`);
+  // aktualisierte Werte für "richtigBeimErstenVersuch": bisheriger Wert aus vokabel.json
+  // + 1, wenn die Vokabel in dieser Session beim ersten Versuch richtig war
+  const aktualisierteZahlen = VOKABELN.vokabeln.map((wort, i) => {
+    const basis = VOKABELN.richtigBeimErstenVersuch[i] || 0;
+    const stat = state.vokabelStatistik[wort];
+    const erhoehen = stat && stat.erstesVersuchRichtig === true;
+    return erhoehen ? basis + 1 : basis;
   });
+
+  log("Aktualisierte Werte für „richtigBeimErstenVersuch“ (zum Einfügen in vokabel.json):");
+  logPre(JSON.stringify(aktualisierteZahlen, null, 2));
+
+  const mindestens3 = VOKABELN.vokabeln.filter((wort, i) => aktualisierteZahlen[i] >= 3);
+  if (mindestens3.length > 0) {
+    log("Vokabeln mit mindestens 3 Treffern beim ersten Versuch (nach diesem Update):");
+    logPre(mindestens3.join(", "));
+  } else {
+    log("Keine Vokabel hat nach diesem Spiel mindestens 3 Treffer beim ersten Versuch.");
+  }
 }
 
 // ---------- Vokabel-Abfrage ----------
@@ -804,6 +890,10 @@ function werteVokabelAbfrageAus() {
 
     const stat = state.vokabelStatistik[aufgabe.wort];
     if (stat) {
+      const istErsterVersuch = stat.richtig === 0 && stat.falsch === 0;
+      if (istErsterVersuch) {
+        stat.erstesVersuchRichtig = istRichtig;
+      }
       if (istRichtig) stat.richtig++; else stat.falsch++;
       stat.zuletzt = istRichtig ? "richtig" : "falsch";
     }
