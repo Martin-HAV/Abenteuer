@@ -16,7 +16,6 @@
     "krank",
     "Flüsse",
     "hungrig"
-
   ],
   "audio": [
     "schmecken. Mir schmecken alle Früchte. Schmecken.",
@@ -35,5 +34,23 @@
     "krank. Es ist nicht schön krank zu sein. krank",
     "Flüsse. In Österreich gibt es viele Flüsse. Flüsse.",
     "hungrig. Nach dem Aufstehen bin ich hungrig. hungrig."
+  ],
+  "richtigBeimErstenVersuch": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
   ]
 }
