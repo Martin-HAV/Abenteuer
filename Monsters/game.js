@@ -13,6 +13,8 @@ const ELEMENT_BONUS = 1.5;
 
 const ELEMENT_LABEL = { fire: "Feuer", water: "Wasser", plant: "Pflanze" };
 const BILD_PFAD = "input/"; // Unterordner, in dem die Kartenbilder liegen
+const MINDEST_POOL_GROESSE = 5; // eine richtig beantwortete Vokabel wird nur "retiniert",
+                                  // wenn danach noch mehr als so viele aktiv bleiben
 
 const SCHWIERIGKEITSGRADE = [
   { name: "Leicht", fehlerquote: 0.60 },
@@ -191,13 +193,18 @@ function initState(decks) {
 }
 
 // legt für jede Vokabel einen Zähler an: wie oft richtig/falsch, der letzte Status,
-// und ob sie beim allerersten Versuch in dieser Session richtig war
+// ob sie beim allerersten Versuch in dieser Session richtig war, und ob sie
+// dauerhaft aus der Abfrage genommen wurde (siehe MINDEST_POOL_GROESSE)
 function erstelleVokabelStatistik() {
   const stat = {};
   VOKABELN.vokabeln.forEach(wort => {
-    stat[wort] = { richtig: 0, falsch: 0, zuletzt: null, erstesVersuchRichtig: null };
-    // zuletzt: null | "richtig" | "falsch"
-    // erstesVersuchRichtig: null (noch nicht gefragt) | true | false
+    stat[wort] = {
+      richtig: 0,
+      falsch: 0,
+      zuletzt: null,             // null | "richtig" | "falsch"
+      erstesVersuchRichtig: null, // null (noch nicht gefragt) | true | false
+      retiniert: false            // true = wird nicht mehr abgefragt
+    };
   });
   return stat;
 }
@@ -752,11 +759,17 @@ function starteVokabelAbfrage(cardId, weiter) {
   renderVokabelAbfrage();
 }
 
-// wählt "anzahl" zufällige Vokabeln (mit Wiederholung, falls zu wenige vorhanden sind)
 // wählt "anzahl" Vokabeln aus: zuerst falsch beantwortete oder noch nie gefragte,
-// erst wenn diese aufgebraucht sind, werden bereits richtig beantwortete erneut verwendet
+// erst wenn diese aufgebraucht sind, werden bereits richtig beantwortete erneut verwendet.
+// Vokabeln, die bereits "retiniert" wurden (siehe werteVokabelAbfrageAus), werden
+// dabei komplett ausgeschlossen.
 function ziehVokabelAufgaben(anzahl) {
-  const alleIndices = VOKABELN.vokabeln.map((_, i) => i);
+  const alleIndices = VOKABELN.vokabeln
+    .map((_, i) => i)
+    .filter(i => {
+      const stat = state.vokabelStatistik[VOKABELN.vokabeln[i]];
+      return !stat || !stat.retiniert;
+    });
   if (alleIndices.length === 0) return [];
 
   const prioritaet = alleIndices.filter(i => {
@@ -773,7 +786,7 @@ function ziehVokabelAufgaben(anzahl) {
   const indices = [];
   while (indices.length < anzahl) {
     if (pool.length === 0) {
-      // mehr Vokabeln nötig als vorhanden sind -> von vorne beginnen
+      // mehr Vokabeln nötig als (aktiv) vorhanden sind -> von vorne beginnen
       pool = mische(alleIndices);
     }
     indices.push(pool.shift());
@@ -896,6 +909,15 @@ function werteVokabelAbfrageAus() {
       }
       if (istRichtig) stat.richtig++; else stat.falsch++;
       stat.zuletzt = istRichtig ? "richtig" : "falsch";
+
+      // eine richtige Vokabel wird nur dann dauerhaft aus dem Pool genommen,
+      // wenn danach noch mehr als MINDEST_POOL_GROESSE aktive Vokabeln übrig bleiben
+      if (istRichtig && !stat.retiniert) {
+        const aktiveAnzahl = Object.values(state.vokabelStatistik).filter(s => !s.retiniert).length;
+        if (aktiveAnzahl > MINDEST_POOL_GROESSE) {
+          stat.retiniert = true;
+        }
+      }
     }
   });
   state.vokabelPunkte = richtig;
