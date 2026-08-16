@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Textabenteuer</title>
+    <style>
+        body { background-color: #1a1a1a; color: #dcdcdc; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .game-container { width: 100%; max-width: 950px; background-color: #222222; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); display: grid; grid-template-columns: 1fr 280px; gap: 30px; }
+        .story-column { display: flex; flex-direction: column; gap: 20px; }
+        .location-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 6px; border: 1px solid #333; background-color: #111; }
+        h1 { color: #2e8b57; font-size: 1.6rem; margin: 0; }
+        .story-text { line-height: 1.6; font-size: 1.1rem; margin: 0; }
+        .room-items-container { padding: 12px; background-color: #252525; border-left: 3px solid #2e8b57; border-radius: 0 4px 4px 0; font-size: 0.95rem; }
+        .btn-take { background-color: #2e8b57; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-left: 10px; font-family: inherit; }
+        .btn-take:hover { background-color: #3b9c68; }
+        .choices-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .btn-choice { background-color: #2e8b57; color: #ffffff; border: none; padding: 12px 18px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 1rem; font-family: inherit; transition: background-color 0.2s ease; }
+        .btn-choice:hover:not(:disabled) { background-color: #3b9c68; }
+        .btn-choice:disabled { background-color: #333333; color: #666666; border: 1px dashed #444; cursor: not-allowed; }
+        .sidebar-column { display: flex; flex-direction: column; gap: 20px; border-left: 1px solid #333; padding-left: 25px; }
+        .inventory-box { background-color: #2a2a2a; padding: 15px; border-radius: 6px; border: 1px solid #444; }
+        .inventory-title { font-weight: bold; color: #2e8b57; margin-bottom: 8px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        .inventory-list { font-size: 0.9rem; color: #bbb; line-height: 1.4; }
+        .btn-reset { background-color: #2a2a2a; border: 1px solid #555; color: #aaa; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 100%; font-family: inherit; transition: all 0.2s ease; }
+        .btn-reset:hover { border-color: #aa3333; color: #ff5555; background-color: #331a1a; }
+        @media (max-width: 768px) { .game-container { grid-template-columns: 1fr; } .sidebar-column { border-left: none; border-top: 1px solid #333; padding-left: 0; padding-top: 25px; } }
+    </style>
+</head>
+<body>
+
+    <!-- Das komplette Layout wird hier hart codiert bereitgestellt -->
+    <div id="main-layout" class="game-container">
+        <div class="story-column" id="story-area">
+            <img id="room-image" class="location-image" src="" alt="Location Bild" style="display: none;">
+            <h1 id="room-title">Lade Abenteuer...</h1>
+            <p id="room-text" class="story-text"></p>
+            <div id="room-items-container" class="room-items-container" style="display: none;"></div>
+            <div id="choices-container" class="choices-container"></div>
+        </div>
+
+                <!-- Rechts: UI Sidebar -->
+        <div class="sidebar-column">
+            <!-- NEU: Abenteuer-Auswahlmenü -->
+            <div class="inventory-box" style="margin-bottom: 0;">
+                <div class="inventory-title">🗺️ Abenteuer wählen</div>
+                <select id="adventure-select" onchange="window.changeAdventure(this.value)" style="width: 100%; background: #1a1a1a; color: #dcdcdc; border: 1px solid #555; padding: 8px; font-family: inherit; border-radius: 4px; cursor: pointer;">
+                    <!-- Value ist genau der Name des Unterordners -->
+                    <option value="Abenteuer-Haus">Das Haus</option>
+                    <option value="Abenteuer-Weltall">ein neues Abenteuer</option>
+                </select>
+            </div>
+
+            <div class="inventory-box">
+                <div class="inventory-title">🎒 Inventar</div>
+                <div id="inventory-list" class="inventory-list">Leer</div>
+            </div>
+            <button class="btn-reset" onclick="window.resetGame()">🔄 Neustart</button>
+        </div>
+
+    </div>    
+
+    <script>
+        // EINGEBAUTE STANDARD-STORY (Falls abenteuer.txt nicht geladen werden kann)
+        const defaultAdventure = {
+            "1": {
+                "title": "Der Eingangsbereich_backup",
+                "text": "Du stehst im hellen Flur des Hauses. Von hier aus führen zwei schwere Holztüren in die angrenzenden Räume. Auf der Kommode liegt ein Schlüssel.",
+                "image": "eingang.jpg",
+                "items": ["Schlüssel"],
+                "choices": [
+                    { "text": "Gehe in das Wohnzimmer", "target": "2" },
+                    { "text": "Schließe die Tür zum Esszimmer auf", "target": "3", "requiredItem": "Schlüssel" }
+                ]
+            }
+        };
+
+        // Standard-Einstellungen
+        let currentAdventureFolder = "Abenteuer-Haus";
+        let adventureData = defaultAdventure;
+        let gameState = { currentRoom: "1", inventory: [] };
+
+        // AKTUALISIERT: Wechselt das Abenteuer und erzwingt einen sofortigen Neustart im neuen Ordner
+        window.changeAdventure = function(folderName) {
+            currentAdventureFolder = folderName;
+            
+            // Setzt den Spielstand für das neu gewählte Abenteuer direkt auf Raum 1 zurück
+            gameState = { currentRoom: "1", inventory: [] };
+            saveGame(); 
+            
+            // Lädt die Datei und startet das Spiel visuell sofort neu
+            loadAdventureFile();
+        };
+
+        window.resetGame = function() {
+            localStorage.removeItem('vibe_save_' + currentAdventureFolder);
+            gameState = { currentRoom: "1", inventory: [] };
+            renderRoom();
+        };
+
+        window.takeItem = function(item) {
+            if (!gameState.inventory.includes(item)) {
+                gameState.inventory.push(item);
+                saveGame();
+                renderRoom();
+            }
+        };
+
+        window.goToRoom = function(roomId) {
+            if (adventureData[roomId]) {
+                gameState.currentRoom = roomId;
+                saveGame();
+                renderRoom();
+            }
+        };
+
+        // AKTUALISIERT: Lädt die abenteuer.txt dynamisch und rendert den Raum sofort nach Erfolg
+        async function loadAdventureFile() {
+            try {
+                const url = currentAdventureFolder + '/abenteuer.txt';
+                const response = await fetch(url);
+                if (response.ok) {
+                    const textData = await response.text();
+                    adventureData = JSON.parse(textData);
+                    console.log(currentAdventureFolder + "/abenteuer.txt erfolgreich gelesen.");
+                } else {
+                    console.log("Ordner oder Datei nicht gefunden. Nutze Backup-Skript.");
+                    adventureData = defaultAdventure;
+                }
+            } catch (e) {
+                console.log("Formatfehler im JSON des gewählten Abenteuers. Nutze Backup.");
+                adventureData = defaultAdventure;
+            }
+            // Zuerst den Spielstand für dieses spezifische Abenteuer aus dem Speicher laden
+            initGame();
+        }
+
+               function initGame() {
+            // Dropdown-Menü visuell auf den richtigen Ordner einstellen
+            // Korrigiert: Greift jetzt stabil auf dein Element zu
+            const selectEl = document.getElementById("adventure-select");
+            if (selectEl) {
+                selectEl.value = currentAdventureFolder;
+            } else {
+                // Fallback, falls die ID im HTML anders benannt ist
+                const fallbackSelect = document.querySelector("select");
+                if (fallbackSelect) fallbackSelect.value = currentAdventureFolder;
+            }
+
+            const savedState = localStorage.getItem('vibe_save_' + currentAdventureFolder);
+            if (savedState) {
+                try { gameState = JSON.parse(savedState); } catch(e) {}
+            } else {
+                gameState = { currentRoom: "1", inventory: [] };
+            }
+            
+            if (!adventureData || !adventureData[gameState.currentRoom]) {
+                gameState.currentRoom = "1";
+            }
+            renderRoom();
+        }
+
+
+            const savedState = localStorage.getItem('vibe_save_' + currentAdventureFolder);
+            if (savedState) {
+                try { gameState = JSON.parse(savedState); } catch(e) {}
+            } else {
+                gameState = { currentRoom: "1", inventory: [] };
+            }
+            
+            if (!adventureData || !adventureData[gameState.currentRoom]) {
+                gameState.currentRoom = "1";
+            }
+            renderRoom();
+        }
+
+        function saveGame() {
+            localStorage.setItem('vibe_save_' + currentAdventureFolder, JSON.stringify(gameState));
+        }
+
+        // SICHERE RENDER-FUNKTION: Erschafft Elemente selbst, falls sie fehlen und wendet requiredItemNot / textConditional an
+        function renderRoom() {
+            const room = adventureData[gameState.currentRoom];
+            if (!room) return;
+            
+            // 1. Titel sicher setzen
+            let titleEl = document.getElementById("room-title");
+            if (!titleEl) {
+                titleEl = document.createElement("h1");
+                titleEl.id = "room-title";
+                document.getElementById("story-area").prepend(titleEl);
+            }
+            titleEl.innerText = room.title || "Raum";
+
+            // 2. Text sicher setzen & DYNAMISCHE TEXT-LOGIK ANWENDEN
+            let textEl = document.getElementById("room-text");
+            if (!textEl) {
+                textEl = document.createElement("p");
+                textEl.id = "room-text";
+                textEl.className = "story-text";
+                titleEl.after(textEl);
+            }
+            
+            let processedText = room.text || "";
+            if (room.textConditional) {
+                room.textConditional.forEach(cond => {
+                    let conditionMet = true;
+                    if (cond.requiredItem && !gameState.inventory.includes(cond.requiredItem)) conditionMet = false;
+                    if (cond.requiredItemNot && gameState.inventory.includes(cond.requiredItemNot)) conditionMet = false;
+                    
+                    if (conditionMet) {
+                        processedText += " " + cond.text;
+                    }
+                });
+            }
+            textEl.innerText = processedText;
+
+            // 3. Bild sicher verwalten (inklusive Unterordner-Pfad)
+            const imgElement = document.getElementById("room-image");
+            if (imgElement) {
+                if (room.image && room.image.trim() !== "") {
+                    imgElement.src = currentAdventureFolder + "/" + room.image;
+                    imgElement.style.display = "block";
+                } else {
+                    imgElement.style.display = "none";
+                }
+            }
+
+            // 4. Inventar anzeigen
+            const invList = document.getElementById("inventory-list");
+            if (invList) {
+                invList.innerText = gameState.inventory.length === 0 ? "Leer" : gameState.inventory.join(", ");
+            }
+
+            // 5. Items auf dem Boden verwalten
+            const itemsContainer = document.getElementById("room-items-container");
+            if (itemsContainer) {
+                itemsContainer.innerHTML = "";
+                const availableItems = room.items ? room.items.filter(item => !gameState.inventory.includes(item)) : [];
+
+                if (availableItems.length > 0) {
+                    itemsContainer.style.display = "block";
+                    availableItems.forEach(item => {
+                        const itemDiv = document.createElement("div");
+                        itemDiv.innerHTML = `Hier liegt: <strong>${item}</strong> <button class="btn-take" onclick="window.takeItem('${item}')">Aufheben</button>`;
+                        itemsContainer.appendChild(itemDiv);
+                    });
+                } else {
+                    itemsContainer.style.display = "none";
+                }
+            }
+
+            // 6. Entscheidungen bauen (Inklusive requiredItemNot)
+            const choicesContainer = document.getElementById("choices-container");
+            if (choicesContainer) {
+                choicesContainer.innerHTML = "";
+                if (room.choices) {
+                    room.choices.forEach(choice => {
+                        const button = document.createElement("button");
+                        button.className = "btn-choice";
+                        
+                        let canClick = true;
+                        let reason = "";
+
+                        if (choice.requiredItem && !gameState.inventory.includes(choice.requiredItem)) {
+                            canClick = false;
+                            reason = ` (Benötigt: ${choice.requiredItem})`;
+                        }
+
+                        if (choice.requiredItemNot && gameState.inventory.includes(choice.requiredItemNot)) {
+                            canClick = false;
+                            reason = ` (Nicht möglich mit: ${choice.requiredItemNot})`;
+                        }
+
+                        if (!canClick) {
+                            button.disabled = true;
+                            button.innerText = choice.text + reason;
+                        } else {
+                            button.innerText = choice.text;
+                        }
+
+                        button.onclick = () => window.goToRoom(choice.target);
+                        choicesContainer.appendChild(button);
+                    });
+                }
+            }
+        }
+
+        window.onload = loadAdventureFile;
+    </script>
+</body>
+</html>
