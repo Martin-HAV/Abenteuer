@@ -10,14 +10,14 @@
         .story-column { display: flex; flex-direction: column; gap: 20px; }
         .location-image { width: 100%; max-height: 380px; object-fit: cover; border-radius: 6px; border: 1px solid #333; background-color: #111; }
         h1 { color: #2e8b57; font-size: 1.6rem; margin: 0; }
-        .story-text { line-height: 1.6; font-size: 1.1rem; margin: 0; }
-        .room-items-container { padding: 12px; background-color: #252525; border-left: 3px solid #2e8b57; border-radius: 0 4px 4px 0; font-size: 0.95rem; }
-        .btn-take { background-color: #2e8b57; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-left: 10px; font-family: inherit; }
-        .btn-take:hover { background-color: #3b9c68; }
+        .story-text { line-height: 1.6; font-size: 1.1rem; margin: 0; white-space: pre-line; }
+        .room-items-container { padding: 12px; background-color: #252525; border-left: 3px solid #2e8b57; border-radius: 0 4px 4px 0; font-size: 0.95rem; display: flex; flex-direction: column; gap: 8px; }
+        .item-link { color: #4fc985; background: none; border: none; padding: 0; font-family: inherit; font-size: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+        .item-link:hover { color: #7fe0ab; }
         .choices-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
         .btn-choice { background-color: #2e8b57; color: #ffffff; border: none; padding: 12px 18px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 1rem; font-family: inherit; transition: background-color 0.2s ease; }
-        .btn-choice:hover:not(:disabled) { background-color: #3b9c68; }
-        .btn-choice:disabled { background-color: #333333; color: #666666; border: 1px dashed #444; cursor: not-allowed; }
+        .btn-choice:hover { background-color: #3b9c68; }
+        .no-choices-hint { color: #666; font-style: italic; font-size: 0.9rem; margin: 0; }
         .sidebar-column { display: flex; flex-direction: column; gap: 20px; border-left: 1px solid #333; padding-left: 25px; }
         .inventory-box { background-color: #2a2a2a; padding: 15px; border-radius: 6px; border: 1px solid #444; }
         .inventory-title { font-weight: bold; color: #2e8b57; margin-bottom: 8px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
@@ -29,7 +29,6 @@
 </head>
 <body>
 
-    <!-- Das komplette Layout wird hier hart codiert bereitgestellt -->
     <div id="main-layout" class="game-container">
         <div class="story-column" id="story-area">
             <img id="room-image" class="location-image" src="" alt="Location Bild" style="display: none;">
@@ -39,15 +38,15 @@
             <div id="choices-container" class="choices-container"></div>
         </div>
 
-                <!-- Rechts: UI Sidebar -->
+        <!-- Rechts: UI Sidebar -->
         <div class="sidebar-column">
-            <!-- NEU: Abenteuer-Auswahlmenü -->
+            <!-- Abenteuer-Auswahlmenü -->
             <div class="inventory-box" style="margin-bottom: 0;">
                 <div class="inventory-title">🗺️ Abenteuer wählen</div>
                 <select id="adventure-select" onchange="window.changeAdventure(this.value)" style="width: 100%; background: #1a1a1a; color: #dcdcdc; border: 1px solid #555; padding: 8px; font-family: inherit; border-radius: 4px; cursor: pointer;">
                     <!-- Value ist genau der Name des Unterordners -->
                     <option value="Abenteuer-Haus">Das Haus</option>
-                    <option value="Abenteuer-Weltall">ein neues Abenteuer</option>
+                    <option value="Abenteuer-Weltall">Weltall-Abenteuer</option>
                 </select>
             </div>
 
@@ -58,19 +57,31 @@
             <button class="btn-reset" onclick="window.resetGame()">🔄 Neustart</button>
         </div>
 
-    </div>    
+    </div>
 
     <script>
-        // EINGEBAUTE STANDARD-STORY (Falls abenteuer.txt nicht geladen werden kann)
+        // EINGEBAUTE STANDARD-STORY (Falls abenteuer.json nicht geladen werden kann)
         const defaultAdventure = {
             "1": {
                 "title": "Der Eingangsbereich_backup",
-                "text": "Du stehst im hellen Flur des Hauses. Von hier aus führen zwei schwere Holztüren in die angrenzenden Räume. Auf der Kommode liegt ein Schlüssel.",
+                "text": "Du stehst im hellen Flur des Hauses. Von hier aus führen zwei schwere Holztüren in die angrenzenden Räume.",
                 "image": "eingang.jpg",
-                "items": ["Schlüssel"],
+                "items": [
+                    { "id": "schluessel", "text": "Auf der Kommode liegt ein Schlüssel.", "target": "item_schluessel", "requiredItemNot": "schluessel" }
+                ],
                 "choices": [
                     { "text": "Gehe in das Wohnzimmer", "target": "2" },
-                    { "text": "Schließe die Tür zum Esszimmer auf", "target": "3", "requiredItem": "Schlüssel" }
+                    { "text": "Schließe die Tür zum Esszimmer auf", "target": "3", "requiredItem": "schluessel" }
+                ]
+            },
+            "item_schluessel": {
+                "title": "Der Schlüssel",
+                "text": "Ein kleiner, unscheinbarer Schlüssel.",
+                "image": "",
+                "items": [],
+                "choices": [
+                    { "text": "Einstecken", "addItem": "schluessel", "target": "1" },
+                    { "text": "Liegen lassen", "target": "1" }
                 ]
             }
         };
@@ -78,35 +89,98 @@
         // Standard-Einstellungen
         let currentAdventureFolder = "Abenteuer-Haus";
         let adventureData = defaultAdventure;
-        let gameState = { currentRoom: "1", inventory: [] };
+        let gameState = { currentRoom: "1", inventory: [], flags: {} };
 
-        // AKTUALISIERT: Wechselt das Abenteuer und erzwingt einen sofortigen Neustart im neuen Ordner
-        window.changeAdventure = function(folderName) {
+        // ---------------------------------------------------------------
+        // Hilfsfunktionen für requiredItem / requiredItemNot / requiredFlag
+        // und addItem / removeItem / setFlag
+        // ---------------------------------------------------------------
+        function toArray(v) {
+            if (v === undefined || v === null) return [];
+            return Array.isArray(v) ? v : [v];
+        }
+
+        function normalizeFlag(f) {
+            // "name" -> {name, value:1} ; {name, value} -> unverändert (value default 1)
+            if (typeof f === "string") return { name: f, value: 1 };
+            return { name: f.name, value: (f.value === undefined ? 1 : f.value) };
+        }
+
+        // Prüft alle Bedingungen eines Eintrags (Choice oder Item). true = alle erfüllt.
+        function conditionsMet(entry) {
+            var ok = true;
+
+            toArray(entry.requiredItem).forEach(function (itemId) {
+                if (!gameState.inventory.includes(itemId)) ok = false;
+            });
+
+            toArray(entry.requiredItemNot).forEach(function (itemId) {
+                if (gameState.inventory.includes(itemId)) ok = false;
+            });
+
+            toArray(entry.requiredFlag).forEach(function (f) {
+                const norm = normalizeFlag(f);
+                const current = gameState.flags[norm.name] === undefined ? 0 : gameState.flags[norm.name];
+                if (current !== norm.value) ok = false;
+            });
+
+            return ok;
+        }
+
+        // Wendet addItem / removeItem / setFlag eines Choice-Eintrags an
+        function applyActions(entry) {
+            toArray(entry.addItem).forEach(function (itemId) {
+                if (!gameState.inventory.includes(itemId)) gameState.inventory.push(itemId);
+            });
+            toArray(entry.removeItem).forEach(function (itemId) {
+                const idx = gameState.inventory.indexOf(itemId);
+                if (idx !== -1) gameState.inventory.splice(idx, 1);
+            });
+            toArray(entry.setFlag).forEach(function (f) {
+                const norm = normalizeFlag(f);
+                gameState.flags[norm.name] = norm.value;
+            });
+        }
+
+        // Anzeigename für ein Item: nutzt adventureData.itemNames[id] falls vorhanden, sonst die id selbst
+        function itemDisplayName(itemId) {
+            if (adventureData && adventureData.itemNames && adventureData.itemNames[itemId]) {
+                return adventureData.itemNames[itemId];
+            }
+            return itemId;
+        }
+
+        // ---------------------------------------------------------------
+        // Abenteuer wechseln / laden
+        // ---------------------------------------------------------------
+        window.changeAdventure = function (folderName) {
             currentAdventureFolder = folderName;
-            
-            // Setzt den Spielstand für das neu gewählte Abenteuer direkt auf Raum 1 zurück
-            gameState = { currentRoom: "1", inventory: [] };
-            saveGame(); 
-            
+
+            // Setzt den Spielstand für das neu gewählte Abenteuer direkt auf den Start zurück
+            gameState = { currentRoom: "1", inventory: [], flags: {} };
+            saveGame();
+
             // Lädt die Datei und startet das Spiel visuell sofort neu
             loadAdventureFile();
         };
 
-        window.resetGame = function() {
+        window.resetGame = function () {
             localStorage.removeItem('vibe_save_' + currentAdventureFolder);
-            gameState = { currentRoom: "1", inventory: [] };
+            gameState = { currentRoom: (adventureData.start || "1"), inventory: [], flags: {} };
+            saveGame();
             renderRoom();
         };
 
-        window.takeItem = function(item) {
-            if (!gameState.inventory.includes(item)) {
-                gameState.inventory.push(item);
+        // Öffnet die Zielseite eines Items (funktioniert wie ein Ortswechsel)
+        window.openItemPage = function (targetId) {
+            if (adventureData[targetId]) {
+                gameState.currentRoom = targetId;
                 saveGame();
                 renderRoom();
             }
         };
 
-        window.goToRoom = function(roomId) {
+        window.goToRoom = function (roomId) {
             if (adventureData[roomId]) {
                 gameState.currentRoom = roomId;
                 saveGame();
@@ -114,62 +188,51 @@
             }
         };
 
-        // AKTUALISIERT: Lädt die abenteuer.txt dynamisch und rendert den Raum sofort nach Erfolg
+        // Lädt die abenteuer.json dynamisch und rendert den Raum sofort nach Erfolg
         async function loadAdventureFile() {
             try {
-                const url = currentAdventureFolder + '/abenteuer.txt';
-                const response = await fetch(url);
+                const url = currentAdventureFolder + '/abenteuer.json';
+                const response = await fetch(url, { cache: "no-store" });
                 if (response.ok) {
                     const textData = await response.text();
                     adventureData = JSON.parse(textData);
-                    console.log(currentAdventureFolder + "/abenteuer.txt erfolgreich gelesen.");
+                    console.log(currentAdventureFolder + "/abenteuer.json erfolgreich gelesen.");
                 } else {
-                    console.log("Ordner oder Datei nicht gefunden. Nutze Backup-Skript.");
+                    console.log("Ordner oder Datei nicht gefunden (HTTP " + response.status + "). Nutze Backup-Skript.");
                     adventureData = defaultAdventure;
                 }
             } catch (e) {
-                console.log("Formatfehler im JSON des gewählten Abenteuers. Nutze Backup.");
+                console.log("Formatfehler im JSON des gewählten Abenteuers, oder Netzwerkfehler. Nutze Backup.", e);
                 adventureData = defaultAdventure;
             }
-            // Zuerst den Spielstand für dieses spezifische Abenteuer aus dem Speicher laden
             initGame();
         }
 
-               function initGame() {
+        function initGame() {
             // Dropdown-Menü visuell auf den richtigen Ordner einstellen
-            // Korrigiert: Greift jetzt stabil auf dein Element zu
             const selectEl = document.getElementById("adventure-select");
             if (selectEl) {
                 selectEl.value = currentAdventureFolder;
             } else {
-                // Fallback, falls die ID im HTML anders benannt ist
                 const fallbackSelect = document.querySelector("select");
                 if (fallbackSelect) fallbackSelect.value = currentAdventureFolder;
             }
 
             const savedState = localStorage.getItem('vibe_save_' + currentAdventureFolder);
             if (savedState) {
-                try { gameState = JSON.parse(savedState); } catch(e) {}
+                try {
+                    gameState = JSON.parse(savedState);
+                    if (!gameState.flags) gameState.flags = {};
+                    if (!gameState.inventory) gameState.inventory = [];
+                } catch (e) {
+                    gameState = { currentRoom: (adventureData.start || "1"), inventory: [], flags: {} };
+                }
             } else {
-                gameState = { currentRoom: "1", inventory: [] };
+                gameState = { currentRoom: (adventureData.start || "1"), inventory: [], flags: {} };
             }
-            
-            if (!adventureData || !adventureData[gameState.currentRoom]) {
-                gameState.currentRoom = "1";
-            }
-            renderRoom();
-        }
 
-
-            const savedState = localStorage.getItem('vibe_save_' + currentAdventureFolder);
-            if (savedState) {
-                try { gameState = JSON.parse(savedState); } catch(e) {}
-            } else {
-                gameState = { currentRoom: "1", inventory: [] };
-            }
-            
             if (!adventureData || !adventureData[gameState.currentRoom]) {
-                gameState.currentRoom = "1";
+                gameState.currentRoom = adventureData.start || "1";
             }
             renderRoom();
         }
@@ -178,11 +241,11 @@
             localStorage.setItem('vibe_save_' + currentAdventureFolder, JSON.stringify(gameState));
         }
 
-        // SICHERE RENDER-FUNKTION: Erschafft Elemente selbst, falls sie fehlen und wendet requiredItemNot / textConditional an
+        // SICHERE RENDER-FUNKTION: Erschafft Elemente selbst, falls sie fehlen
         function renderRoom() {
             const room = adventureData[gameState.currentRoom];
             if (!room) return;
-            
+
             // 1. Titel sicher setzen
             let titleEl = document.getElementById("room-title");
             if (!titleEl) {
@@ -192,7 +255,7 @@
             }
             titleEl.innerText = room.title || "Raum";
 
-            // 2. Text sicher setzen & DYNAMISCHE TEXT-LOGIK ANWENDEN
+            // 2. Text sicher setzen
             let textEl = document.getElementById("room-text");
             if (!textEl) {
                 textEl = document.createElement("p");
@@ -200,17 +263,11 @@
                 textEl.className = "story-text";
                 titleEl.after(textEl);
             }
-            
             let processedText = room.text || "";
+            // optionale dynamische Textzusätze (z.B. je nach Item/Flag ein Extra-Satz anhängen)
             if (room.textConditional) {
-                room.textConditional.forEach(cond => {
-                    let conditionMet = true;
-                    if (cond.requiredItem && !gameState.inventory.includes(cond.requiredItem)) conditionMet = false;
-                    if (cond.requiredItemNot && gameState.inventory.includes(cond.requiredItemNot)) conditionMet = false;
-                    
-                    if (conditionMet) {
-                        processedText += " " + cond.text;
-                    }
+                room.textConditional.forEach(function (cond) {
+                    if (conditionsMet(cond)) processedText += " " + cond.text;
                 });
             }
             textEl.innerText = processedText;
@@ -229,20 +286,69 @@
             // 4. Inventar anzeigen
             const invList = document.getElementById("inventory-list");
             if (invList) {
-                invList.innerText = gameState.inventory.length === 0 ? "Leer" : gameState.inventory.join(", ");
+                invList.innerText = gameState.inventory.length === 0
+                    ? "Leer"
+                    : gameState.inventory.map(itemDisplayName).join(", ");
             }
 
-            // 5. Items auf dem Boden verwalten
+            // 5. Items im Raum verwalten – jedes Item ist ein klickbarer Link, der eine
+            //    eigene Seite (Bild/Text/Choices) öffnet, genau wie ein Ort.
+            //    Items können requiredItem / requiredItemNot / requiredFlag nutzen, um sich
+            //    z.B. selbst auszublenden, sobald sie im Inventar liegen.
             const itemsContainer = document.getElementById("room-items-container");
             if (itemsContainer) {
                 itemsContainer.innerHTML = "";
-                const availableItems = room.items ? room.items.filter(item => !gameState.inventory.includes(item)) : [];
+                const roomItems = room.items || [];
+                const availableItems = roomItems.filter(function (item) {
+                    // Rückwärtskompatibilität: einfache String-Items ("Schlüssel") werden
+                    // automatisch ausgeblendet, sobald sie im Inventar sind.
+                    if (typeof item === "string") {
+                        return !gameState.inventory.includes(item);
+                    }
+                    return conditionsMet(item);
+                });
 
                 if (availableItems.length > 0) {
                     itemsContainer.style.display = "block";
-                    availableItems.forEach(item => {
+                    availableItems.forEach(function (item) {
                         const itemDiv = document.createElement("div");
-                        itemDiv.innerHTML = `Hier liegt: <strong>${item}</strong> <button class="btn-take" onclick="window.takeItem('${item}')">Aufheben</button>`;
+
+                        if (typeof item === "string") {
+                            // Altes einfaches Format: direkt aufnehmbar per Button
+                            itemDiv.innerHTML = "Hier liegt: <strong>" + item + "</strong> ";
+                            const btn = document.createElement("button");
+                            btn.className = "item-link";
+                            btn.textContent = "[Aufheben]";
+                            btn.onclick = function () {
+                                if (!gameState.inventory.includes(item)) {
+                                    gameState.inventory.push(item);
+                                    saveGame();
+                                    renderRoom();
+                                }
+                            };
+                            itemDiv.appendChild(btn);
+                        } else if (item.target && adventureData[item.target]) {
+                            // Neues Format: Item ist ein Link zu einer eigenen Item-Seite
+                            const link = document.createElement("button");
+                            link.className = "item-link";
+                            link.textContent = item.text || itemDisplayName(item.id);
+                            link.onclick = function () { window.openItemPage(item.target); };
+                            itemDiv.appendChild(link);
+                        } else {
+                            // Objekt-Item ohne target: direkt per Klick aufnehmbar
+                            const link = document.createElement("button");
+                            link.className = "item-link";
+                            link.textContent = (item.text || itemDisplayName(item.id)) + " [Aufheben]";
+                            link.onclick = function () {
+                                if (!gameState.inventory.includes(item.id)) {
+                                    gameState.inventory.push(item.id);
+                                    saveGame();
+                                    renderRoom();
+                                }
+                            };
+                            itemDiv.appendChild(link);
+                        }
+
                         itemsContainer.appendChild(itemDiv);
                     });
                 } else {
@@ -250,38 +356,40 @@
                 }
             }
 
-            // 6. Entscheidungen bauen (Inklusive requiredItemNot)
+            // 6. Entscheidungen bauen (requiredItem / requiredItemNot / requiredFlag,
+            //    sowie addItem / removeItem / setFlag beim Klick).
+            //    Nicht erfüllte Choices werden komplett ausgeblendet, nicht nur deaktiviert.
             const choicesContainer = document.getElementById("choices-container");
             if (choicesContainer) {
                 choicesContainer.innerHTML = "";
-                if (room.choices) {
-                    room.choices.forEach(choice => {
-                        const button = document.createElement("button");
-                        button.className = "btn-choice";
-                        
-                        let canClick = true;
-                        let reason = "";
+                const choices = room.choices || [];
 
-                        if (choice.requiredItem && !gameState.inventory.includes(choice.requiredItem)) {
-                            canClick = false;
-                            reason = ` (Benötigt: ${choice.requiredItem})`;
-                        }
+                const visibleChoices = choices.filter(function (choice) {
+                    return conditionsMet(choice);
+                });
 
-                        if (choice.requiredItemNot && gameState.inventory.includes(choice.requiredItemNot)) {
-                            canClick = false;
-                            reason = ` (Nicht möglich mit: ${choice.requiredItemNot})`;
-                        }
+                visibleChoices.forEach(function (choice) {
+                    const button = document.createElement("button");
+                    button.className = "btn-choice";
+                    button.innerText = choice.text;
 
-                        if (!canClick) {
-                            button.disabled = true;
-                            button.innerText = choice.text + reason;
+                    button.onclick = function () {
+                        applyActions(choice);
+                        saveGame();
+                        if (choice.target) {
+                            window.goToRoom(choice.target);
                         } else {
-                            button.innerText = choice.text;
+                            renderRoom();
                         }
+                    };
+                    choicesContainer.appendChild(button);
+                });
 
-                        button.onclick = () => window.goToRoom(choice.target);
-                        choicesContainer.appendChild(button);
-                    });
+                if (visibleChoices.length === 0) {
+                    const hint = document.createElement("p");
+                    hint.className = "no-choices-hint";
+                    hint.textContent = "Es gibt hier nichts weiter zu tun.";
+                    choicesContainer.appendChild(hint);
                 }
             }
         }
