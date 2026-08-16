@@ -182,10 +182,13 @@
             }
         }
 
-        // Ersetzt Platzhalter {SPIELER} und {FREUNDIN} in Texten durch die gewählten Namen
+        // Ersetzt Platzhalter {SPIELER} und {FREUNDIN} (unabhängig von Groß-/Kleinschreibung)
+        // in Texten durch die gewählten Namen
         function replacePlaceholders(text) {
             if (!text) return text;
-            return text.split("{SPIELER}").join(playerName).split("{FREUNDIN}").join(girlfriendName);
+            return text
+                .replace(/\{\s*spieler\s*\}/gi, playerName)
+                .replace(/\{\s*freundin\s*\}/gi, girlfriendName);
         }
 
         // ---------------------------------------------------------------
@@ -468,9 +471,32 @@
 
         window.resetGame = function () {
             localStorage.removeItem('vibe_save_' + currentAdventureFolder);
-            gameState = { currentRoom: (adventureData.start || "1"), inventory: [], flags: {} };
-            saveGame();
-            renderRoom();
+            localStorage.removeItem('vibe_player_name');
+            localStorage.removeItem('vibe_girlfriend_name');
+            playerName = "";
+            girlfriendName = "";
+            gameState = { currentRoom: "1", inventory: [], flags: {} };
+
+            const overlay = document.getElementById("name-setup-overlay");
+            const mainLayout = document.getElementById("main-layout");
+            if (overlay) {
+                // Setup-Box wieder in ihren ursprünglichen Zustand zurücksetzen
+                overlay.querySelector(".setup-box").innerHTML =
+                    '<p class="setup-question" id="setup-question">Was ist der erste Buchstabe deines Namens?</p>' +
+                    '<div class="quiz-controls">' +
+                    '<input type="text" id="setup-input" class="quiz-input" maxlength="1" autocomplete="off" autocapitalize="characters">' +
+                    '<button type="button" class="btn-quiz" id="setup-submit-btn">Weiter</button>' +
+                    '</div>' +
+                    '<p id="setup-feedback" class="quiz-feedback"></p>';
+                overlay.style.display = "flex";
+            }
+            if (mainLayout) mainLayout.style.display = "none";
+
+            runNameSetup(function () {
+                gameState = { currentRoom: (adventureData.start || "1"), inventory: [], flags: {} };
+                saveGame();
+                renderRoom();
+            });
         };
 
         // Öffnet die Zielseite eines Items (funktioniert wie ein Ortswechsel)
