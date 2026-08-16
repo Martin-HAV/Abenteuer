@@ -1,0 +1,66 @@
+{
+"1": {
+"title": "Ein besonderer Tag",
+"text": "Heute ist ein ganz besonderer Tag. {Spieler} ist draußen unterwegs, als plötzlich jemand fröhlich ruft: „Hallo!“ Vor {Spieler} steht {Freundin} und lächelt. Sie trägt ihre roten Gummistiefel und hält einen kleinen, bunten Rucksack in der Hand.",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"2"}]
+},
+
+"2": {
+"title": "Die neue Freundin",
+"text": "{Freundin} stellt sich vor und sagt: „Ich bin {Freundin}. Möchtest du mit mir auf ein kleines Abenteuer gehen?“ {Spieler} freut sich. Gemeinsam machen sie sich auf den Weg.",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Ja, ich möchte mit dir auf ein Abenteuer gehen","target":"3"},
+{"text":"Nein, lieber nicht. Danke.","target":"2"}]
+},
+
+"3": {
+"title": "Der geheimnisvolle Rucksack",
+"text": "Nach einer Weile setzt sich {Freundin} ins Gras und öffnet ihren Rucksack. Darin liegen eine kleine Taschenlampe, ein Apfel und eine glitzernde Lupe. „Die habe ich für unser Abenteuer mitgebracht“, sagt {Freundin} geheimnisvoll.",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"4"}]
+},
+
+"4": {
+"title": "Ein seltsames Geräusch",
+"text": "Plötzlich hören {Spieler} und {Freundin} ein leises Rascheln. Raschel, raschel! Hinter einem Busch bewegt sich etwas. {Freundin} schaut neugierig hin und flüstert: „Was könnte das sein?“",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"5"}]
+},
+
+"5": {
+"title": "Ein kleiner Fund",
+"text": "Gemeinsam gehen {Spieler} und {Freundin} vorsichtig zum Busch. Dort entdecken sie keine Gefahr, sondern einen kleinen, verlorenen Teddybären. „Oh nein! Der gehört bestimmt jemandem“, sagt {Freundin}. Sie hebt den Teddy vorsichtig auf.",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"6"}]
+},
+
+"6": {
+"title": "Die Spur im Matsch",
+"text": "Neben dem Busch entdecken die beiden kleine Fußspuren im Matsch. Sie führen über den Weg und verschwinden hinter einem großen Baum. {Freundin} nimmt ihre Lupe heraus. „Ein echter Abenteuerfall!“, ruft sie begeistert.",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"7"}]
+},
+
+"7": {
+"title": "Der große Baum",
+"text": "Hinter dem Baum finden {Spieler} und {Freundin} eine kleine Bank. Darauf liegt ein Zettel. Auf dem Zettel steht: „Bitte hilf mir, meinen Teddy zu finden!“ {Freundin} sieht {Spieler} an und sagt: „Dann sind wir heute wohl Teddy-Detektivinnen!“",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"8"}]
+},
+
+"8": {
+"title": "Das Abenteuer beginnt",
+"text": "Die Sonne scheint, die Vögel zwitschern und {Freundin} hält den kleinen Teddy ganz vorsichtig im Arm. Gemeinsam machen sich {Spieler} und {Freundin} auf die Suche nach seinem Besitzer. Beide wissen noch nicht, welches spannende Geheimnis sie dabei entdecken werden.",
+"image": "peppa.jpg",
+"items": [],
+"choices": [{"text":"Weiter...","target":"9"}]
+}
+}

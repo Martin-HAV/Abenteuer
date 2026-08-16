@@ -194,16 +194,33 @@
         // ---------------------------------------------------------------
         let setupStep = 1; // 1 = eigener Name, 2 = Name der Freundin
 
+        // Spricht die Begrüßung und wartet danach eine kurze Pause, bevor es weitergeht
+        function speakGreetingThen(callback) {
+            const overlay = document.getElementById("name-setup-overlay");
+            const box = overlay ? overlay.querySelector(".setup-box") : null;
+            if (box) {
+                box.innerHTML = '<p class="setup-question">👋 Hallo ' + playerName + '!</p>';
+            }
+            if (overlay) overlay.style.display = "flex";
+            const mainLayout = document.getElementById("main-layout");
+            if (mainLayout) mainLayout.style.display = "none";
+
+            speak("Hallo " + playerName + ".", function () {
+                setTimeout(function () {
+                    if (overlay) overlay.style.display = "none";
+                    if (mainLayout) mainLayout.style.display = "grid";
+                    callback();
+                }, 1500); // zusätzliche Pause nach der Begrüßung
+            });
+        }
+
         function runNameSetup(onComplete) {
             const savedPlayer = localStorage.getItem("vibe_player_name");
             const savedGirlfriend = localStorage.getItem("vibe_girlfriend_name");
             if (savedPlayer && savedGirlfriend) {
                 playerName = savedPlayer;
                 girlfriendName = savedGirlfriend;
-                document.getElementById("name-setup-overlay").style.display = "none";
-                document.getElementById("main-layout").style.display = "grid";
-                speak("Hallo " + playerName + ".");
-                onComplete();
+                speakGreetingThen(onComplete);
                 return;
             }
 
@@ -240,11 +257,7 @@
                 } else {
                     girlfriendName = answer + "eppa";
                     localStorage.setItem("vibe_girlfriend_name", girlfriendName);
-
-                    document.getElementById("name-setup-overlay").style.display = "none";
-                    document.getElementById("main-layout").style.display = "grid";
-                    speak("Hallo " + playerName + ".");
-                    onComplete();
+                    speakGreetingThen(onComplete);
                 }
             }
 
@@ -267,12 +280,26 @@
         // ---------------------------------------------------------------
         // Sprachausgabe (Web Speech API)
         // ---------------------------------------------------------------
-        function speak(text) {
-            if (!("speechSynthesis" in window) || !text) return;
+        function speak(text, onEnd) {
+            if (!("speechSynthesis" in window) || !text) {
+                if (onEnd) onEnd();
+                return;
+            }
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = "de-DE";
             utterance.rate = 0.95;
+            let finished = false;
+            const finish = function () {
+                if (finished) return;
+                finished = true;
+                if (onEnd) onEnd();
+            };
+            utterance.onend = finish;
+            utterance.onerror = finish;
+            // Sicherheitsnetz, falls das onend-Event im Browser nicht zuverlässig feuert
+            const fallbackMs = Math.max(1500, text.length * 90);
+            setTimeout(finish, fallbackMs);
             window.speechSynthesis.speak(utterance);
         }
 
