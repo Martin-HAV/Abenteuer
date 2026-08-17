@@ -65,11 +65,10 @@
 "choices": [{"text":"Weiter...","target":"9"}]
 },
 
-{
   "9": {
     "title": "Zu Hause bei Peppa",
     "text": "{Spieler} und {Freundin} gehen schnell nach Hause. Dort erzählen sie Mama Wutz und Papa Wutz von dem seltsamen Geräusch und dem kleinen Teddybären. Mama Wutz hört aufmerksam zu. Papa Wutz schaut sich den Teddy genau an und sagt: „Hmm, vielleicht können wir gemeinsam herausfinden, wem er gehört!“",
-    "image": "peppa_familie.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"10"}]
   },
@@ -77,7 +76,7 @@
   "10": {
     "title": "Schorsch ist da!",
     "text": "Da kommt plötzlich Schorsch Wutz ins Zimmer. Er trägt sein Spielzeug-Dinosaurierchen bei sich. „Dinosaurier!“, ruft Schorsch fröhlich und zeigt auf den Teddy. Doch dann schüttelt er den Kopf. Der Teddy gehört ihm nicht. {Freundin} kichert: „Vielleicht kann Schorsch uns trotzdem helfen!“",
-    "image": "schorsch.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"11"}]
   },
@@ -85,7 +84,7 @@
   "11": {
     "title": "Oma und Opa Wutz",
     "text": "Kurz darauf kommen Oma Wutz und Opa Wutz zu Besuch. Sie begrüßen {Spieler} und {Freundin} ganz herzlich. Als sie den Teddy sehen, wird Oma Wutz neugierig. „Was für ein hübscher kleiner Bär!“, sagt sie. Opa Wutz setzt seine Brille auf und betrachtet den Teddy ganz genau.",
-    "image": "oma_opa.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"12"}]
   },
@@ -93,7 +92,7 @@
   "12": {
     "title": "Ein lustiger Verdacht",
     "text": "Opa Wutz entdeckt etwas Kleines am Teddy. An seinem Fuß hängt ein Stückchen grünes Gras. „Der Teddy war also draußen unterwegs“, sagt er. Schorsch hält seinen Dinosaurier hoch und ruft: „Vielleicht hat der Dino ihn gefunden!“ Alle lachen. „Das wäre ein sehr fleißiger Dinosaurier“, sagt Papa Wutz.",
-    "image": "familie_teddy.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"13"}]
   },
@@ -101,7 +100,7 @@
   "13": {
     "title": "Ein wichtiger Hinweis",
     "text": "Mama Wutz nimmt den Zettel, den {Spieler} und {Freundin} gefunden haben. Auf der Rückseite entdeckt sie eine kleine Zeichnung. Darauf ist ein rotes Haus mit einem großen Baum daneben. „Ich glaube, das ist ein Hinweis!“, sagt Mama Wutz. {Freundin} strahlt: „Dann wissen wir vielleicht, wo der Teddy hingehört!“",
-    "image": "hinweis.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"14"}]
   },
@@ -109,7 +108,7 @@
   "14": {
     "title": "Ein gemütlicher Abend",
     "text": "Bevor sie weiter suchen, gibt es für alle eine kleine Pause. Mama Wutz bringt Kekse und Saft. {Spieler}, {Freundin}, Schorsch, Oma Wutz, Opa Wutz und Papa Wutz sitzen zusammen und erzählen lustige Geschichten. Schorsch lässt seinen Dinosaurier über den Tisch laufen und alle müssen lachen.",
-    "image": "familie_kekse.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"15"}]
   },
@@ -117,7 +116,7 @@
   "15": {
     "title": "Das nächste Abenteuer",
     "text": "Als es langsam dunkel wird, legt {Freundin} den Teddy vorsichtig neben den Rucksack. „Morgen suchen wir weiter“, sagt sie. {Spieler} nickt. Doch plötzlich klopft es an der Haustür. Klopf, klopf, klopf! Alle schauen sich überrascht an. Wer wohl vor der Tür steht?",
-    "image": "haustuer.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"16"}]
   },
@@ -125,9 +124,8 @@
   "16": {
     "title": "Wer klopft da?",
     "text": "Papa Wutz geht zur Tür und öffnet sie. Draußen steht jemand, den {Spieler} und {Freundin} bisher noch nicht gesehen haben. Die unbekannte Person schaut aufgeregt und fragt: „Habt ihr vielleicht einen kleinen Teddybären gefunden?“ {Freundin} schaut {Spieler} mit großen Augen an. Vielleicht haben sie den Besitzer gefunden!",
-    "image": "haustuer_teddy.jpg",
+    "image": "peppa.jpg",
     "items": [],
     "choices": [{"text":"Weiter...","target":"17"}]
   }
-}
 }
