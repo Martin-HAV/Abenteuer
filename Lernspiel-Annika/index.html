@@ -15,9 +15,12 @@
         .item-link { color: #4fc985; background: none; border: none; padding: 0; font-family: inherit; font-size: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
         .item-link:hover { color: #7fe0ab; }
         .choices-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .btn-choice { background-color: #2e8b57; color: #ffffff; border: none; padding: 12px 18px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 1rem; font-family: inherit; transition: background-color 0.2s ease; }
+        .choice-row { display: flex; gap: 8px; align-items: stretch; }
+        .btn-choice { background-color: #2e8b57; color: #ffffff; border: none; padding: 12px 18px; border-radius: 4px; cursor: pointer; text-align: left; font-size: 1rem; font-family: inherit; transition: background-color 0.2s ease; flex: 1; }
         .btn-choice:hover:not(:disabled) { background-color: #3b9c68; }
         .btn-choice:disabled { background-color: #333333; color: #666666; border: 1px dashed #444; cursor: not-allowed; }
+        .btn-choice-replay { background-color: #333333; border: 1px solid #555; color: #dcdcdc; border-radius: 4px; cursor: pointer; padding: 0 14px; font-size: 1.15rem; font-family: inherit; flex-shrink: 0; }
+        .btn-choice-replay:hover { border-color: #4fc985; color: #4fc985; }
         .no-choices-hint { color: #666; font-style: italic; font-size: 0.9rem; margin: 0; }
         .sidebar-column { display: flex; flex-direction: column; gap: 20px; border-left: 1px solid #333; padding-left: 25px; }
         .inventory-box { background-color: #2a2a2a; padding: 15px; border-radius: 6px; border: 1px solid #444; }
@@ -279,6 +282,7 @@
         let currentQuizWord = "";
         let pendingSpeechTitle = "";
         let pendingSpeechText = "";
+        let pendingChoiceTexts = [];
 
         // ---------------------------------------------------------------
         // Sprachausgabe (Web Speech API)
@@ -304,6 +308,25 @@
             const fallbackMs = Math.max(1500, text.length * 90);
             setTimeout(finish, fallbackMs);
             window.speechSynthesis.speak(utterance);
+        }
+
+        // Liest zuerst die Geschichte, dann "Was willst du tun?" und danach
+        // nacheinander alle Handlungsoptionen vor
+        function speakStoryAndChoices() {
+            speak(pendingSpeechTitle + ". " + pendingSpeechText, function () {
+                setTimeout(function () {
+                    speak("Was willst du tun?", function () {
+                        setTimeout(function () { speakChoicesSequentially(0); }, 400);
+                    });
+                }, 800);
+            });
+        }
+
+        function speakChoicesSequentially(index) {
+            if (!pendingChoiceTexts || index >= pendingChoiceTexts.length) return;
+            speak(pendingChoiceTexts[index], function () {
+                setTimeout(function () { speakChoicesSequentially(index + 1); }, 500);
+            });
         }
 
         // ---------------------------------------------------------------
@@ -353,7 +376,7 @@
                     const gated = document.getElementById("content-gated");
                     if (quizBox) quizBox.style.display = "none";
                     if (gated) gated.style.display = "flex";
-                    speak(pendingSpeechTitle + ". " + pendingSpeechText);
+                    speakStoryAndChoices();
                 }, 700);
             } else {
                 if (feedback) { feedback.textContent = "Das war noch nicht richtig. Hör nochmal genau hin!"; feedback.className = "quiz-feedback wrong"; }
@@ -378,7 +401,7 @@
                 }
             });
             if (speakBtn) speakBtn.addEventListener("click", function () {
-                speak(pendingSpeechTitle + ". " + pendingSpeechText);
+                speakStoryAndChoices();
             });
         });
 
@@ -704,7 +727,14 @@
     return checkConditions(choice).met;
 });
 
-visibleChoices.forEach(function (choice) {
+pendingChoiceTexts = visibleChoices.map(function (choice) {
+    return replacePlaceholders(choice.text);
+});
+
+visibleChoices.forEach(function (choice, choiceIndex) {
+    const row = document.createElement("div");
+    row.className = "choice-row";
+
     const button = document.createElement("button");
     button.className = "btn-choice";
     button.innerText = replacePlaceholders(choice.text);
@@ -718,7 +748,20 @@ visibleChoices.forEach(function (choice) {
             renderRoom();
         }
     };
-    choicesContainer.appendChild(button);
+
+    const replayIcon = document.createElement("button");
+    replayIcon.type = "button";
+    replayIcon.className = "btn-choice-replay";
+    replayIcon.title = "Diese Option vorlesen";
+    replayIcon.textContent = "🔊";
+    replayIcon.onclick = function (e) {
+        e.stopPropagation();
+        speak(pendingChoiceTexts[choiceIndex]);
+    };
+
+    row.appendChild(button);
+    row.appendChild(replayIcon);
+    choicesContainer.appendChild(row);
 });
 
 if (visibleChoices.length === 0) {
