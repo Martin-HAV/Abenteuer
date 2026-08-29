@@ -56,6 +56,68 @@
     "strength": 3,
     "element": "water"
 
+  },
+  "Crabby": {
+    "name": "Crabby",
+    "text": "Malfoy's Schläger.",
+    "image": "Crabby.jpg",
+    "strength": 2,
+    "element": "slytherin"
+  },
+ "Goyle": {
+    "name": "Goyle",
+    "text": "Malfoy's Schläger.",
+    "image": "Goyle.jpg",
+    "strength": 1,
+    "element": "slytherin"
+  },
+  "Malfoy": {
+    "name": "Malfoy",
+    "text": "Harry's Erzfeind.",
+    "image": "Malfoy.jpg",
+    "strength": 2,
+    "element": "slytherin"
+  },
+  "Ron": {
+    "name": "Ron",
+    "text": "Ronald Weasley mit den roten Haaren.",
+    "image": "Ron.jpg",
+    "strength": 1,
+    "element": "griffindor"
+  },
+  "Hermine": {
+    "name": "Hermine",
+    "text": "Die schlaue Hermine Granger.",
+    "image": "Hermine.jpg",
+    "strength": 2,
+    "element": "griffindor"
+  },
+  "Harry": {
+    "name": "Harry",
+    "text": "Harry Potter! Der berühmte Zauberer.",
+    "image": "Harry.jpg",
+    "strength": 3,
+    "element": "griffindor"
+  },
+   "Hannah": {
+    "name": "Hannah Abbot",
+    "text": "Hannah Abbott setzt als erstes den sprechenden Hut auf.",
+    "image": "Hannah.jpg",
+    "strength": 1,
+    "element": "hufflepuff"
+  },
+   "Moench": {
+    "name": "Der fette Mönche",
+    "text": "Der Hausgeist von Hufflepuff.",
+    "image": "Moench.jpg",
+    "strength": 2,
+    "element": "hufflepuff"
+  },
+   "Sprout": {
+    "name": "Pomona Sprout",
+    "text": "Die Lehrerin für Kräuterkunde und Hauslehrerin von Hufflepuff.",
+    "image": "Sprout.jpg",
+    "strength": 3,
+    "element": "hufflepuff"
   }
- 
 }
