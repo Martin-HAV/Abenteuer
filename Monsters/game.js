@@ -16,6 +16,21 @@ const BILD_PFAD = "input/"; // Unterordner, in dem die Kartenbilder liegen
 const MINDEST_POOL_GROESSE = 5; // eine richtig beantwortete Vokabel wird nur "retiniert",
                                   // wenn danach noch mehr als so viele aktiv bleiben
 
+// Alias-Tabelle: erlaubt, in cards.json statt fire/water/plant auch andere Namen zu
+// verwenden (z.B. Hogwarts-Häuser). Schlüssel werden klein geschrieben verglichen.
+const ELEMENT_ALIASE = {
+  fire: "fire", feuer: "fire", slytherin: "fire",
+  water: "water", wasser: "water", griffindor: "water", gryffindor: "water",
+  plant: "plant", pflanze: "plant", hufflepuff: "plant"
+};
+
+// wandelt einen rohen Element-Namen aus cards.json in den kanonischen Wert
+// (fire/water/plant) um, der für Stärkevergleiche verwendet wird
+function normalisiereElement(roh) {
+  const schluessel = (roh || "").trim().toLowerCase();
+  return ELEMENT_ALIASE[schluessel] || schluessel;
+}
+
 const SCHWIERIGKEITSGRADE = [
   { name: "Leicht", fehlerquote: 0.60 },
   { name: "Normal", fehlerquote: 0.45 },
@@ -43,6 +58,14 @@ async function ladeDaten() {
   CARDS = await cardsRes.json();
   const decks = await deckRes.json();
   VOKABELN = await vokabelRes.json();
+
+  // erkennt automatisch, welches Element (Feuer/Wasser/Pflanze bzw. ein Alias
+  // dafür wie Slytherin/Griffindor/Hufflepuff) jede Karte hat. Die Original-
+  // Bezeichnung aus cards.json bleibt für die Anzeige erhalten.
+  Object.values(CARDS).forEach(karte => {
+    karte.elementAnzeige = karte.element;
+    karte.element = normalisiereElement(karte.element);
+  });
 
   // Rückwärtskompatibilität: falls das Feld in der Datei noch fehlt, mit Nullen auffüllen
   if (!Array.isArray(VOKABELN.richtigBeimErstenVersuch)) {
@@ -296,7 +319,7 @@ function renderSpielerHand() {
       <img src="${BILD_PFAD}${karte.image}" alt="${karte.name}">
       <div class="name">${karte.name}</div>
       <div class="staerke">Stärke: ${karte.strength}</div>
-      <div class="element">${ELEMENT_LABEL[karte.element]}</div>
+      <div class="element">${karte.elementAnzeige}</div>
       <div class="flavor">${karte.text}</div>
     `;
     if (auswaehlbar) {
@@ -327,7 +350,7 @@ function erstelleTischKarte(cardId, besitzer) {
     <img src="${BILD_PFAD}${karte.image}" alt="${karte.name}">
     <div class="name">${karte.name}</div>
     <div class="staerke">Stärke: ${karte.strength}</div>
-    <div class="element">${ELEMENT_LABEL[karte.element]}</div>
+    <div class="element">${karte.elementAnzeige}</div>
   `;
   return div;
 }
@@ -366,7 +389,7 @@ function computerDecktAuf() {
   }
   const index = computerWaehleIndex(state.computer.hand, null);
   state.computerOffeneKarte = spieleKarteAusHand(state.computer, index);
-  log(`Computer deckt auf: ${CARDS[state.computerOffeneKarte].name} (Stärke ${CARDS[state.computerOffeneKarte].strength}, ${ELEMENT_LABEL[CARDS[state.computerOffeneKarte].element]})`);
+  log(`Computer deckt auf: ${CARDS[state.computerOffeneKarte].name} (Stärke ${CARDS[state.computerOffeneKarte].strength}, ${CARDS[state.computerOffeneKarte].elementAnzeige})`);
   state.phase = "spielerWaehlt";
   render();
 }
@@ -496,7 +519,7 @@ function erstelleErgebnisKarte(cardId, besitzer, staerke, status) {
     <img src="${BILD_PFAD}${karte.image}" alt="${karte.name}" style="width:100%;height:100px;object-fit:cover;border-radius:4px;margin:6px 0;">
     <div style="font-weight:bold;color:#eee;">${karte.name}</div>
     <div style="color:${rahmenfarbe};font-weight:bold;">Stärke: ${staerke}</div>
-    <div style="color:#9ad;font-size:0.85em;">${ELEMENT_LABEL[karte.element]}</div>
+    <div style="color:#9ad;font-size:0.85em;">${karte.elementAnzeige}</div>
   `;
   return div;
 }
