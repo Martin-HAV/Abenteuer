@@ -75,7 +75,7 @@
     "name": "Malfoy",
     "text": "Harry's Erzfeind.",
     "image": "Malfoy.jpg",
-    "strength": 2,
+    "strength": 3,
     "element": "slytherin"
   },
   "Ron": {
