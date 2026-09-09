@@ -113,6 +113,13 @@
     "strength": 2,
     "element": "hufflepuff"
   },
+   "Isabel": {
+    "name": "Die fleißige Isabel",
+    "text": "Isabel gewinnt Punkte für Hufflepuff.",
+    "image": "Isabel.jpeg",
+    "strength": 4,
+    "element": "hufflepuff"
+  },
    "Sprout": {
     "name": "Pomona Sprout",
     "text": "Die Lehrerin für Kräuterkunde und Hauslehrerin von Hufflepuff.",
