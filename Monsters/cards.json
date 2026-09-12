@@ -120,6 +120,41 @@
     "strength": 4,
     "element": "hufflepuff"
   },
+   "Snape": {
+    "name": "Professor Snape",
+    "text": "Slytherin's Hauslehrer.",
+    "image": "Snape.jpg",
+    "strength": 3,
+    "element": "slytherin"
+  },
+  "Hagrid": {
+    "name": "Rubeus Hagrid",
+    "text": "Der hilfsbereite Wildhüter von Hogwarts.",
+    "image": "Hagrid.jpg",
+    "strength": 2,
+    "element": "griffindor"
+  },
+  "McGonagall": {
+    "name": "Minerva McGonagall",
+    "text": "Die Hauslehrerin von Gryffindor.",
+    "image": "McGonagall.jpg",
+    "strength": 3,
+    "element": "griffindor"
+  },
+  "Neville": {
+    "name": "Neville Longbottom",
+    "text": "Harry's Freund in Griffindor.",
+    "image": "Neville.jpg",
+    "strength": 1,
+    "element": "griffindor"
+  },
+  "Baron": {
+    "name": "Der blutige Baron",
+    "text": "Der Hausgeist von Slytherin.",
+    "image": "BlutigeBaron.jpg",
+    "strength": 2,
+    "element": "slytherin"
+  },
    "Sprout": {
     "name": "Pomona Sprout",
     "text": "Die Lehrerin für Kräuterkunde und Hauslehrerin von Hufflepuff.",
