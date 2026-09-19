@@ -1,11 +1,8 @@
 {
   "vokabeln": [
     "Frühling",
-    "Mohn",
-    "hasse",
     "Ratte",
-    "Ofen",
-    "Meer",
+    "Frühstück",
     
 "mehr",
     "Leben",
@@ -20,11 +17,9 @@
   ],
   "audio": [
     "Frühling. Annika hat im Frühling Geburtstag. Frühling.",
-     "Mohn. Auf dem Brötchen sind Mohnkörner. Mohn.",
-     "hasse. Ich hasse laute Geräusche. hasse.",
     "Ratte. Eine Ratte läuft durch den Garten. Ratte.",
-    "Ofen. Der Kuchen ist im Ofen. Ofen.",
-    "Meer. Im Sommer fahren wir ans Meer. Meer.",
+    "Frühstück. Jeden Morgen esse ich Frühstück. Frühstück.",
+
 
     "mehr. Ich möchte mehr Saft. mehr.",
     "Leben. Das Leben ist schön. Leben.",
@@ -39,21 +34,17 @@
   ],
   "richtigBeimErstenVersuch": [
   2,
-  2,
-  2,
-  2,
-  2,
-  2,
-
-   1,
   0,
+  2,
+  2,
   1,
-  0,
+  2,
   0,
   0,
   1,
+  1,
+  1,
   0,
-  0,
-  0
+  1
 ]
 }
