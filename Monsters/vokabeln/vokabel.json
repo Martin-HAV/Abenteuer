@@ -1,15 +1,8 @@
 {
   "vokabeln": [
-     "Ratte",
-
-    "Miete",
     "Mitte",
     "Bühne",
-    "Tür",
-    "wieder",
     "Saal",
-    "Kohl",
-    "Kohle",
     "Höhle",
      "Huhn",
     "Hund",
@@ -17,22 +10,14 @@
     "Wanne",
     "Boten",
     "Latten",
-    "Bett",
     "Schiff",
     "schief",
     "Stadt"
   ],
   "audio": [
-    "Ratte. Eine Ratte läuft durch den Garten. Ratte.",
-
-    "Miete. Die Miete wird jeden Monat bezahlt. Miete.",
     "Mitte. In der Mitte steht ein Baum. Mitte.",
            "Bühne. Die Kinder stehen auf der Bühne. Bühne.",
-    "Tür. Die Tür ist geschlossen. Tür.",
-    "wieder. Wir sehen uns morgen wieder. wieder.",
     "Saal. Viele Kinder sitzen im Saal. Saal.",
-    "Kohl. Im Garten wächst Kohl. Kohl.",
-    "Kohle. Die Kohle liegt im Eimer. Kohle.",
     "Höhle. Der Bär schläft in einer Höhle. Höhle.",
 
     
@@ -42,7 +27,6 @@
     "Wanne. Das Kind sitzt in der Wanne. Wanne.",
     "Boten. Die Boten bringen die Nachricht. Boten.",
     "Latten. Die Latten liegen neben dem Haus. Latten.",
-    "Bett. Das Bett ist weich. Bett.",
     "Schiff. Das Schiff fährt über das Meer. Schiff.",
     "schief. Das Bild hängt schief. schief.",
     "Stadt. Die Stadt ist groß. Stadt."
@@ -50,21 +34,13 @@
   "richtigBeimErstenVersuch": [
   2,
   2,
+  2,
+  1,
   1,
   1,
   2,
-  2,
   1,
   2,
-  2,
-  0,
-
-  0,
-  0,
-  2,
-  0,
-  2,
-  1,
   2,
   1,
   1,
