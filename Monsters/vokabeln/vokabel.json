@@ -1,49 +1,68 @@
 {
   "vokabeln": [
     "Mitte",
-    "Bühne",
-    "Saal",
     "Höhle",
      "Huhn",
     "Hund",
-    "Sohn",
     "Wanne",
-    "Boten",
     "Latten",
     "Schiff",
     "schief",
-    "Stadt"
+    "Stadt",
+
+        "statt",
+    "Tee",
+    "Staat",
+    "Fall",
+    "Kamm",
+    "kam",
+    "dann",
+    "kennen",
+    "singen"
+    
   ],
   "audio": [
     "Mitte. In der Mitte steht ein Baum. Mitte.",
-           "Bühne. Die Kinder stehen auf der Bühne. Bühne.",
-    "Saal. Viele Kinder sitzen im Saal. Saal.",
     "Höhle. Der Bär schläft in einer Höhle. Höhle.",
 
     
     "Huhn. Das Huhn läuft über den Hof. Huhn.",
     "Hund. Der Hund liegt unter dem Tisch. Hund.",
-    "Sohn. Ihr Sohn geht zur Schule. Sohn.",
     "Wanne. Das Kind sitzt in der Wanne. Wanne.",
-    "Boten. Die Boten bringen die Nachricht. Boten.",
     "Latten. Die Latten liegen neben dem Haus. Latten.",
     "Schiff. Das Schiff fährt über das Meer. Schiff.",
     "schief. Das Bild hängt schief. schief.",
-    "Stadt. Die Stadt ist groß. Stadt."
+    "Stadt. Die Stadt ist groß. Stadt.",
+
+        "statt. Wir fahren mit dem Bus statt mit dem Auto. statt.",
+    "Tee. Ich trinke gerne Tee. Tee.",
+    "Staat. Österreich ist ein Staat. Staat.",
+    "Fall. Im Herbst fällt ein Blatt. Fall.",
+    "Kamm. Der Kamm liegt im Bad. Kamm.",
+    "kam. Gestern kam mein Freund zu Besuch. kam.",
+    "dann. Erst essen wir und dann spielen wir. dann.",
+    "kennen. Wir kennen den Weg. kennen.",
+    "singen. Die Kinder singen ein Lied. singen."
   ],
   "richtigBeimErstenVersuch": [
   2,
   2,
   2,
-  1,
-  1,
-  1,
   2,
-  1,
+  2,
   2,
   2,
   1,
+  2,
+
+  0,
   1,
-  1
+  0,
+  1,
+  0,
+  2,
+  1,
+  1,
+  2
 ]
 }
