@@ -1,15 +1,7 @@
 {
   "vokabeln": [
-    "Mitte",
-    "Höhle",
-     "Huhn",
-    "Hund",
-    "Wanne",
-    "Latten",
-    "Schiff",
-    "schief",
-    "Stadt",
-
+       "schief",
+    
         "statt",
     "Tee",
     "Staat",
@@ -18,22 +10,30 @@
     "kam",
     "dann",
     "kennen",
-    "singen"
-    
+
+     "Mann",
+    "man",
+    "Tasse",
+    "Taste",
+    "Kasse",
+    "Käse",
+    "Haar",
+    "hart",
+    "Hand",
+    "Hahn",
+    "Haus",
+    "Haut",
+    "Heft",
+    "Buch",
+    "Buche",
+    "Stelle",
+    "stehle"
+       
   ],
   "audio": [
-    "Mitte. In der Mitte steht ein Baum. Mitte.",
-    "Höhle. Der Bär schläft in einer Höhle. Höhle.",
 
-    
-    "Huhn. Das Huhn läuft über den Hof. Huhn.",
-    "Hund. Der Hund liegt unter dem Tisch. Hund.",
-    "Wanne. Das Kind sitzt in der Wanne. Wanne.",
-    "Latten. Die Latten liegen neben dem Haus. Latten.",
-    "Schiff. Das Schiff fährt über das Meer. Schiff.",
     "schief. Das Bild hängt schief. schief.",
-    "Stadt. Die Stadt ist groß. Stadt.",
-
+   
         "statt. Wir fahren mit dem Bus statt mit dem Auto. statt.",
     "Tee. Ich trinke gerne Tee. Tee.",
     "Staat. Österreich ist ein Staat. Staat.",
@@ -42,27 +42,53 @@
     "kam. Gestern kam mein Freund zu Besuch. kam.",
     "dann. Erst essen wir und dann spielen wir. dann.",
     "kennen. Wir kennen den Weg. kennen.",
-    "singen. Die Kinder singen ein Lied. singen."
-  ],
+
+    "Mann. Der Mann wartet an der Tür. Mann.",
+    "man. Man kann hier gut spielen. man.",
+    "Tasse. Die Tasse steht auf dem Tisch. Tasse.",
+    "Taste. Drücke auf die Taste. Taste.",
+    "Kasse. An der Kasse stehen viele Menschen. Kasse.",
+    "Käse. Der Käse liegt auf dem Brot. Käse.",
+    "Haar. Ein Haar liegt auf dem Tisch. Haar.",
+    "hart. Der Stein ist sehr hart. hart.",
+    "Hand. Meine Hand ist sauber. Hand.",
+    "Hahn. Der Hahn kräht am Morgen. Hahn.",
+    "Haus. Unser Haus hat einen Garten. Haus.",
+    "Haut. Die Haut ist weich. Haut.",
+    "Heft. Das Heft liegt in der Schultasche. Heft.",
+    "Buch. Das Buch liegt auf dem Tisch. Buch.",
+    "Buche. Die Buche ist ein Baum. Buche.",
+    "Stelle. An dieser Stelle steht ein Baum. Stelle.",
+    "stehle. Ich stehle nichts. stehle."
+      ],
   "richtigBeimErstenVersuch": [
+    2,
+   0,
   2,
+  0,
   2,
-  2,
-  2,
-  2,
-  2,
+  0,
   2,
   1,
   2,
 
+  2,
+  2,
   0,
-  1,
-  0,
-  1,
+  2,
   0,
   2,
   1,
+  0,
+  1,
+  0,
+  0,
+  1,
+  0,
+  0,
+  2,
   1,
   2
+ 
 ]
 }
