@@ -3,7 +3,6 @@
        "schief",
     
         "statt",
-    "Tee",
     "Staat",
     "Fall",
     "Kamm",
@@ -11,12 +10,10 @@
     "dann",
     "kennen",
 
-     "Mann",
     "man",
     "Tasse",
     "Taste",
     "Kasse",
-    "Käse",
     "Haar",
     "hart",
     "Hand",
@@ -35,7 +32,6 @@
     "schief. Das Bild hängt schief. schief.",
    
         "statt. Wir fahren mit dem Bus statt mit dem Auto. statt.",
-    "Tee. Ich trinke gerne Tee. Tee.",
     "Staat. Österreich ist ein Staat. Staat.",
     "Fall. Im Herbst fällt ein Blatt. Fall.",
     "Kamm. Der Kamm liegt im Bad. Kamm.",
@@ -43,12 +39,10 @@
     "dann. Erst essen wir und dann spielen wir. dann.",
     "kennen. Wir kennen den Weg. kennen.",
 
-    "Mann. Der Mann wartet an der Tür. Mann.",
     "man. Man kann hier gut spielen. man.",
     "Tasse. Die Tasse steht auf dem Tisch. Tasse.",
     "Taste. Drücke auf die Taste. Taste.",
     "Kasse. An der Kasse stehen viele Menschen. Kasse.",
-    "Käse. Der Käse liegt auf dem Brot. Käse.",
     "Haar. Ein Haar liegt auf dem Tisch. Haar.",
     "hart. Der Stein ist sehr hart. hart.",
     "Hand. Meine Hand ist sauber. Hand.",
@@ -62,33 +56,28 @@
     "stehle. Ich stehle nichts. stehle."
       ],
   "richtigBeimErstenVersuch": [
-    2,
-   0,
   2,
+  0,
   0,
   2,
   0,
   2,
-  1,
   2,
-
   2,
   2,
   0,
   2,
-  0,
-  2,
-  1,
   0,
   1,
-  0,
-  0,
   1,
-  0,
-  0,
+  1,
+  1,
+  1,
   2,
+  0,
   1,
+  2,
+  2,
   2
- 
 ]
 }
