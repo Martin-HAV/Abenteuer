@@ -5,18 +5,12 @@
     "Staat",
     "Kamm",
     "kam",
-    "kennen",
-
+  
     "man",
     "Tasse",
-    "Kasse",
-    "Haar",
-    "hart",
-    "Hand",
-    "Hahn",
+     "Haar",
     "Haus",
     "Heft",
-    "Buch",
     "stehle",
 
     "trägt",
@@ -27,7 +21,10 @@
     "einen",
     "fett",
     "rennen",
-    "schnell"
+    "schnell",
+
+    "Banane",
+    "Tonne"
        
   ],
   "audio": [
@@ -37,18 +34,12 @@
     "Staat. Österreich ist ein Staat. Staat.",
     "Kamm. Der Kamm liegt im Bad. Kamm.",
     "kam. Gestern kam mein Freund zu Besuch. kam.",
-    "kennen. Wir kennen den Weg. kennen.",
 
     "man. Man kann hier gut spielen. man.",
     "Tasse. Die Tasse steht auf dem Tisch. Tasse.",
-    "Kasse. An der Kasse stehen viele Menschen. Kasse.",
     "Haar. Ein Haar liegt auf dem Tisch. Haar.",
-    "hart. Der Stein ist sehr hart. hart.",
-    "Hand. Meine Hand ist sauber. Hand.",
-    "Hahn. Der Hahn kräht am Morgen. Hahn.",
     "Haus. Unser Haus hat einen Garten. Haus.",
     "Heft. Das Heft liegt in der Schultasche. Heft.",
-    "Buch. Das Buch liegt auf dem Tisch. Buch.",
     "stehle. Ich stehle nichts. stehle.",
 
     "trägt. Sie trägt eine Hose. Trägt.",
@@ -59,30 +50,30 @@
     "Einen. Hast du einen Vorschlag? Einen.",
     "fett. Der burger ist sehr fett. fett.",
     "rennen. Ich kann schnell rennen. rennen.",
-    "schnell. Ich kann sehr schnell rennen. schnell"
+    "schnell. Ich kann sehr schnell rennen. schnell",
+
+    "Banane. Banane ist ein sehr süßes Obst. Banane.",
+    "Tonne. Schmeiße bitte die Bananenschale in die Tonne. Tonne."
       ],
   "richtigBeimErstenVersuch": [
   1,
   1,
-  1,
   2,
   2,
-  1,
-  1,
   2,
-  1,
+  2,
   2,
   2,
   2,
   1,
-  2,
-  2,
   0,
   0,
   0,
+  1,
+  1,
   0,
-  0,
-  0,
+  1,
+  1,
   0,
   0,
   0
