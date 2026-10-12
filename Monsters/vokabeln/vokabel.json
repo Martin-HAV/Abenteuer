@@ -1,18 +1,8 @@
 {
-  "vokabeln": [
-          
-        "statt",
+  "vokabeln": [          
+    "statt",
     "Staat",
-    "Kamm",
-    "kam",
-  
-    "man",
-    "Tasse",
-     "Haar",
-    "Haus",
-    "Heft",
     "stehle",
-
     "trägt",
     "richtig",
     "dreckig",
@@ -22,26 +12,16 @@
     "fett",
     "rennen",
     "schnell",
-
     "Banane",
-    "Tonne"
-       
+    "Tonne",
+    "Pinguin",
+    "Pinguin"       
   ],
-  "audio": [
 
-      
-        "statt. Wir fahren mit dem Bus statt mit dem Auto. statt.",
+  "audio": [      
+    "statt. Wir fahren mit dem Bus statt mit dem Auto. statt.",
     "Staat. Österreich ist ein Staat. Staat.",
-    "Kamm. Der Kamm liegt im Bad. Kamm.",
-    "kam. Gestern kam mein Freund zu Besuch. kam.",
-
-    "man. Man kann hier gut spielen. man.",
-    "Tasse. Die Tasse steht auf dem Tisch. Tasse.",
-    "Haar. Ein Haar liegt auf dem Tisch. Haar.",
-    "Haus. Unser Haus hat einen Garten. Haus.",
-    "Heft. Das Heft liegt in der Schultasche. Heft.",
-    "stehle. Ich stehle nichts. stehle.",
-
+     "stehle. Ich stehle nichts. stehle.",
     "trägt. Sie trägt eine Hose. Trägt.",
     "richtig. Diese Vokabel schreibe ich richtig. richtig.",
     "dreckig. Der Matsch ist sehr dreckig. Dreckig.",
@@ -51,27 +31,24 @@
     "fett. Der burger ist sehr fett. fett.",
     "rennen. Ich kann schnell rennen. rennen.",
     "schnell. Ich kann sehr schnell rennen. schnell",
-
     "Banane. Banane ist ein sehr süßes Obst. Banane.",
-    "Tonne. Schmeiße bitte die Bananenschale in die Tonne. Tonne."
+    "Tonne. Schmeiße bitte die Bananenschale in die Tonne. Tonne.",
+    "Pinguin. Lödl, lödl, lödl. Pinguin",
+    "Pinguin. P. I. N. G. U. I. N. Pinguin"
       ],
+
   "richtigBeimErstenVersuch": [
-  1,
-  1,
   2,
   2,
   2,
-  2,
-  2,
-  2,
-  2,
-  1,
-  0,
-  0,
   0,
   1,
   1,
-  0,
+  2,
+  2,
+  1,
+  1,
+  2,
   1,
   1,
   0,
