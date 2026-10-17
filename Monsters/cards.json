@@ -113,6 +113,20 @@
     "strength": 2,
     "element": "hufflepuff"
   },
+   "Hannah2": {
+    "name": "Hannah Abbot",
+    "text": "Hannah Abbott setzt als erstes den sprechenden Hut auf.",
+    "image": "Hannah2.jpg",
+    "strength": 1,
+    "element": "hufflepuff"
+  },
+   "Moench2": {
+    "name": "Der fette Mönche",
+    "text": "Der Hausgeist von Hufflepuff.",
+    "image": "Moench2.jpg",
+    "strength": 2,
+    "element": "hufflepuff"
+  },
    "Isabel": {
     "name": "Die fleißige Isabel",
     "text": "Isabel gewinnt Punkte für Hufflepuff.",
