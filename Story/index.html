@@ -44,7 +44,7 @@
     <select id="gameSel"></select>
     <label for="file">Weitere Spiele laden (JSON-Datei)</label>
     <input id="file" type="file" accept=".json,application/json">
-    <div class="row"><button id="start">Spiel starten</button></div>
+    <div class="row"><button id="start">Neues Spiel starten</button><button id="resume" hidden>Gespeicherten Stand laden</button></div>
   </section>
 
   <section id="game" hidden>
@@ -54,6 +54,7 @@
     <div class="row">
       <button id="mute" title="Sprachausgabe an/aus">🔊 Sprache an</button>
       <button id="replay">🔁 Nochmal vorlesen</button>
+      <button id="save">💾 Fortschritt speichern</button>
       <button id="restart">Neu starten</button>
     </div>
   </section>
@@ -119,6 +120,7 @@ function chooseGame() {
   cfg = games[+$('gameSel').value || 0];
   $('title').textContent = cfg.titel || cfg.title || 'KI-Textadventure';
   document.title = $('title').textContent;
+  $('resume').hidden = !hasSave();
 }
 
 /* ---------- Sprachausgabe ---------- */
@@ -201,13 +203,17 @@ async function step(choice) {
   }
 }
 
-function render() {
+function render(resume) {
   const log = $('log');
-  log.querySelectorAll('p.last').forEach(p => p.classList.remove('last'));
-  const p = document.createElement('p');
-  p.className = 'last';
-  p.textContent = current.story;
-  log.appendChild(p);
+  if (!resume) log.querySelectorAll('p.last').forEach(p => p.classList.remove('last'));
+  let p;
+  if (resume) p = log.querySelector('p.last') || log.lastElementChild;
+  else {
+    p = document.createElement('p');
+    p.className = 'last';
+    p.textContent = current.story;
+    log.appendChild(p);
+  }
   const box = $('options');
   box.innerHTML = '';
   current.optionen.forEach((o, i) => {
@@ -232,7 +238,7 @@ function render() {
     box.appendChild(row);
   });
   p.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  speak(speechText(current));
+  if (!resume) speak(speechText(current));
 }
 
 function startGame() {
@@ -248,6 +254,41 @@ function startGame() {
   step(null);
 }
 
+/* ---------- Speichern / Fortsetzen ---------- */
+const saveSlot = () => 'adventure_save_' + (cfg.titel || cfg.title || 'spiel');
+function hasSave() {
+  try { return !!localStorage.getItem(saveSlot()); } catch (e) { return false; }
+}
+function saveProgress() {
+  if (!current) return setStatus('Noch nichts zu speichern.', true);
+  const items = Array.from($('log').children).map(p => ({ c: p.className, t: p.textContent }));
+  const last = items.map(i => i.c).lastIndexOf('last');   // unbeantwortete Wahl nicht mitspeichern
+  try {
+    localStorage.setItem(saveSlot(), JSON.stringify({ memory, turn, current, log: items.slice(0, last + 1) }));
+    setStatus('Fortschritt gespeichert ✔');
+  } catch (e) { setStatus('Speichern fehlgeschlagen: ' + e.message, true); }
+}
+function resumeGame() {
+  chooseGame();
+  if (!localStorage.getItem(LS_KEY)) { alert('Bitte zuerst deinen Gemini API-Key speichern.'); return; }
+  try {
+    const d = JSON.parse(localStorage.getItem(saveSlot()));
+    speechSynthesis.cancel();
+    memory = d.memory; turn = d.turn; current = d.current;
+    const log = $('log');
+    log.innerHTML = '';
+    d.log.forEach(i => {
+      const p = document.createElement('p');
+      p.className = i.c; p.textContent = i.t;
+      log.appendChild(p);
+    });
+    $('setup').hidden = true;
+    $('game').hidden = false;
+    setStatus('Stand geladen.');
+    render(true);
+  } catch (e) { alert('Speicherstand nicht lesbar: ' + e.message); }
+}
+
 /* ---------- UI ---------- */
 $('key').value = localStorage.getItem(LS_KEY) || '';
 $('saveKey').onclick = () => {
@@ -259,7 +300,9 @@ $('saveKey').onclick = () => {
 $('clearKey').onclick = () => { localStorage.removeItem(LS_KEY); $('key').value = ''; };
 $('start').onclick = startGame;
 $('gameSel').onchange = chooseGame;
-$('restart').onclick = () => { speechSynthesis.cancel(); $('game').hidden = true; $('setup').hidden = false; };
+$('save').onclick = saveProgress;
+$('resume').onclick = resumeGame;
+$('restart').onclick = () => { speechSynthesis.cancel(); $('game').hidden = true; $('setup').hidden = false; chooseGame(); };
 $('mute').onclick = () => {
   muted = !muted;
   $('mute').textContent = muted ? '🔇 Sprache aus' : '🔊 Sprache an';
