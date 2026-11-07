@@ -20,6 +20,10 @@
   #log p { margin:0 0 14px; color:var(--dim); }
   #log p.last { color:var(--text); }
   #options button { display:block; width:100%; text-align:left; padding:12px 14px; margin:8px 0 0; }
+  #options .opt { display:flex; gap:8px; align-items:stretch; margin-top:8px; }
+  #options .opt button { margin:0; }
+  #options .opt button.speak { width:auto; flex:0 0 auto; text-align:center; }
+  select { width:100%; padding:10px; border-radius:6px; border:1px solid #4a3f33; background:#14110f; color:var(--text); font:inherit; font-size:1rem; }
   #status { min-height:1.4em; color:var(--dim); font-size:.9rem; margin-top:8px; }
   #status.err { color:var(--err); }
   .row { display:flex; flex-wrap:wrap; }
@@ -36,7 +40,9 @@
       <button id="saveKey">Key speichern</button>
       <button id="clearKey">Key löschen</button>
     </div>
-    <label for="file">Anderes Spiel laden (JSON-Datei)</label>
+    <label for="gameSel">Spiel auswählen</label>
+    <select id="gameSel"></select>
+    <label for="file">Weitere Spiele laden (JSON-Datei)</label>
     <input id="file" type="file" accept=".json,application/json">
     <div class="row"><button id="start">Spiel starten</button></div>
   </section>
@@ -59,7 +65,8 @@ const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 const MEMORY_LIMIT = 8000;               // max. Zeichen im Memory
 const $ = id => document.getElementById(id);
 
-let cfg = null;        // {instructions, startconditions, memoryresend, ...}
+let games = [];       // alle Spiele aus der JSON
+let cfg = null;        // gewähltes Spiel {instructions, startconditions, memoryresend, ...}
 let memory = '';       // Memory: komprimierter Verlauf
 let turn = 0;          // Anzahl bisheriger Anfragen
 let current = null;    // letzte KI-Antwort {story, optionen}
@@ -84,23 +91,41 @@ function normalize(obj) {            // Schlüssel unabhängig von Groß-/Kleins
   o.memoryresend = Math.max(1, parseInt(o.memoryresend) || 3);
   return o;
 }
+function parseGames(data) {          // Liste von Spielen oder {"spiele":[...]} oder einzelnes Spiel
+  const arr = Array.isArray(data) ? data : (data.spiele || data.games || [data]);
+  return arr.map(normalize);
+}
 async function loadConfig() {
   const name = new URLSearchParams(location.search).get('game') || 'game.json';
   const res = await fetch(name, { cache: 'no-store' });
   if (!res.ok) throw new Error(`Konnte ${name} nicht laden (HTTP ${res.status}).`);
-  setConfig(normalize(await res.json()));
+  setGames(parseGames(await res.json()));
 }
-function setConfig(c) {
-  cfg = c;
-  $('title').textContent = c.titel || c.title || 'KI-Textadventure';
+function setGames(list) {
+  if (!list.length) throw new Error('Keine Spiele in der JSON gefunden.');
+  games = list;
+  const sel = $('gameSel');
+  sel.innerHTML = '';
+  games.forEach((g, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = g.titel || g.title || `Spiel ${i + 1}`;
+    sel.appendChild(o);
+  });
+  chooseGame();
+}
+function chooseGame() {
+  if (!games.length) return;
+  cfg = games[+$('gameSel').value || 0];
+  $('title').textContent = cfg.titel || cfg.title || 'KI-Textadventure';
   document.title = $('title').textContent;
 }
 
 /* ---------- Sprachausgabe ---------- */
-function speak(text) {
+function speak(text, force) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  if (muted || !text) return;
+  if ((muted && !force) || !text) return;
   const u = new SpeechSynthesisUtterance(text);
   u.lang = cfg.sprache || 'de-DE';
   const v = speechSynthesis.getVoices().find(v => v.lang.replace('_','-').startsWith(u.lang.slice(0,2)));
@@ -186,6 +211,8 @@ function render() {
   const box = $('options');
   box.innerHTML = '';
   current.optionen.forEach((o, i) => {
+    const row = document.createElement('div');
+    row.className = 'opt';
     const b = document.createElement('button');
     b.textContent = `${i + 1}. ${o}`;
     b.onclick = () => {
@@ -195,13 +222,21 @@ function render() {
       log.appendChild(q);
       step(o);
     };
-    box.appendChild(b);
+    const s = document.createElement('button');
+    s.className = 'speak';
+    s.textContent = '🔊';
+    s.title = 'Option vorlesen';
+    s.setAttribute('aria-label', `Option ${i + 1} vorlesen`);
+    s.onclick = () => speak(`Option ${i + 1}: ${o}`, true);
+    row.append(b, s);
+    box.appendChild(row);
   });
   p.scrollIntoView({ behavior: 'smooth', block: 'start' });
   speak(speechText(current));
 }
 
 function startGame() {
+  chooseGame();
   if (!cfg) return setStatus('Keine Spielkonfiguration geladen.', true);
   if (!localStorage.getItem(LS_KEY)) { alert('Bitte zuerst deinen Gemini API-Key speichern.'); return; }
   speechSynthesis.cancel();
@@ -223,6 +258,7 @@ $('saveKey').onclick = () => {
 };
 $('clearKey').onclick = () => { localStorage.removeItem(LS_KEY); $('key').value = ''; };
 $('start').onclick = startGame;
+$('gameSel').onchange = chooseGame;
 $('restart').onclick = () => { speechSynthesis.cancel(); $('game').hidden = true; $('setup').hidden = false; };
 $('mute').onclick = () => {
   muted = !muted;
@@ -232,8 +268,8 @@ $('mute').onclick = () => {
 $('replay').onclick = () => current && (muted = false, $('mute').textContent = '🔊 Sprache an', speak(speechText(current)));
 $('file').onchange = async e => {
   try {
-    setConfig(normalize(JSON.parse(await e.target.files[0].text())));
-    alert('Spiel geladen: ' + $('title').textContent);
+    setGames(parseGames(JSON.parse(await e.target.files[0].text())));
+    alert(games.length + ' Spiel(e) geladen.');
   } catch (err) { alert('Ungültige JSON-Datei: ' + err.message); }
 };
 if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
