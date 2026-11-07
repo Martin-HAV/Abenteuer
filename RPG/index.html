@@ -21,24 +21,29 @@
   button:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
   .row { display:flex; flex-wrap:wrap; }
 
-  /* Hauptfenster: drei Bereiche */
-  .layout { display:grid; grid-template-columns:250px minmax(0,1fr) 270px; gap:14px; align-items:start; }
+  /* Hauptfenster: Ressourcenleiste oben, darunter Erzählbereich und Charakter-Spalte */
+  #resBar { padding:10px 14px; }
+  #pRes { display:flex; flex-wrap:wrap; gap:10px 24px; }
+  #pRes .res { flex:1 1 150px; min-width:130px; margin:0; }
+  .layout { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:14px; align-items:start; }
   .side { position:sticky; top:12px; max-height:calc(100vh - 24px); overflow-y:auto; }
   .center { min-width:0; }
   @media (max-width:980px) {
     .layout { grid-template-columns:1fr; }
-    .center { order:-1; }
     .side { position:static; max-height:none; }
   }
 
   /* Geschichte */
-  #log { position:relative; max-height:calc(100vh - 330px); min-height:220px; overflow-y:auto; padding-right:6px; }
+  #log { position:relative; max-height:calc(100vh - 400px); min-height:240px; overflow-y:auto; padding-right:6px; }
   #log p { margin:0 0 14px; color:var(--dim); }
   #log p.last { color:var(--text); }
-  #log p.ev { font-size:.82rem; margin:0 0 4px; color:var(--accent); font-family:system-ui, sans-serif; }
-  #log p.ev.neg { color:var(--err); }
-  #log p.ev.pos { color:var(--ok); }
-  #log p.ev.warn { color:var(--err); font-weight:bold; }
+  .evbox { margin:0 0 16px; padding:4px 12px; background:var(--panel2); border:1px solid var(--line); border-radius:6px; font-family:system-ui, sans-serif; font-size:.85rem; color:var(--dim); }
+  .evbox summary { cursor:pointer; color:var(--accent); padding:4px 0; }
+  .evbox .evl { padding:6px 0; border-top:1px solid var(--line); color:var(--text); }
+  .evbox .evl.pos { color:var(--ok); }
+  .evbox .evl.neg { color:var(--err); }
+  .evbox .evl.warn { color:var(--err); font-weight:bold; }
+  .evbox .evd { margin:2px 0 0 16px; font-size:.8rem; font-weight:normal; color:var(--dim); }
   #options button { display:block; width:100%; text-align:left; padding:12px 14px; margin:8px 0 0; }
   #options .opt { display:flex; gap:8px; align-items:stretch; margin-top:8px; }
   #options .opt button { margin:0; }
@@ -90,12 +95,8 @@
   </section>
 
   <div id="game" hidden>
+    <section class="card" id="resBar"><div id="pRes"></div></section>
     <div class="layout">
-
-      <aside class="side">
-        <section class="card"><h2>Ressourcen</h2><div id="pRes"></div></section>
-        <section class="card"><h2>Stats</h2><div id="pStats"></div></section>
-      </aside>
 
       <div class="center">
         <section class="card">
@@ -118,6 +119,7 @@
       </div>
 
       <aside class="side">
+        <section class="card"><h2>Stats</h2><div id="pStats"></div></section>
         <section class="card"><h2>Skills</h2><div id="pSkills"></div></section>
         <section class="card"><h2>Flaws</h2><div id="pFlaws"></div></section>
         <section class="card"><h2>Inventar</h2><div id="pInv"></div></section>
@@ -255,7 +257,7 @@ function findRes(q) {
   return cfg.ressourcen.find(r => r.id === q || r.name.toLowerCase() === q)
       || cfg.ressourcen.find(r => r.name.toLowerCase().includes(q) || q.includes(r.name.toLowerCase())) || null;
 }
-function addEvent(t, k) { turnEvents.push({ t, k: k || 'info' }); }
+function addEvent(t, k, d) { turnEvents.push({ t, k: k || 'info', d: d || [] }); }
 
 /* ---------- Werkzeuge, die die KI aufrufen kann ---------- */
 const TOOLS = {
@@ -276,14 +278,23 @@ const TOOLS = {
     if (a.stat && !sa) return { fehler: `Stat "${a.stat}" existiert nicht.`, verfuegbar: st.stats.map(s => s.name) };
     if (!sk && !sa) return { fehler: 'Gib einen skill und/oder einen stat an.' };
     const diff = clamp(Math.round(+a.schwierigkeit || 10), 1, 25);
-    const bonus = (sk && sa) ? sk.wert + Math.floor(sa.wert / 2) : (sk ? sk.wert : sa.wert);
+    const skPart = sk ? sk.wert : 0;
+    const saPart = sa ? (sk ? Math.floor(sa.wert / 2) : sa.wert) : 0;
+    const mod = clamp(Math.round(+a.modifikator) || 0, -10, 10);
+    const bonus = skPart + saPart + mod;
     const wurf = 1 + Math.floor(Math.random() * 10);
     const summe = wurf + bonus;
     const kritisch = wurf === 10 ? 'kritischer Erfolg' : wurf === 1 ? 'Patzer' : null;
     const erfolg = wurf === 10 ? true : wurf === 1 ? false : summe >= diff;
     const label = [sk && `${sk.name} ${sk.wert}`, sa && `${sa.name} ${sa.wert}`].filter(Boolean).join(' + ');
-    addEvent(`🎲 ${label}: W10 = ${wurf}, Bonus ${bonus}, Summe ${summe} gegen ${diff} → ${erfolg ? 'Erfolg' : 'Fehlschlag'}${kritisch ? ' (' + kritisch + ')' : ''}`, 'dice');
-    return { wurf, bonus, summe, schwierigkeit: diff, erfolg, kritisch, hinweis: 'Erzähle das Ergebnis ehrlich; berücksichtige passende Flaws.' };
+    const detail = [`Schwierigkeit: ${diff}`];
+    if (sk) detail.push(`Skill ${sk.name}: +${skPart}`);
+    if (sa) detail.push(sk ? `Stat ${sa.name} ${sa.wert}: +${saPart} (halber Wert)` : `Stat ${sa.name}: +${saPart}`);
+    if (mod) detail.push(`${mod > 0 ? 'Bonus' : 'Malus'}: ${mod > 0 ? '+' : ''}${mod}${a.modifikator_grund ? ' (' + a.modifikator_grund + ')' : ''}`);
+    detail.push(`Wurf W10: ${wurf}${kritisch ? ' – ' + kritisch : ''}`);
+    detail.push(`Summe: ${wurf} + ${bonus} = ${summe} → ${erfolg ? 'Erfolg' : 'Fehlschlag'}`);
+    addEvent(`🎲 ${a.grund || label}: ${erfolg ? 'Erfolg' : 'Fehlschlag'} (${summe} gegen ${diff})`, erfolg ? 'pos' : 'neg', detail);
+    return { wurf, bonus, modifikator: mod, summe, schwierigkeit: diff, erfolg, kritisch, hinweis: 'Erzähle das Ergebnis ehrlich; berücksichtige passende Flaws.' };
   },
 
   ressource_aendern(a) {
@@ -392,10 +403,12 @@ const S = d => ({ type: 'STRING', description: d });
 const N = d => ({ type: 'INTEGER', description: d });
 const functionDeclarations = [
   { name: 'status_abfragen', description: 'Liefert den kompletten Spielzustand: Ressourcen (mit Regeln bei Wert 0), XP, Level, Stats, Skills, Flaws, Inventar.' },
-  { name: 'probe', description: 'Würfelprobe (W10 + Skill + halber Stat gegen Schwierigkeit). Die App würfelt, nicht du.',
+  { name: 'probe', description: 'Würfelprobe (W10 + Skill + halber Stat + Modifikator gegen Schwierigkeit). Die App würfelt, nicht du.',
     parameters: { type: 'OBJECT', properties: {
       skill: S('Name eines Skills (optional)'), stat: S('Name eines Stats (optional)'),
-      schwierigkeit: N('1–25: 6 leicht, 10 mittel, 14 schwer, 18 extrem'), grund: S('Kurz, worum es geht')
+      schwierigkeit: N('1–25: 6 leicht, 10 mittel, 14 schwer, 18 extrem'), grund: S('Kurz, worum es geht'),
+      modifikator: N('Situativer Bonus (+) oder Malus (−) von −10 bis +10, z. B. durch Flaws, Ausrüstung oder Umstände'),
+      modifikator_grund: S('Begründung des Modifikators')
     }, required: ['schwierigkeit'] } },
   { name: 'ressource_aendern', description: 'Ändert eine Ressource (Leben, Mana, Geld …) relativ um delta. Die App meldet, wenn der Wert 0 erreicht.',
     parameters: { type: 'OBJECT', properties: {
@@ -425,7 +438,7 @@ const functionDeclarations = [
 const RPG_RULES = `SPIELREGELN (Rollenspiel-Engine):
 - Der Spielzustand (Ressourcen, XP, Stats, Skills, Flaws, Inventar) liegt in der Spiel-App. Rufe zu Beginn jeder Runde status_abfragen auf, wenn du ihn nicht sicher kennst. Erfinde niemals Werte.
 - Änderungen geschehen NUR über Funktionen: ressource_aendern, xp_vergeben, item_hinzufuegen, item_entfernen, wert_aendern, flaw_aendern.
-- Bei Handlungen mit unsicherem Ausgang rufe probe auf (die App würfelt) und erzähle das Ergebnis ehrlich. Lasse Flaws spürbar in die Geschichte einfließen.
+- Bei Handlungen mit unsicherem Ausgang rufe probe auf (die App würfelt) und erzähle das Ergebnis ehrlich. Lasse Flaws spürbar in die Geschichte einfließen. Situative Boni und Mali (z. B. durch Flaws, Ausrüstung, Umstände) übergibst du über modifikator und modifikator_grund.
 - Der Spieler kann nur Gegenstände nutzen, die im Inventar sind. Verbrauchte Gegenstände entfernst du mit item_entfernen.
 - Meldet eine Funktion, dass eine Ressource auf 0 gefallen ist, setze die dort genannte Regel in der Geschichte um.
 - Vergib XP für Erfolge, kluge Ideen und Entdeckungen.
@@ -584,9 +597,6 @@ async function step(choice, retry) {
     if (memory.length > MEMORY_LIMIT) memory = '…' + memory.slice(-MEMORY_LIMIT);
     turn++;
     current = out;
-    // Würfe und Änderungen als kleine Zeilen vor der Geschichte
-    const log = $('log');
-    out.events.forEach(e => log.appendChild(el('p', 'ev ' + e.k, e.t)));
     busy = false;
     render();
     setStatus('');
@@ -609,6 +619,20 @@ function act(text) {
   step(text);
 }
 
+// Aufklappbares Feld unter dem Erzähltext: Würfe, Boni/Mali, Änderungen
+function makeEventBox(events) {
+  const d = document.createElement('details');
+  d.className = 'evbox';
+  d._ev = events;
+  d.append(el('summary', '', `📋 Würfe & Änderungen (${events.length})`));
+  events.forEach(e => {
+    const row = el('div', 'evl ' + e.k, e.t);
+    (e.d || []).forEach(line => row.append(el('div', 'evd', line)));
+    d.append(row);
+  });
+  return d;
+}
+
 function render(resume) {
   const log = $('log');
   if (!resume) log.querySelectorAll('p.last').forEach(p => p.classList.remove('last'));
@@ -617,6 +641,7 @@ function render(resume) {
   else {
     p = el('p', 'last', current.story);
     log.appendChild(p);
+    if (current.events && current.events.length) log.appendChild(makeEventBox(current.events));
   }
   const box = $('options');
   box.innerHTML = '';
@@ -637,11 +662,7 @@ function render(resume) {
     });
   }
   renderPanels();
-  if (p) {
-    let t = p;
-    while (t.previousElementSibling && t.previousElementSibling.classList.contains('ev')) t = t.previousElementSibling;
-    log.scrollTo({ top: t.offsetTop - 4, behavior: 'smooth' });
-  }
+  if (p) log.scrollTo({ top: p.offsetTop - 4, behavior: 'smooth' });
   if (!resume) speak(st.gameover ? current.story : speechText(current));
 }
 
@@ -672,10 +693,12 @@ function hasSave() {
 function saveProgress() {
   if (!current) return setStatus('Noch nichts zu speichern.', true);
   if (busy) return setStatus('Bitte warten, bis der Erzähler fertig ist.', true);
-  const items = Array.from($('log').children).map(p => ({ c: p.className, t: p.textContent }));
+  const items = Array.from($('log').children).map(n => n._ev ? { c: 'evbox', ev: n._ev } : { c: n.className, t: n.textContent });
   const last = items.map(i => i.c).lastIndexOf('last');   // unbeantwortete Wahl nicht mitspeichern
+  let end = last + 1;
+  while (items[end] && items[end].c === 'evbox') end++;    // Ereignisfeld der letzten Geschichte mitnehmen
   try {
-    localStorage.setItem(saveSlot(), JSON.stringify({ memory, turn, current, st, log: items.slice(0, last + 1) }));
+    localStorage.setItem(saveSlot(), JSON.stringify({ memory, turn, current, st, log: items.slice(0, end) }));
     setStatus('Fortschritt gespeichert ✔');
   } catch (e) { setStatus('Speichern fehlgeschlagen: ' + e.message, true); }
 }
@@ -689,7 +712,7 @@ function resumeGame() {
     memory = d.memory; turn = d.turn; current = d.current; st = d.st;
     const log = $('log');
     log.innerHTML = '';
-    d.log.forEach(i => log.appendChild(el('p', i.c, i.t)));
+    d.log.forEach(i => log.appendChild(i.c === 'evbox' ? makeEventBox(i.ev) : el('p', i.c, i.t)));
     showGame();
     setStatus('Stand geladen.');
     render(true);
