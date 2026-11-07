@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KI-Textadventure</title>
+<style>
+  :root { --bg:#14110f; --panel:#201b17; --text:#eadfce; --dim:#9c8f7c; --accent:#d9a441; --err:#e07a6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:18px/1.6 Georgia, "Times New Roman", serif; }
+  main { max-width:760px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { color:var(--accent); font-size:1.6rem; margin:0 0 16px; }
+  section { background:var(--panel); border-radius:10px; padding:16px; margin-bottom:16px; }
+  label { display:block; font-size:.85rem; color:var(--dim); margin:8px 0 4px; }
+  input[type=password], input[type=text] { width:100%; padding:10px; border-radius:6px; border:1px solid #4a3f33; background:#14110f; color:var(--text); font-size:1rem; }
+  input[type=file] { color:var(--dim); font-size:.9rem; }
+  button { font:inherit; font-size:.95rem; cursor:pointer; border:1px solid var(--accent); background:transparent; color:var(--accent); padding:8px 14px; border-radius:6px; margin:8px 8px 0 0; }
+  button:hover:not(:disabled) { background:var(--accent); color:#14110f; }
+  button:disabled { opacity:.4; cursor:default; }
+  #log p { margin:0 0 14px; color:var(--dim); }
+  #log p.last { color:var(--text); }
+  #options button { display:block; width:100%; text-align:left; padding:12px 14px; margin:8px 0 0; }
+  #status { min-height:1.4em; color:var(--dim); font-size:.9rem; margin-top:8px; }
+  #status.err { color:var(--err); }
+  .row { display:flex; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">KI-Textadventure</h1>
+
+  <section id="setup">
+    <label for="key">Gemini API-Key (wird nur lokal in deinem Browser gespeichert)</label>
+    <input id="key" type="password" autocomplete="off" placeholder="AIza...">
+    <div class="row">
+      <button id="saveKey">Key speichern</button>
+      <button id="clearKey">Key löschen</button>
+    </div>
+    <label for="file">Anderes Spiel laden (JSON-Datei)</label>
+    <input id="file" type="file" accept=".json,application/json">
+    <div class="row"><button id="start">Spiel starten</button></div>
+  </section>
+
+  <section id="game" hidden>
+    <div id="log"></div>
+    <div id="options"></div>
+    <div id="status"></div>
+    <div class="row">
+      <button id="mute" title="Sprachausgabe an/aus">🔊 Sprache an</button>
+      <button id="replay">🔁 Nochmal vorlesen</button>
+      <button id="restart">Neu starten</button>
+    </div>
+  </section>
+</main>
+
+<script>
+const LS_KEY = 'gemini_api_key';
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+const MEMORY_LIMIT = 8000;               // max. Zeichen im Memory
+const $ = id => document.getElementById(id);
+
+let cfg = null;        // {instructions, startconditions, memoryresend, ...}
+let memory = '';       // Memory: komprimierter Verlauf
+let turn = 0;          // Anzahl bisheriger Anfragen
+let current = null;    // letzte KI-Antwort {story, optionen}
+let muted = false;
+
+// Antwortformat erzwingen
+const responseSchema = {
+  type: 'OBJECT',
+  properties: {
+    story:   { type: 'STRING' },
+    optionen:{ type: 'ARRAY', items: { type: 'STRING' }, minItems: 3, maxItems: 3 }
+  },
+  required: ['story', 'optionen'],
+  propertyOrdering: ['story', 'optionen']
+};
+
+/* ---------- Konfiguration ---------- */
+function normalize(obj) {            // Schlüssel unabhängig von Groß-/Kleinschreibung
+  const o = {};
+  for (const k in obj) o[k.toLowerCase()] = obj[k];
+  if (!o.instructions || !o.startconditions) throw new Error('JSON braucht "instructions" und "startconditions".');
+  o.memoryresend = Math.max(1, parseInt(o.memoryresend) || 3);
+  return o;
+}
+async function loadConfig() {
+  const name = new URLSearchParams(location.search).get('game') || 'game.json';
+  const res = await fetch(name, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Konnte ${name} nicht laden (HTTP ${res.status}).`);
+  setConfig(normalize(await res.json()));
+}
+function setConfig(c) {
+  cfg = c;
+  $('title').textContent = c.titel || c.title || 'KI-Textadventure';
+  document.title = $('title').textContent;
+}
+
+/* ---------- Sprachausgabe ---------- */
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  if (muted || !text) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = cfg.sprache || 'de-DE';
+  const v = speechSynthesis.getVoices().find(v => v.lang.replace('_','-').startsWith(u.lang.slice(0,2)));
+  if (v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function speechText(r) {
+  return r.story + ' ... Deine Optionen: ' + r.optionen.map((o, i) => `Option ${i + 1}: ${o}.`).join(' ');
+}
+
+/* ---------- Gemini ---------- */
+async function callGemini(prompt) {
+  const key = localStorage.getItem(LS_KEY);
+  if (!key) throw new Error('Bitte zuerst einen API-Key speichern.');
+  const model = cfg.model || DEFAULT_MODEL;
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: cfg.instructions }] },
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema,
+        temperature: cfg.temperature ?? 1
+      }
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || `API-Fehler ${res.status}`);
+  const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('');
+  if (!text) throw new Error('Leere Antwort (evtl. durch Sicherheitsfilter blockiert).');
+  const out = JSON.parse(text);
+  if (!out.story || !Array.isArray(out.optionen) || out.optionen.length < 3)
+    throw new Error('Antwort entspricht nicht dem Schema.');
+  out.optionen = out.optionen.slice(0, 3);
+  return out;
+}
+
+/* ---------- Spielablauf ---------- */
+function setStatus(msg, err) { $('status').textContent = msg || ''; $('status').className = err ? 'err' : ''; }
+
+function buildPrompt(choice) {
+  const parts = [];
+  // Memory wird nur jedes x-te Mal mitgeschickt
+  if (turn % cfg.memoryresend === 0 && memory) parts.push(`GEDÄCHTNIS (bisheriger Spielverlauf, bitte konsistent bleiben):\n${memory}`);
+  if (current) parts.push(`Letzter Erzählabschnitt:\n${current.story}`);
+  if (choice) parts.push(`Der Spieler wählt: ${choice}\nErzähle, wie es weitergeht.`);
+  else parts.push(`Startbedingungen:\n${cfg.startconditions}\nBeginne das Abenteuer.`);
+  return parts.join('\n\n');
+}
+
+async function step(choice) {
+  $('options').innerHTML = '';
+  setStatus('Der Erzähler denkt nach …');
+  try {
+    const prompt = buildPrompt(choice);
+    const prev = current;
+    const out = await callGemini(prompt);
+    // Verlauf ins Memory übernehmen
+    if (prev && choice) memory += `\n- ${prev.story.slice(0, 350)}… → Wahl: ${choice}`;
+    if (memory.length > MEMORY_LIMIT) memory = '…' + memory.slice(-MEMORY_LIMIT);
+    turn++;
+    current = out;
+    render();
+    setStatus('');
+  } catch (e) {
+    setStatus('Fehler: ' + e.message, true);
+    const b = document.createElement('button');
+    b.textContent = 'Nochmal versuchen';
+    b.onclick = () => step(choice);
+    $('options').appendChild(b);
+  }
+}
+
+function render() {
+  const log = $('log');
+  log.querySelectorAll('p.last').forEach(p => p.classList.remove('last'));
+  const p = document.createElement('p');
+  p.className = 'last';
+  p.textContent = current.story;
+  log.appendChild(p);
+  const box = $('options');
+  box.innerHTML = '';
+  current.optionen.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.textContent = `${i + 1}. ${o}`;
+    b.onclick = () => {
+      speechSynthesis.cancel();
+      const q = document.createElement('p');
+      q.textContent = '➤ ' + o;
+      log.appendChild(q);
+      step(o);
+    };
+    box.appendChild(b);
+  });
+  p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  speak(speechText(current));
+}
+
+function startGame() {
+  if (!cfg) return setStatus('Keine Spielkonfiguration geladen.', true);
+  if (!localStorage.getItem(LS_KEY)) { alert('Bitte zuerst deinen Gemini API-Key speichern.'); return; }
+  speechSynthesis.cancel();
+  $('log').innerHTML = '';
+  current = null; turn = 0;
+  memory = `Startbedingungen: ${cfg.startconditions}`;
+  $('setup').hidden = true;
+  $('game').hidden = false;
+  step(null);
+}
+
+/* ---------- UI ---------- */
+$('key').value = localStorage.getItem(LS_KEY) || '';
+$('saveKey').onclick = () => {
+  const k = $('key').value.trim();
+  if (!k) return;
+  localStorage.setItem(LS_KEY, k);
+  alert('Key gespeichert.');
+};
+$('clearKey').onclick = () => { localStorage.removeItem(LS_KEY); $('key').value = ''; };
+$('start').onclick = startGame;
+$('restart').onclick = () => { speechSynthesis.cancel(); $('game').hidden = true; $('setup').hidden = false; };
+$('mute').onclick = () => {
+  muted = !muted;
+  $('mute').textContent = muted ? '🔇 Sprache aus' : '🔊 Sprache an';
+  if (muted) speechSynthesis.cancel();
+};
+$('replay').onclick = () => current && (muted = false, $('mute').textContent = '🔊 Sprache an', speak(speechText(current)));
+$('file').onchange = async e => {
+  try {
+    setConfig(normalize(JSON.parse(await e.target.files[0].text())));
+    alert('Spiel geladen: ' + $('title').textContent);
+  } catch (err) { alert('Ungültige JSON-Datei: ' + err.message); }
+};
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
+
+loadConfig().catch(e => {
+  alert(e.message + '\nTipp: Lokal per file:// geht das Laden nicht – nutze einen Webserver oder die Datei-Auswahl.');
+});
+</script>
+</body>
+</html>
