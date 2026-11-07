@@ -261,16 +261,6 @@ function addEvent(t, k, d) { turnEvents.push({ t, k: k || 'info', d: d || [] });
 
 /* ---------- Werkzeuge, die die KI aufrufen kann ---------- */
 const TOOLS = {
-  status_abfragen() {
-    return {
-      ressourcen: cfg.ressourcen.map(r => ({ id: r.id, name: r.name, wert: st.res[r.id], max: r.max, wenn_null: r.bei_null || 'keine Regel' })),
-      xp: st.xp, level: level(), xp_bis_naechstes_level: cfg.xpprolevel - (st.xp % cfg.xpprolevel),
-      stats: st.stats, skills: st.skills, flaws: st.flaws,
-      inventar: st.inv.map(i => ({ name: i.name, menge: i.menge, beschreibung: i.beschreibung })),
-      spiel_beendet: st.gameover
-    };
-  },
-
   probe(a) {
     const sk = a.skill ? findByName(st.skills, a.skill) : null;
     const sa = a.stat ? findByName(st.stats, a.stat) : null;
@@ -402,7 +392,6 @@ const TOOLS = {
 const S = d => ({ type: 'STRING', description: d });
 const N = d => ({ type: 'INTEGER', description: d });
 const functionDeclarations = [
-  { name: 'status_abfragen', description: 'Liefert den kompletten Spielzustand: Ressourcen (mit Regeln bei Wert 0), XP, Level, Stats, Skills, Flaws, Inventar.' },
   { name: 'probe', description: 'Würfelprobe (W10 + Skill + halber Stat + Modifikator gegen Schwierigkeit). Die App würfelt, nicht du.',
     parameters: { type: 'OBJECT', properties: {
       skill: S('Name eines Skills (optional)'), stat: S('Name eines Stats (optional)'),
@@ -436,12 +425,13 @@ const functionDeclarations = [
 ];
 
 const RPG_RULES = `SPIELREGELN (Rollenspiel-Engine):
-- Der Spielzustand (Ressourcen, XP, Stats, Skills, Flaws, Inventar) liegt in der Spiel-App. Rufe zu Beginn jeder Runde status_abfragen auf, wenn du ihn nicht sicher kennst. Erfinde niemals Werte.
+- Den aktuellen Spielzustand (Ressourcen samt Regeln bei 0, XP, Stats, Skills, Flaws, Inventar) bekommst du in jeder Anfrage vollständig mitgeliefert. Verlasse dich darauf und erfinde niemals Werte.
 - Änderungen geschehen NUR über Funktionen: ressource_aendern, xp_vergeben, item_hinzufuegen, item_entfernen, wert_aendern, flaw_aendern.
 - Bei Handlungen mit unsicherem Ausgang rufe probe auf (die App würfelt) und erzähle das Ergebnis ehrlich. Lasse Flaws spürbar in die Geschichte einfließen. Situative Boni und Mali (z. B. durch Flaws, Ausrüstung, Umstände) übergibst du über modifikator und modifikator_grund.
 - Der Spieler kann nur Gegenstände nutzen, die im Inventar sind. Verbrauchte Gegenstände entfernst du mit item_entfernen.
 - Meldet eine Funktion, dass eine Ressource auf 0 gefallen ist, setze die dort genannte Regel in der Geschichte um.
 - Vergib XP für Erfolge, kluge Ideen und Entdeckungen.
+- Ablauf: Brauchst du Funktionen (probe, Änderungen), rufe alle nötigen gleichzeitig in EINEM Schritt auf, ohne antworten, und warte auf die Ergebnisse. Rufe danach antworten auf. Ist nichts zu würfeln oder zu ändern, rufe direkt antworten auf. Rufe antworten niemals im selben Schritt wie probe oder ressource_aendern auf, weil du deren Ergebnis erst erzählen kannst, wenn du es kennst.
 - Beende JEDE Runde mit der Funktion antworten (story + genau 3 Optionen). Das ist der einzige Weg, dem Spieler zu antworten; schreibe keinen freien Text. Die Vorgaben zu Stil und Optionen aus der Spielbeschreibung gelten weiterhin.`;
 
 /* ---------- Gemini ---------- */
@@ -471,19 +461,24 @@ async function runTurn(prompt) {
     if (!calls.length) throw new Error('Keine verwertbare Antwort (evtl. durch Sicherheitsfilter blockiert).');
     contents.push(content);   // unverändert zurückgeben (inkl. evtl. Gedanken-Signaturen)
 
-    let final = null;
+    let final = null, finalResp = null;
     const responses = [];
     for (const p of calls) {
       const { name, args = {} } = p.functionCall;
       if (name === 'antworten') {
         final = args;
-        responses.push({ functionResponse: { name, response: { ok: true } } });
+        finalResp = { functionResponse: { name, response: { ok: true } } };
+        responses.push(finalResp);
         continue;
       }
       let result;
       try { result = TOOLS[name] ? TOOLS[name](args) : { fehler: 'Unbekannte Funktion ' + name }; }
       catch (e) { result = { fehler: e.message }; }
       responses.push({ functionResponse: { name, response: result } });
+    }
+    if (final && calls.some(c => ['probe', 'ressource_aendern'].includes(c.functionCall.name))) {
+      finalResp.functionResponse.response = { fehler: 'antworten wurde zu früh aufgerufen: Die Ergebnisse von probe/ressource_aendern lagen dir noch nicht vor. Erzähle passend zu diesen Ergebnissen und rufe antworten erneut auf.' };
+      final = null;
     }
     if (final) {
       if (!final.story || !Array.isArray(final.optionen) || final.optionen.length < 3)
@@ -563,14 +558,28 @@ function renderPanels() {
 /* ---------- Spielablauf ---------- */
 function setStatus(msg, err) { $('status').textContent = msg || ''; $('status').className = err ? 'err' : ''; }
 
+function stateText() {
+  const res = cfg.ressourcen.map(r => `${r.name} ${st.res[r.id]}${r.max != null ? '/' + r.max : ''}${r.bei_null ? ` (fällt sie auf 0: ${r.bei_null})` : ''}`);
+  const rated = l => l.length ? l.map(i => `${i.name} ${i.wert}`).join(', ') : 'keine';
+  const inv = st.inv.length ? st.inv.map(i => `${i.name}${i.menge > 1 ? ' ×' + i.menge : ''}${i.beschreibung ? ' (' + i.beschreibung + ')' : ''}`).join(', ') : 'leer';
+  return `AKTUELLER SPIELZUSTAND (vollständig, nicht nachfragen):\n`
+    + `Ressourcen: ${res.join('; ') || 'keine'}\n`
+    + `XP: ${st.xp} (Level ${level()}, noch ${cfg.xpprolevel - (st.xp % cfg.xpprolevel)} XP bis Level ${level() + 1})\n`
+    + `Stats (0–10): ${rated(st.stats)}\n`
+    + `Skills (0–10): ${rated(st.skills)}\n`
+    + `Flaws: ${st.flaws.length ? st.flaws.join(' | ') : 'keine'}\n`
+    + `Inventar: ${inv}`;
+}
+
 function buildPrompt(choice, retry) {
   const parts = [];
+  parts.push(stateText());
   // Memory wird nur jedes x-te Mal mitgeschickt
   if (turn % cfg.memoryresend === 0 && memory) parts.push(`GEDÄCHTNIS (bisheriger Spielverlauf, bitte konsistent bleiben):\n${memory}`);
   if (current) parts.push(`Letzter Erzählabschnitt:\n${current.story}`);
   if (choice) parts.push(`Der Spieler wählt: ${choice}\nErzähle, wie es weitergeht.`);
   else parts.push(`Startbedingungen:\n${cfg.startconditions}\nBeginne das Abenteuer.`);
-  if (retry) parts.push('HINWEIS: Ein früherer Versuch dieser Runde wurde unterbrochen. Zustandsänderungen wurden eventuell schon ausgeführt – rufe status_abfragen auf, bevor du etwas änderst.');
+  if (retry) parts.push('HINWEIS: Ein früherer Versuch dieser Runde wurde unterbrochen. Zustandsänderungen wurden eventuell schon ausgeführt und stehen bereits im mitgelieferten Spielzustand – ändere nichts doppelt.');
   return parts.join('\n\n');
 }
 
