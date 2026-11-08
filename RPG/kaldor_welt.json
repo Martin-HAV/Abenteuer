@@ -1,0 +1,29 @@
+{
+  "sprache": "de-DE",
+  "freitext": true,
+  "startort": "Brunnenfurt",
+  "orte": [
+    {
+      "name": "Brunnenfurt",
+      "beschreibung": "Kleines Dorf am Rand der Ruinen mit Taverne und Händler"
+    },
+    {
+      "name": "Alte Mühle",
+      "beschreibung": "Verfallene Mühle am Weg nach Kaldor"
+    },
+    {
+      "name": "Stadttor von Kaldor",
+      "beschreibung": "Eingestürztes Tor der versunkenen Stadt"
+    },
+    {
+      "name": "Marktplatz von Kaldor",
+      "beschreibung": "Weiter Platz voller Trümmer und Schatten"
+    },
+    {
+      "name": "Katakomben",
+      "beschreibung": "Dunkle Gänge unter der Stadt"
+    }
+  ],
+  "startconditions": "Der Abenteurer erreicht bei Einbruch der Dunkelheit das Dorf Brunnenfurt am Rand der versunkenen Stadt Kaldor. Die Dorfbewohner flüstern von verschwundenen Schatzsuchern und einem Licht, das nachts aus den Ruinen scheint.",
+  "instructions": "Du bist ein erfahrener Spielleiter für ein Dark-Fantasy-Rollenspiel. Schreibe auf Deutsch, in der zweiten Person (\"Du ...\"), atmosphärisch und dicht, aber nicht länger als drei kurze Absätze. Sei fair, aber nicht nachsichtig: Entscheidungen haben Folgen, Gefahren sind echt. Nichtspielercharaktere haben eigene Ziele. Liefere am Ende jeder Antwort genau 3 kurze, sinnvoll verschiedene Handlungsoptionen (je maximal 12 Wörter)."
+}

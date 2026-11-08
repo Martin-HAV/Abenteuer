@@ -1,0 +1,45 @@
+{
+  "memoryresend": 3,
+  "xpprolevel": 100,
+  "xpvergabe": "Vergib 10 bis 20 XP für kleine Erfolge, 25 bis 50 XP für überwundene Gegner oder gelöste Rätsel und bis zu 100 XP für Meilensteine der Geschichte.",
+  "proben": {
+    "wuerfel": 10,
+    "stufen": { "leicht": 6, "mittel": 10, "schwer": 14, "extrem": 18 }
+  },
+  "ressourcen": [
+    {
+      "id": "leben",
+      "name": "Leben",
+      "icon": "❤️",
+      "start": 20,
+      "max": 20,
+      "farbe": "#c8503c",
+      "bei_null": "Der Charakter stirbt. Erzähle ein würdiges, atmosphärisches Ende.",
+      "ende": true
+    },
+    {
+      "id": "mana",
+      "name": "Mana",
+      "icon": "🔮",
+      "start": 10,
+      "max": 10,
+      "farbe": "#5b7fd6",
+      "bei_null": "Der Charakter ist magisch ausgebrannt: keine Zauber möglich, bis er sich ausruht (Erschöpfung beschreiben)."
+    },
+    {
+      "id": "geld",
+      "name": "Geld",
+      "icon": "💰",
+      "start": 15,
+      "bei_null": "Der Charakter ist pleite: Händler, Wirte und Bestechungen sind nicht mehr möglich."
+    }
+  ],
+  "aufstieg": {
+    "regeln": "Die Maxima und die Heilung durch den Aufstieg sind bereits automatisch angewendet. Die Verteilung der Punkte geschieht im Gespräch mit dem Spieler: Erzähle kurz, wie der Charakter durch das Erlebte wächst, und biete passende Verbesserungen als Optionen an (Freitext des Spielers ist ebenfalls möglich). Befindet sich der Charakter gerade in akuter Gefahr, merke den Aufstieg vor und führe ihn bei der ersten ruhigen Gelegenheit durch. Alle 3 Level darf ein Flaw gemildert oder entfernt werden, wenn der Spieler es durch seine Taten verdient hat (flaw_aendern).",
+    "statpunkte": 1,
+    "skillpunkte": 2,
+    "maxwert": 10,
+    "ressourcen_max": { "leben": 2, "mana": 1 },
+    "auffuellen": ["leben", "mana"]
+  }
+}

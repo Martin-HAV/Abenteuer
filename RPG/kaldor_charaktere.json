@@ -1,0 +1,64 @@
+{
+  "charaktere": [
+    {
+      "id": "brann",
+      "name": "Brann",
+      "beschreibung": "Narbiger Söldner: stark im Kampf, schwach bei Höhe und Menschenkenntnis.",
+      "background": "Brann diente zehn Jahre als Söldner in den Grenzkriegen. Nach einem verlorenen Gefecht schuldet er seinem alten Hauptmann noch Gold und hofft, in den Ruinen von Kaldor genug zu finden, um frei zu sein.",
+      "stats": { "Stärke": 6, "Geschick": 5, "Intelligenz": 4, "Charisma": 3, "Willenskraft": 5 },
+      "skills": { "Kämpfen": 4, "Springen": 3, "Klettern": 3, "Schleichen": 2, "Taschendiebstahl": 1, "Überreden": 2 },
+      "flaws": [
+        "Höhenangst: In großer Höhe lähmt die Angst, Proben fallen schwerer.",
+        "Gutgläubig: Fällt leicht auf freundliche Fremde herein."
+      ],
+      "inventar": [
+        { "name": "Rostiges Schwert", "menge": 1, "beschreibung": "Schlechte Klinge, aber besser als nichts" },
+        { "name": "Fackel", "menge": 3, "beschreibung": "Brennt etwa eine Stunde" },
+        { "name": "Heiltrank", "menge": 1, "beschreibung": "Stellt Leben wieder her" },
+        { "name": "Brot", "menge": 2, "beschreibung": "Reiseproviant" },
+        { "name": "Seil", "menge": 1, "beschreibung": "15 Meter, robust" }
+      ]
+    },
+    {
+      "id": "mira",
+      "name": "Mira",
+      "beschreibung": "Flinke Diebin: leise und geschickt, aber leicht von Schätzen zu blenden.",
+      "background": "Mira wuchs in den Gassen der Hafenstadt auf und lebte von dem, was andere vergaßen festzuhalten. Als ein Auftrag schiefging, musste sie die Stadt verlassen. Die Gerüchte über Kaldors Schätze kommen ihr gerade recht.",
+      "stats": { "Stärke": 3, "Geschick": 8, "Intelligenz": 5, "Charisma": 5, "Willenskraft": 4 },
+      "skills": { "Kämpfen": 2, "Springen": 5, "Klettern": 6, "Schleichen": 6, "Taschendiebstahl": 5, "Überreden": 3 },
+      "flaws": [
+        "Gesucht: Die Wachen mehrerer Städte kennen ihr Gesicht.",
+        "Gierig: Bei Schätzen fallen Willenskraft-Proben schwerer."
+      ],
+      "inventar": [
+        { "name": "Dolch", "menge": 1, "beschreibung": "Scharf und leicht" },
+        { "name": "Dietriche", "menge": 1, "beschreibung": "Für Schlösser aller Art" },
+        { "name": "Fackel", "menge": 2, "beschreibung": "Brennt etwa eine Stunde" },
+        { "name": "Seil", "menge": 1, "beschreibung": "15 Meter, robust" },
+        { "name": "Brot", "menge": 1, "beschreibung": "Reiseproviant" }
+      ],
+      "start": { "geld": 30 }
+    },
+    {
+      "id": "eldran",
+      "name": "Eldran",
+      "beschreibung": "Gelehrter Magier: mächtiges Mana, aber körperlich schwach.",
+      "background": "Eldran ist Archivar einer Akademie, die Kaldor seit Jahrzehnten erforschen will, aber nie jemanden hinschickte. Er ging auf eigene Faust, um zu beweisen, dass die Legenden stimmen.",
+      "stats": { "Stärke": 2, "Geschick": 4, "Intelligenz": 8, "Charisma": 4, "Willenskraft": 7 },
+      "skills": { "Arkane Kunde": 6, "Feuermagie": 4, "Überreden": 4, "Schleichen": 2, "Kämpfen": 1 },
+      "flaws": [
+        "Schwächlich: Schwere Lasten und lange Märsche zehren stark an ihm.",
+        "Neugier über alles: Kann Rätseln und alten Büchern kaum widerstehen."
+      ],
+      "inventar": [
+        { "name": "Zauberstab", "menge": 1, "beschreibung": "Bündelt Feuermagie" },
+        { "name": "Zauberbuch", "menge": 1, "beschreibung": "Notizen über Kaldor" },
+        { "name": "Fackel", "menge": 2, "beschreibung": "Brennt etwa eine Stunde" },
+        { "name": "Manatrank", "menge": 1, "beschreibung": "Stellt Mana wieder her" },
+        { "name": "Brot", "menge": 2, "beschreibung": "Reiseproviant" }
+      ],
+      "max": { "leben": 14, "mana": 16 },
+      "start": { "leben": 14, "mana": 16 }
+    }
+  ]
+}

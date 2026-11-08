@@ -1,119 +1,25 @@
 {
+  "spieler": [
+    "Mama",
+    "Papa",
+    "Isabel",
+    "Annika"
+  ],
+  "firebase": "firebase.json",
   "spiele": [
     {
       "titel": "Peppa Wutz",
-      "sprache": "de-DE",
-      "memoryresend": 3,
-      "xpprolevel": 50,
-      "freitext": false,
-      "startconditions": "Der Spieler erkundet das Haus und die Umgebung von Peppa Wutz und trifft nach und nach alle Familienmitglieder.",
-      "instructions": "Du bist ein erfahrener Erzähler und erzählst einem 5 Jährigen Kind eine Geschichte, die es in der Welt von Peppa Wutz erlebt. Schreibe auf Deutsch, in der zweiten Person (\"Du ...\"), atmosphärisch und lebendig. Die Geschichte soll interessant, freundlich und lehrreich sein. Es gibt keine Gefahren und kein Scheitern, nur kleine Herausforderungen, die man freundlich löst. Liefere am Ende jeder Antwort genau 3 kurze, sinnvoll verschiedene Handlungsoptionen (je maximal 12 Wörter).",
-      "ressourcen": [
-        {
-          "id": "freude",
-          "name": "Freude",
-          "icon": "💗",
-          "start": 10,
-          "max": 10,
-          "bei_null": "Peppa ist ein bisschen traurig. Mama oder Papa Wutz kommen, trösten sie, und die Freude steigt wieder (ressource_aendern +5). Es gibt kein Game Over."
-        },
-        {
-          "id": "energie",
-          "name": "Energie",
-          "icon": "⚡",
-          "start": 10,
-          "max": 10,
-          "bei_null": "Peppa ist müde und macht ein kleines Päuschen. Danach geht es weiter (ressource_aendern +6)."
-        },
-        {
-          "id": "muenzen",
-          "name": "Gummistiefel-Münzen",
-          "icon": "🪙",
-          "start": 0
-        }
-      ],
-      "stats": [
-        { "name": "Mut", "wert": 4 },
-        { "name": "Neugier", "wert": 7 },
-        { "name": "Freundlichkeit", "wert": 8 }
-      ],
-      "skills": [
-        { "name": "Hüpfen", "wert": 6 },
-        { "name": "Teilen", "wert": 6 },
-        { "name": "Suchen", "wert": 4 },
-        { "name": "Malen", "wert": 3 }
-      ],
-      "flaws": [
-        "Hat ein bisschen Angst im Dunkeln",
-        "Ist manchmal ungeduldig"
-      ],
-      "inventar": [
-        { "name": "Gummistiefel", "menge": 1, "beschreibung": "Perfekt für Matschpfützen" },
-        { "name": "Teddy", "menge": 1, "beschreibung": "Kuscheliger Begleiter" },
-        { "name": "Apfel", "menge": 2, "beschreibung": "Gibt neue Energie" }
-      ]
+      "beschreibung": "Ein freundliches Abenteuer für Kinder ab 5 Jahren.",
+      "regeln": "peppa_regeln.json",
+      "welt": "peppa_welt.json",
+      "charaktere": "peppa_charaktere.json"
     },
     {
       "titel": "Die Ruinen von Kaldor",
-      "sprache": "de-DE",
-      "memoryresend": 3,
-      "xpprolevel": 100,
-      "startconditions": "Der Abenteurer erreicht bei Einbruch der Dunkelheit das Dorf Brunnenfurt am Rand der versunkenen Stadt Kaldor. Die Dorfbewohner flüstern von verschwundenen Schatzsuchern und einem Licht, das nachts aus den Ruinen scheint.",
-      "instructions": "Du bist ein erfahrener Spielleiter für ein Dark-Fantasy-Rollenspiel. Schreibe auf Deutsch, in der zweiten Person (\"Du ...\"), atmosphärisch und dicht, aber nicht länger als drei kurze Absätze. Sei fair, aber nicht nachsichtig: Entscheidungen haben Folgen, Gefahren sind echt. Nichtspielercharaktere haben eigene Ziele. Liefere am Ende jeder Antwort genau 3 kurze, sinnvoll verschiedene Handlungsoptionen (je maximal 12 Wörter).",
-      "ressourcen": [
-        {
-          "id": "leben",
-          "name": "Leben",
-          "icon": "❤️",
-          "start": 20,
-          "max": 20,
-          "farbe": "#c8503c",
-          "bei_null": "Der Charakter stirbt. Erzähle ein würdiges, atmosphärisches Ende.",
-          "ende": true
-        },
-        {
-          "id": "mana",
-          "name": "Mana",
-          "icon": "🔮",
-          "start": 10,
-          "max": 10,
-          "farbe": "#5b7fd6",
-          "bei_null": "Der Charakter ist magisch ausgebrannt: keine Zauber möglich, bis er sich ausruht (Erschöpfung beschreiben)."
-        },
-        {
-          "id": "geld",
-          "name": "Geld",
-          "icon": "💰",
-          "start": 15,
-          "bei_null": "Der Charakter ist pleite: Händler, Wirte und Bestechungen sind nicht mehr möglich."
-        }
-      ],
-      "stats": [
-        { "name": "Stärke", "wert": 6 },
-        { "name": "Geschick", "wert": 5 },
-        { "name": "Intelligenz", "wert": 4 },
-        { "name": "Charisma", "wert": 3 },
-        { "name": "Willenskraft", "wert": 5 }
-      ],
-      "skills": [
-        { "name": "Kämpfen", "wert": 4 },
-        { "name": "Springen", "wert": 3 },
-        { "name": "Klettern", "wert": 3 },
-        { "name": "Schleichen", "wert": 2 },
-        { "name": "Taschendiebstahl", "wert": 1 },
-        { "name": "Überreden", "wert": 2 }
-      ],
-      "flaws": [
-        "Höhenangst: In großer Höhe lähmt die Angst, Proben fallen schwerer.",
-        "Gutgläubig: Fällt leicht auf freundliche Fremde herein."
-      ],
-      "inventar": [
-        { "name": "Rostiges Schwert", "menge": 1, "beschreibung": "Schlechte Klinge, aber besser als nichts" },
-        { "name": "Fackel", "menge": 3, "beschreibung": "Brennt etwa eine Stunde" },
-        { "name": "Heiltrank", "menge": 1, "beschreibung": "Stellt Leben wieder her" },
-        { "name": "Brot", "menge": 2, "beschreibung": "Reiseproviant" },
-        { "name": "Seil", "menge": 1, "beschreibung": "15 Meter, robust" }
-      ]
+      "beschreibung": "Dark-Fantasy-Rollenspiel für Erwachsene mit echten Gefahren.",
+      "regeln": "kaldor_regeln.json",
+      "welt": "kaldor_welt.json",
+      "charaktere": "kaldor_charaktere.json"
     }
   ]
 }
