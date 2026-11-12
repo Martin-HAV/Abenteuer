@@ -183,6 +183,7 @@ let players = [];     // Spieler aus game.json
 let player = '';      // gewählter Spieler (Name)
 let fbConfigPath = '', fbBase = '';
 let fb = null;        // Welt-Speicher (Firestore-Adapter), null = nicht verbunden
+let fbConf = null, fbDiag = '', fbDown = false;
 let world = { ok: false, fehler: '', ort: '', ortId: '', players: {}, allgemein: [], ortInfos: [] };
 const FIREBASE_VERSION = '10.14.1';
 const MAX_INFOS = 30;                 // max. Infos pro Ort bzw. allgemein
@@ -410,12 +411,39 @@ async function initFirebase() {
     const conf = await fetchJson(fbConfigPath, fbBase);
     const root = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/`;
     const [A, F] = await withTimeout(Promise.all([import(root + 'firebase-app.js'), import(root + 'firebase-firestore.js')]), 15000, 'Firebase laden');
-    const app = A.initializeApp(conf.firebaseConfig || conf);
+    fbConf = conf.firebaseConfig || conf;
+    const app = A.initializeApp(fbConf);
     fb = makeFirestoreStore(F.getFirestore(app), F);
-    info.textContent = '🟢 Welt-Speicher bereit (Firebase).';
+    info.textContent = 'Prüfe die Verbindung zu Firestore …';
+    fbDiag = await diagnoseFirebase();
+    info.textContent = fbDiag ? '🔴 ' + fbDiag : '🟢 Welt-Speicher bereit (Firebase).';
   } catch (e) {
     fb = null;
     info.textContent = '🔴 Welt-Speicher nicht verfügbar: ' + e.message + ' – das Spiel läuft ohne gemeinsame Welt.';
+  }
+}
+
+// Fragt Firestore einmal direkt per REST ab (gleicher Absender wie die Seite) und übersetzt Fehler in eine Ursache
+async function diagnoseFirebase() {
+  if (!fbConf) return '';
+  const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(fbConf.projectId)}/databases/(default)/documents/welten/diagnose/allgemein/infos?key=${encodeURIComponent(fbConf.apiKey)}`;
+  try {
+    const res = await withTimeout(fetch(url), 8000, 'Verbindungstest');
+    if (res.ok) return '';
+    const j = await res.json().catch(() => ({}));
+    const err = j.error || {};
+    const reasons = (err.details || []).map(d => d.reason).filter(Boolean).join(',');
+    const msg = err.message || `HTTP ${res.status}`;
+    const all = `${reasons} ${err.status || ''} ${msg}`;
+    if (/REFERER|REFERRER/i.test(all)) return `Der API-Schlüssel blockiert diese Seite (${location.origin}). Trage in der Google Cloud Console unter APIs & Dienste → Anmeldedaten → API-Schlüssel → „Websites“ die Adresse ${location.origin}/* ein (mit /* am Ende).`;
+    if (/API_KEY_SERVICE_BLOCKED|are blocked/i.test(all)) return 'Der API-Schlüssel erlaubt die Cloud Firestore API nicht. Füge sie unter „API-Einschränkungen“ des Schlüssels hinzu oder hebe die API-Einschränkung auf.';
+    if (/SERVICE_DISABLED|has not been used|is disabled/i.test(all)) return 'Die Cloud Firestore API ist nicht aktiviert. Lege in der Firebase-Konsole unter „Firestore Database“ eine Datenbank an.';
+    if (res.status === 404 && /database/i.test(msg)) return 'Es gibt keine Firestore-Datenbank „(default)“. Lege sie in der Firebase-Konsole unter „Firestore Database“ an.';
+    if (res.status === 404) return '';   // Dokument existiert nicht: Verbindung und Regeln sind in Ordnung
+    if (res.status === 403 || /PERMISSION_DENIED/i.test(all)) return 'Die Firestore-Regeln verbieten den Zugriff. Prüfe unter Firestore → Regeln, ob der Pfad welten/{welt}/{document=**} Lesen und Schreiben erlaubt, und veröffentliche die Regeln.';
+    return `Firestore antwortet mit Fehler ${res.status}: ${msg}`;
+  } catch (e) {
+    return 'Firestore ist nicht erreichbar: ' + e.message;
   }
 }
 
@@ -446,9 +474,12 @@ async function loadWorld() {
       }
       const pl = await fb.readPlace(w, ps[id].ortId);
       world = { ok: true, fehler: '', ort: ps[id].ort, ortId: ps[id].ortId, players: ps, allgemein: ag, ortInfos: pl.infos };
-    })(), 8000, 'Welt lesen');
+    })(), fbDown ? 3000 : 8000, 'Welt lesen');
+    fbDown = false;
   } catch (e) {
-    world = { ...world, ok: false, fehler: e.message };
+    fbDown = true;                     // solange Firebase nicht antwortet, wartet jeder Zug nur kurz
+    if (!fbDiag) fbDiag = await diagnoseFirebase();
+    world = { ...world, ok: false, fehler: fbDiag || ('Verbindung zu Firestore fehlgeschlagen: ' + e.message + '. Möglicherweise blockiert ein Werbeblocker oder das Netzwerk die Verbindung.') };
   }
   renderWorld();
 }
@@ -522,7 +553,7 @@ function renderWorld() {
     infos(`Infos zu „${world.ort}“`, world.ortInfos, 'ort');
   }
   const rb = el('button', '', '🔄 Welt neu laden');
-  rb.onclick = () => loadWorld();
+  rb.onclick = () => { fbDiag = ''; loadWorld(); };
   body.append(rb);
 }
 async function removeInfoUi(bereich, e) {
@@ -1127,7 +1158,7 @@ async function step(choice, retry) {
     if (memory.length > MEMORY_LIMIT) memory = '…' + memory.slice(-MEMORY_LIMIT);
     turn++;
     current = out;
-    busy = false;
+    lock(false);
     render();
     setStatus('');
     savePresence();
@@ -1136,8 +1167,7 @@ async function step(choice, retry) {
     const b = el('button', '', 'Nochmal versuchen');
     b.onclick = () => step(choice, true);
     $('options').appendChild(b);
-    busy = false;
-    renderPanels();
+    lock(false);
   }
 }
 
@@ -1177,6 +1207,7 @@ function render(resume) {
   const box = $('options');
   box.innerHTML = '';
   $('freeRow').hidden = !cfg.freitext || st.gameover;
+  document.querySelectorAll('#freeRow button, #freeRow input').forEach(b => { b.disabled = busy; });
   if (st.gameover) {
     box.append(el('p', 'end', 'Das Abenteuer ist zu Ende. Über „Neu starten“ beginnst du eine neue Geschichte.'));
   } else {
