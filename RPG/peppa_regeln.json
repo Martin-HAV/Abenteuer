@@ -1,5 +1,12 @@
 {
   "memoryresend": 3,
+  "erinnerung": {
+    "pro_zug": 100,
+    "max": 10000,
+    "kuerzen_auf": 8000,
+    "lokal": false,
+    "pfad": "Erinnerungen/Peppa"
+  },
   "xpprolevel": 50,
   "xpvergabe": "Vergib 5 bis 15 XP für freundliche Taten, Mut, Teilen und neugierige Entdeckungen. Es gibt nie Abzüge.",
   "proben": {
