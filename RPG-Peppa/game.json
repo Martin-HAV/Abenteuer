@@ -1,0 +1,25 @@
+{
+  "spieler": [
+    "Mama",
+    "Papa",
+    "Isabel",
+    "Annika"
+  ],
+  "firebase": "firebase.json",
+  "spiele": [
+    {
+      "titel": "Peppa Wutz",
+      "beschreibung": "Ein freundliches Abenteuer für Kinder ab 5 Jahren.",
+      "regeln": "peppa_regeln.json",
+      "welt": "peppa_welt.json",
+      "charaktere": "peppa_charaktere.json"
+    },
+    {
+      "titel": "Die Ruinen von Kaldor",
+      "beschreibung": "Dark-Fantasy-Rollenspiel für Erwachsene mit echten Gefahren.",
+      "regeln": "kaldor_regeln.json",
+      "welt": "kaldor_welt.json",
+      "charaktere": "kaldor_charaktere.json"
+    }
+  ]
+}
