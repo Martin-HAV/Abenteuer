@@ -5,8 +5,8 @@
       "name": "Peppa Wutz",
       "beschreibung": "Neugierig und freundlich, liebt Matschpfützen.",
       "background": "Peppa ist ein kleines Schweinemädchen, das mit Mama Wutz, Papa Wutz und ihrem kleinen Bruder Schorsch in einem Haus auf einem Hügel wohnt. Sie liebt Matschpfützen, ihren Teddy und ihre Freunde.",
-      "stats": { "Mut": 4, "Neugier": 7, "Freundlichkeit": 8 },
-      "skills": { "Hüpfen": 6, "Teilen": 6, "Suchen": 4, "Malen": 3 },
+      "stats": {  },
+      "skills": {  },
       "flaws": [
         "Hat ein bisschen Angst im Dunkeln",
         "Ist manchmal ungeduldig"
@@ -22,8 +22,8 @@
       "name": "Schorsch",
       "beschreibung": "Peppas kleiner Bruder, mutig mit seinem Dinosaurier.",
       "background": "Schorsch ist Peppas kleiner Bruder und noch ziemlich klein. Er liebt Dinosaurier, vor allem sein Spielzeug Herrn Dino, und sagt manchmal einfach nur \"Dinosaurier! Grrr!\".",
-      "stats": { "Mut": 3, "Neugier": 6, "Freundlichkeit": 7 },
-      "skills": { "Hüpfen": 3, "Teilen": 4, "Suchen": 3, "Malen": 2 },
+      "stats": {  },
+      "skills": {  },
       "flaws": [
         "Weint schnell, wenn etwas kaputtgeht",
         "Hat ein bisschen Angst im Dunkeln"
@@ -39,8 +39,8 @@
       "name": "Annika",
       "beschreibung": "Annika erkundet die Welt der Familie Wutz.",
       "background": "Annika mag Peppa Wutz und macht sich auf den Weg ihre Welt und die Familie Wutz kennen zu lernen.",
-      "stats": { "Mut": 3, "Neugier": 6, "Freundlichkeit": 7 },
-      "skills": { "Hüpfen": 3, "Teilen": 4, "Suchen": 2, "Malen": 3 },
+      "stats": {  },
+      "skills": { },
       "flaws": [
         "Weint schnell, wenn sie etwas nicht mag."
       ],

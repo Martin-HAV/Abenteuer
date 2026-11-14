@@ -7,40 +7,19 @@
     "lokal": false,
     "pfad": "Erinnerungen/Peppa"
   },
-  "xpprolevel": 50,
+  "xpprolevel": 100,
   "xpvergabe": "Vergib 5 bis 15 XP für freundliche Taten, Mut, Teilen und neugierige Entdeckungen. Es gibt nie Abzüge.",
   "proben": {
     "wuerfel": 10,
     "stufen": { "leicht": 5, "mittel": 8, "schwer": 12, "extrem": 16 }
   },
   "ressourcen": [
-    {
-      "id": "freude",
-      "name": "Freude",
-      "icon": "💗",
-      "start": 10,
-      "max": 10,
-      "bei_null": "Der Charakter ist ein bisschen traurig. Mama oder Papa Wutz kommen, trösten ihn, und die Freude steigt wieder (ressource_aendern +5). Es gibt kein Game Over."
-    },
-    {
-      "id": "energie",
-      "name": "Energie",
-      "icon": "⚡",
-      "start": 10,
-      "max": 10,
-      "bei_null": "Der Charakter ist müde und macht ein kleines Päuschen. Danach geht es weiter (ressource_aendern +6)."
-    },
-    {
-      "id": "muenzen",
-      "name": "Gummistiefel-Münzen",
-      "icon": "🪙",
-      "start": 0
-    }
+    
   ],
   "aufstieg": {
-    "regeln": "Feiere den Aufstieg fröhlich und kindgerecht, zum Beispiel mit einem kleinen Familienfest. Frage das Kind, worin der Charakter besser werden möchte, und biete drei einfache Möglichkeiten an. Halte es kurz und spielerisch.",
-    "statpunkte": 1,
-    "skillpunkte": 1,
+    "regeln": "Feiere fröhlich und kindgerecht, dass der Charakter schon soviel erlebt hat. Halte es kurz und spielerisch.",
+    "statpunkte": 0,
+    "skillpunkte": 0,
     "maxwert": 10,
     "auffuellen": "alle"
   }
