@@ -21,6 +21,14 @@
       "welt": "kaldor_welt.json",
       "charaktere": "kaldor_charaktere.json",
       "karte": "kaldor_karte.json"
+    },
+    {
+      "titel": "Call of Cthulhu: Arkham",
+      "beschreibung": "Lovecraftianisches Abenteuer. 1926.",
+      "regeln": "arkham_regeln.json",
+      "welt": "arkham_welt.json",
+      "charaktere": "arkham_charaktere.json",
+      "karte": "akrham_karte.json"
     }
   ]
 }
