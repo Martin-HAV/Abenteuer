@@ -1,7 +1,7 @@
 {
   "sprache": "zh-CN",
   "weltid": "harry-stein-der-weisen",
-  "freitext": false,
+  "freitext": true,
   "startort": "Der Bootsanleger am schwarzen See",
   "orte": [
     {
