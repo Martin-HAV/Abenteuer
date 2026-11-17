@@ -212,12 +212,16 @@ let busy = false;
 let muted = false;
 let levelupFlag = false;   // wurde in dieser Funktionsrunde ein Level erreicht?
 let loadToken = 0;
-let vokabeln = [];
-let vokSprache = null;   // Sprache der Vokabelliste (z. B. "de-DE"), null = Sprache der Spieloberfläche    // Wörter und Sätze aus Vokabel.json
+let vokabeln = [];    // Wörter und Sätze der Vokabelliste
+let vokSprache = null;   // Sprache der Vokabelliste (z. B. "de-DE"); null = Sprache der Spieloberfläche
 let vokBag = [];      // gemischter Vorrat: jedes Wort kommt dran, bevor sich eines wiederholt
 let vokGlobal = '';   // optionaler Pfad aus game.json ("vokabeln")
 let choiceCount = 0;  // Anzahl bisheriger Auswahlen des Spielers (jede zweite löst die Wort-Abfrage aus)
-let quizActive = false, quizItem = null, quizTries = 0, quizAfter = null;
+let quizActive = false, quizItem = null, quizTries = 0, quizAfter = null, quizTimer = null;
+let runToken = 0;     // zählt Spieldurchläufe: Ein Zug eines beendeten Spiels (Neustart/Laden) wird verworfen
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } };
+const lsDel = k => { try { localStorage.removeItem(k); } catch (e) { /* egal */ } };
 let LANG = 'de';     // Sprache der Spielausgabe ('de' oder 'zh'); das Hauptmenü ist immer Englisch
 const TX = {
   de: {
@@ -278,6 +282,7 @@ const TX = {
     here_also: 'Hier auch: ', alone_here: 'allein hier', as: 'als', players_positions: 'Spieler und Positionen',
     you: ' – du', none: '(keine)', infos_for: 'Infos zu', reload_world: '🔄 Welt neu laden',
     confirm_del: 'Diese Info löschen?', ago_now: 'gerade eben aktiv',
+    del_info: 'Info löschen', general_infos: 'Allgemeine Infos', crit_win: 'kritischer Erfolg', crit_fail: 'Patzer',
     ago_min: m => `zuletzt aktiv vor ${m} Min.`, ago_h: h => `zuletzt aktiv vor ${h} Std.`,
     ago_d: d => `zuletzt aktiv vor ${d} Tagen`, from: ' (von ', from_close: ')'
   },
@@ -339,6 +344,7 @@ const TX = {
     here_also: '这里还有：', alone_here: '只有你在这里', as: '扮演', players_positions: '玩家与位置',
     you: ' – 你', none: '（无）', infos_for: '关于', reload_world: '🔄 重新加载世界',
     confirm_del: '删除这条信息吗？', ago_now: '刚刚在线',
+    del_info: '删除信息', general_infos: '通用信息', crit_win: '大成功', crit_fail: '大失败',
     ago_min: m => `${m} 分钟前在线`, ago_h: h => `${h} 小时前在线`,
     ago_d: d => `${d} 天前在线`, from: ' （来自 ', from_close: '）'
   }
@@ -346,7 +352,7 @@ const TX = {
 const tx = (k, ...a) => { const v = (TX[LANG] || {})[k] ?? TX.de[k] ?? k; return typeof v === 'function' ? v(...a) : v; };
 // Setzt die Texte der Spieloberfläche auf die gewählte Sprache
 function applyGameLang() {
-  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : 'de';
+  $('game').lang = LANG === 'zh' ? 'zh-CN' : 'de';   // nur die Spieloberfläche; das Hauptmenü bleibt Englisch
   const set = (id, k) => { const e = document.getElementById(id); if (e) e.textContent = tx(k); };
   set('worldSum', 'world_sum'); set('hStats', 'stats'); set('hSkills', 'skills');
   set('hFlaws', 'flaws'); set('hInv', 'inv'); set('freeGo', 'free_go'); set('quizReplay', 'quiz_replay');
@@ -456,7 +462,7 @@ function normChars(data) {
       background: c.background || c.hintergrund || '',
       stats: rating(c.stats), skills: rating(c.skills),
       flaws: toList(c.flaws).map(f => [f.name || f.text, f.beschreibung || f.wert].filter(Boolean).join(' – ')).filter(Boolean),
-      inventar: toList(c.inventar, 'menge').filter(i => i.name).map(i => ({ name: i.name, menge: Math.max(1, parseInt(i.menge) || 1), beschreibung: i.beschreibung || '' })),
+      inventar: toList(c.inventar, 'menge').filter(it => it.name).map(it => ({ name: it.name, menge: Math.max(1, parseInt(it.menge) || 1), beschreibung: it.beschreibung || '' })),
       start: mapById(c.start || c.ressourcen_start),   // optionale Startwerte der Ressourcen
       max: mapById(c.max || c.ressourcen_max)          // optionale Maximalwerte der Ressourcen
     };
@@ -543,7 +549,7 @@ async function selectGame() {
     $('gameInfo').textContent = cfg.beschreibung;
     const cs = $('charSel');
     cs.innerHTML = '';
-    chars.forEach((c, i) => { const o = document.createElement('option'); o.value = i; o.textContent = c.name; cs.appendChild(o); });
+    chars.forEach((chr, i) => { const o = document.createElement('option'); o.value = i; o.textContent = chr.name; cs.appendChild(o); });
     $('charRow').hidden = chars.length < 2;
     showCharInfo();
     updateMemInfo();
@@ -589,7 +595,8 @@ function normVokabeln(data) {
   });
   return out;
 }
-// Vokabellisten: Vorrang hat die RPG-Welt (peppa_welt.json: "vokabeln"), dann game.json (Spiel), dann global, dann Vokabel.json.
+// Vokabellisten: Vorrang hat game.json ("vokabeln" beim Spiel), dann die Welt-Datei, dann global (game.json oberste Ebene), dann Vokabel.json.
+// Eine Datei darf auch { "sprache": "de-DE", "vokabeln": [...] } sein: Wort und Satz werden dann in dieser Sprache gesprochen.
 // Der Wert darf sein: ein Dateipfad, eine Liste von Dateipfaden (werden zusammengefügt) oder die Liste direkt eingebettet.
 // Wirft nie: bei Problemen kommen ein paar eingebaute Wörter zum Einsatz.
 async function loadVokabeln(g, welt) {
@@ -615,7 +622,7 @@ function showCharInfo() {
 }
 
 /* ---------- Gemeinsame Welt (Firebase / Firestore) ---------- */
-const withTimeout = (p, ms, what) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(what + ': Zeitüberschreitung')), ms))]);
+const withTimeout = (p, ms, what) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(what + ': timed out')), ms))]);
 const entryMatches = (e, m) => m.contains
   ? String(e.text).toLowerCase().includes(String(m.contains).toLowerCase())
   : (e.zeit === m.zeit && e.text === m.text);
@@ -634,24 +641,24 @@ function makeFirestoreStore(db, F) {
     async setPlace(w, ortId, name) { await F.setDoc(ref(w, 'orte', ortId), { name }, { merge: true }); },
     async addInfo(w, bereich, ortId, entry, ortName) {
       const r = infoRef(w, bereich, ortId), f = field(bereich);
-      await F.runTransaction(db, async tx => {
-        const s = await tx.get(r);
+      await F.runTransaction(db, async trn => {
+        const s = await trn.get(r);
         const list = (s.exists() && s.data()[f]) || [];
         list.push(entry);
         while (list.length > MAX_INFOS) list.shift();
-        tx.set(r, bereich === 'ort' ? { name: ortName, [f]: list } : { [f]: list }, { merge: true });
+        trn.set(r, bereich === 'ort' ? { name: ortName, [f]: list } : { [f]: list }, { merge: true });
       });
     },
     async removeInfo(w, bereich, ortId, m) {
       const r = infoRef(w, bereich, ortId), f = field(bereich);
       let n = 0;
-      await F.runTransaction(db, async tx => {
-        const s = await tx.get(r);
+      await F.runTransaction(db, async trn => {
+        const s = await trn.get(r);
         if (!s.exists()) return;
         const list = s.data()[f] || [];
         const keep = list.filter(e => !entryMatches(e, m));
         n = list.length - keep.length;
-        if (n) tx.update(r, { [f]: keep });
+        if (n) trn.update(r, { [f]: keep });
       });
       return n;
     }
@@ -664,7 +671,7 @@ async function initFirebase() {
   try {
     const conf = await fetchJson(fbConfigPath, fbBase);
     const root = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/`;
-    const [A, F] = await withTimeout(Promise.all([import(root + 'firebase-app.js'), import(root + 'firebase-firestore.js')]), 15000, 'Firebase laden');
+    const [A, F] = await withTimeout(Promise.all([import(root + 'firebase-app.js'), import(root + 'firebase-firestore.js')]), 15000, 'Loading Firebase');
     fbConf = conf.firebaseConfig || conf;
     const app = A.initializeApp(fbConf);
     fb = makeFirestoreStore(F.getFirestore(app), F);
@@ -682,22 +689,22 @@ async function diagnoseFirebase() {
   if (!fbConf) return '';
   const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(fbConf.projectId)}/databases/(default)/documents/welten/diagnose/allgemein/infos?key=${encodeURIComponent(fbConf.apiKey)}`;
   try {
-    const res = await withTimeout(fetch(url), 8000, 'Verbindungstest');
+    const res = await withTimeout(fetch(url), 8000, 'Connection test');
     if (res.ok) return '';
     const j = await res.json().catch(() => ({}));
     const err = j.error || {};
     const reasons = (err.details || []).map(d => d.reason).filter(Boolean).join(',');
     const msg = err.message || `HTTP ${res.status}`;
     const all = `${reasons} ${err.status || ''} ${msg}`;
-    if (/REFERER|REFERRER/i.test(all)) return `Der API-Schlüssel blockiert diese Seite (${location.origin}). Trage in der Google Cloud Console unter APIs & Dienste → Anmeldedaten → API-Schlüssel → „Websites“ die Adresse ${location.origin}/* ein (mit /* am Ende).`;
-    if (/API_KEY_SERVICE_BLOCKED|are blocked/i.test(all)) return 'Der API-Schlüssel erlaubt die Cloud Firestore API nicht. Füge sie unter „API-Einschränkungen“ des Schlüssels hinzu oder hebe die API-Einschränkung auf.';
-    if (/SERVICE_DISABLED|has not been used|is disabled/i.test(all)) return 'Die Cloud Firestore API ist nicht aktiviert. Lege in der Firebase-Konsole unter „Firestore Database“ eine Datenbank an.';
-    if (res.status === 404 && /database\b[^"]*does not exist/i.test(msg)) return 'Es gibt keine Firestore-Datenbank „(default)“. Lege sie in der Firebase-Konsole unter „Firestore Database“ an.';
+    if (/REFERER|REFERRER/i.test(all)) return `The API key blocks this page (${location.origin}). In the Google Cloud Console (APIs & Services → Credentials → your API key → Website restrictions) add this address.`;
+    if (/API_KEY_SERVICE_BLOCKED|are blocked/i.test(all)) return 'The API key does not allow the Cloud Firestore API. Add it under "API restrictions" of the key or remove the restriction.';
+    if (/SERVICE_DISABLED|has not been used|is disabled/i.test(all)) return 'The Cloud Firestore API is not enabled. Create a database in the Firebase console under "Firestore Database".';
+    if (res.status === 404 && /database\b[^"]*does not exist/i.test(msg)) return 'There is no Firestore database "(default)". Create it in the Firebase console under "Firestore Database".';
     if (res.status === 404) return '';   // Dokument existiert nicht: Verbindung und Regeln sind in Ordnung
-    if (res.status === 403 || /PERMISSION_DENIED/i.test(all)) return 'Die Firestore-Regeln verbieten den Zugriff. Prüfe unter Firestore → Regeln, ob der Pfad welten/{welt}/{document=**} Lesen und Schreiben erlaubt, und veröffentliche die Regeln.';
-    return `Firestore antwortet mit Fehler ${res.status}: ${msg}`;
+    if (res.status === 403 || /PERMISSION_DENIED/i.test(all)) return 'The Firestore rules forbid access. Check under Firestore → Rules that the path welten/{world}/{document=**} allows reading and writing.';
+    return `Firestore answered with error ${res.status}: ${msg}`;
   } catch (e) {
-    return 'Firestore ist nicht erreichbar: ' + e.message;
+    return 'Firestore is not reachable: ' + e.message;
   }
 }
 
@@ -715,7 +722,7 @@ function ago(ms) {
 
 // Liest bei JEDEM Zug: alle Spielerpositionen, allgemeine Infos und die Infos des aktuellen Ortes
 async function loadWorld() {
-  if (!fb) { world = { ...world, ok: false, fehler: 'Nicht mit Firebase verbunden.' }; renderWorld(); return; }
+  if (!fb) { world = { ...world, ok: false, fehler: 'Not connected to Firebase.' }; renderWorld(); return; }
   try {
     await withTimeout((async () => {
       const w = worldId(), id = meId();
@@ -728,18 +735,18 @@ async function loadWorld() {
       }
       const pl = await fb.readPlace(w, ps[id].ortId);
       world = { ok: true, fehler: '', ort: ps[id].ort, ortId: ps[id].ortId, players: ps, allgemein: ag, ortInfos: pl.infos };
-    })(), fbDown ? 3000 : 8000, 'Welt lesen');
+    })(), fbDown ? 3000 : 8000, 'Reading world');
     fbDown = false;
   } catch (e) {
     fbDown = true;                     // solange Firebase nicht antwortet, wartet jeder Zug nur kurz
     if (!fbDiag) fbDiag = await diagnoseFirebase();
-    world = { ...world, ok: false, fehler: fbDiag || ('Verbindung zu Firestore fehlgeschlagen: ' + e.message + '. Möglicherweise blockiert ein Werbeblocker oder das Netzwerk die Verbindung.') };
+    world = { ...world, ok: false, fehler: fbDiag || ('Connection to Firestore failed: ' + e.message + '. An ad blocker or the network may be blocking the connection.') };
   }
   renderWorld();
 }
 async function savePresence() {        // Charaktername, Level und Aktivität nach jedem Zug aktualisieren
   if (!fb || !world.ok) return;
-  try { await withTimeout(fb.setPlayer(worldId(), meId(), { name: player, charakter: ch.name, level: level(), zeit: Date.now() }), 6000, 'Speichern'); }
+  try { await withTimeout(fb.setPlayer(worldId(), meId(), { name: player, charakter: ch.name, level: level(), zeit: Date.now() }), 6000, 'Saving'); }
   catch (e) { /* nicht kritisch */ }
 }
 async function setStartPosition() {    // neues Spiel: Spieler beginnt am Startort
@@ -750,7 +757,7 @@ async function setStartPosition() {    // neues Spiel: Spieler beginnt am Starto
     await withTimeout((async () => {
       await fb.setPlace(w, id, cfg.startort);
       await fb.setPlayer(w, meId(), { name: player, charakter: ch.name, level: 1, ort: cfg.startort, ortId: id, zeit: Date.now() });
-    })(), 8000, 'Startposition');
+    })(), 8000, 'Start position');
   } catch (e) { /* loadWorld meldet Probleme */ }
 }
 
@@ -795,15 +802,15 @@ function renderWorld() {
       list.forEach(e => {
         const li = el('li', '', infoLine(e));
         const b = el('button', '', '×');
-        b.title = 'Info löschen';
-        b.setAttribute('aria-label', 'Info löschen');
+        b.title = tx('del_info');
+        b.setAttribute('aria-label', tx('del_info'));
         b.onclick = () => removeInfoUi(bereich, e);
         li.append(b);
         l.append(li);
       });
       body.append(l);
     };
-    infos('Allgemeine Infos', world.allgemein, 'allgemein');
+    infos(tx('general_infos'), world.allgemein, 'allgemein');
     infos(`${tx('infos_for')} „${world.ort}“`, world.ortInfos, 'ort');
   }
   const rb = el('button', '', tx('reload_world'));
@@ -813,12 +820,18 @@ function renderWorld() {
 async function removeInfoUi(bereich, e) {
   if (!fb || !confirm(tx('confirm_del') + '\n\n' + e.text)) return;
   try {
-    await withTimeout(fb.removeInfo(worldId(), bereich, world.ortId, { zeit: e.zeit, text: e.text }), 8000, 'Löschen');
+    await withTimeout(fb.removeInfo(worldId(), bereich, world.ortId, { zeit: e.zeit, text: e.text }), 8000, 'Deleting');
     await loadWorld();
   } catch (err) { setStatus(tx('del_fail') + err.message, true); }
 }
 
 /* ---------- Sprachausgabe ---------- */
+let voices = [];
+function loadVoices() { if ('speechSynthesis' in window) voices = speechSynthesis.getVoices(); }
+function pickVoice(lang) {             // erst exakt (zh-CN), dann gleiche Sprache (zh-HK, zh-TW …)
+  const norm = s => String(s).replace('_', '-').toLowerCase(), l = norm(lang);
+  return voices.find(v => norm(v.lang) === l) || voices.find(v => norm(v.lang).startsWith(l.slice(0, 2))) || null;
+}
 function speak(text, force, rate, lang) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
@@ -826,8 +839,8 @@ function speak(text, force, rate, lang) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang || (LANG === 'zh' ? 'zh-CN' : 'de-DE');
   if (rate) u.rate = rate;
-  const v = speechSynthesis.getVoices().find(v => v.lang.replace('_', '-').startsWith(u.lang.slice(0, 2)));
-  if (v) u.voice = v;
+  const voice = pickVoice(u.lang);
+  if (voice) u.voice = voice;
   speechSynthesis.speak(u);
 }
 function speechText(r) {
@@ -940,7 +953,7 @@ const TOOLS = {
     if (sk) detail.push(tx('d_skill', sk.name, skPart));
     if (sa) detail.push(sk ? tx('d_stat_half', sa.name, sa.wert, saPart) : tx('d_stat', sa.name, saPart));
     if (mod) detail.push(tx('d_mod', mod > 0, mod, a.modifikator_grund));
-    detail.push(tx('d_wurf', W, wurf, kritisch));
+    detail.push(tx('d_wurf', W, wurf, wurf === W ? tx('crit_win') : wurf === 1 ? tx('crit_fail') : null));
     detail.push(tx('d_sum', wurf, bonus, summe, erfolg));
     addEvent(tx('ev_dice', a.grund || label, erfolg, summe, diff), erfolg ? 'pos' : 'neg', detail);
     return { wurf, bonus, modifikator: mod, summe, schwierigkeit: diff, erfolg, kritisch, hinweis: 'Erzähle das Ergebnis ehrlich; berücksichtige passende Flaws.' };
@@ -1053,7 +1066,7 @@ const TOOLS = {
         await fb.setPlayer(w, meId(), { name: player, charakter: ch.name, level: level(), ort: name, ortId: id, zeit: Date.now() });
         const [ps, pl] = await Promise.all([fb.readPlayers(w), fb.readPlace(w, id)]);
         world.players = ps; world.ortInfos = pl.infos;
-      })(), 8000, 'Position speichern');
+      })(), 8000, 'Saving position');
     } catch (e) { return { fehler: e.message }; }
     world.ort = name; world.ortId = id;
     addEvent(tx('ev_pos', alt || '?', name), 'info');
@@ -1074,7 +1087,7 @@ const TOOLS = {
     if (!text) return { fehler: 'text fehlt.' };
     if ((bereich === 'ort' ? world.ortInfos : world.allgemein).some(e => e.text === text)) return { ok: true, bereich, hinweis: 'Diese Info steht schon im Speicher.' };
     const entry = { text, von: player, charakter: ch.name, zeit: Date.now() };
-    try { await withTimeout(fb.addInfo(worldId(), bereich, world.ortId, entry, world.ort), 8000, 'Info speichern'); }
+    try { await withTimeout(fb.addInfo(worldId(), bereich, world.ortId, entry, world.ort), 8000, 'Saving info'); }
     catch (e) { return { fehler: e.message }; }
     const list = bereich === 'ort' ? world.ortInfos : world.allgemein;
     list.push(entry);
@@ -1090,7 +1103,7 @@ const TOOLS = {
     const text = String(a.text || '').trim();
     if (!bereich || !text) return { fehler: 'bereich ("ort" oder "allgemein") und text sind nötig.' };
     let n;
-    try { n = await withTimeout(fb.removeInfo(worldId(), bereich, world.ortId, { contains: text }), 8000, 'Info entfernen'); }
+    try { n = await withTimeout(fb.removeInfo(worldId(), bereich, world.ortId, { contains: text }), 8000, 'Removing info'); }
     catch (e) { return { fehler: e.message }; }
     if (!n) return { fehler: 'Keine passende Info gefunden.' };
     const f = bereich === 'ort' ? 'ortInfos' : 'allgemein';
@@ -1248,9 +1261,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // Eine Anfrage an Gemini. Bei Zeitüberschreitung, Netzproblemen, überlasteten Servern (429/5xx) oder leerer Antwort
 // versucht das Spiel es selbst mehrmals erneut. Falsche Schlüssel oder Anfragen (400/401/403) brechen sofort ab.
-async function callGemini(url, key, body) {
+async function callGemini(url, key, body, myRun) {
   let lastErr = null;
   for (let attempt = 1; attempt <= API_ATTEMPTS; attempt++) {
+    if (myRun !== runToken) throw new Error('cancelled');   // Spiel wurde inzwischen neu gestartet
     if (attempt > 1) {
       setStatus(tx('status_retry', attempt, lastErr.message, API_ATTEMPTS));
       await sleep(API_BACKOFF_MS * 2 ** (attempt - 2));
@@ -1284,8 +1298,8 @@ async function callGemini(url, key, body) {
   throw new Error(tx('ai_gave_up', API_ATTEMPTS, lastErr.message));
 }
 
-async function runTurn(prompt) {
-  const key = localStorage.getItem(LS_KEY);
+async function runTurn(prompt, myRun) {
+  const key = lsGet(LS_KEY);
   if (!key) throw new Error('Bitte zuerst einen API-Key speichern.');
   const model = cfg.model || DEFAULT_MODEL;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
@@ -1299,7 +1313,8 @@ async function runTurn(prompt) {
       tools: [{ functionDeclarations }],
       toolConfig: { functionCallingConfig: { mode: 'ANY' } },
       generationConfig: { temperature: cfg.temperature }
-    });
+    }, myRun);
+    if (myRun !== runToken) throw new Error('cancelled');
     const content = data.candidates[0].content;
     const calls = content.parts.filter(p => p.functionCall);
     contents.push(content);   // unverändert zurückgeben (inkl. evtl. Gedanken-Signaturen)
@@ -1383,13 +1398,15 @@ function renderPanels() {
     xrow.append(el('small', 'up', tx('up_open', st.punkte.stat, st.punkte.skill)));
   rp.append(xrow);
 
-  valueRows($('pStats'), st.stats);
-  valueRows($('pSkills'), st.skills);
+  [['pStats', st.stats], ['pSkills', st.skills]].forEach(([id, list]) => {   // leere Listen (z. B. bei Peppa) ausblenden
+    valueRows($(id), list);
+    $(id).closest('.card').style.display = list.length ? '' : 'none';
+  });
 
-  const fb = $('pFlaws');
-  fb.innerHTML = '';
-  fb.closest('.card').style.display = st.flaws.length ? '' : 'none';   // Flaws sind optional: leer = nichts anzeigen
-  st.flaws.forEach(f => fb.append(el('p', 'flaw', f)));
+  const flawBox = $('pFlaws');
+  flawBox.innerHTML = '';
+  flawBox.closest('.card').style.display = st.flaws.length ? '' : 'none';   // Flaws sind optional: leer = nichts anzeigen
+  st.flaws.forEach(f => flawBox.append(el('p', 'flaw', f)));
 
   const ib = $('pInv');
   ib.innerHTML = '';
@@ -1563,7 +1580,7 @@ function lock(on) {
 async function restorePosition(snap) {
   if (!snap || !fb || !world.ok || world.ortId === snap.ortId) return;
   try {
-    await withTimeout(fb.setPlayer(worldId(), meId(), { name: player, charakter: ch.name, level: level(), ort: snap.ort, ortId: snap.ortId, zeit: Date.now() }), 6000, 'Position zurücksetzen');
+    await withTimeout(fb.setPlayer(worldId(), meId(), { name: player, charakter: ch.name, level: level(), ort: snap.ort, ortId: snap.ortId, zeit: Date.now() }), 6000, 'Resetting position');
     world.ort = snap.ort; world.ortId = snap.ortId;
     renderWorld();
   } catch (e) { /* nicht kritisch */ }
@@ -1572,6 +1589,7 @@ async function restorePosition(snap) {
 // Ein Zug ist eine Einheit: Klappt er nicht, wird alles zurückgesetzt, was die KI in diesem Versuch schon geändert hat
 // (XP, Ressourcen, Gegenstände, Position). So zählt beim erneuten Versuch alles nur einmal.
 async function step(choice) {
+  const myRun = runToken;
   $('options').innerHTML = '';
   lock(true);
   turnEvents = []; turnXpGiven = false;
@@ -1580,10 +1598,11 @@ async function step(choice) {
   try {
     setStatus(tx('status_read_world'));
     await loadWorld();                 // Positionen und Infos werden bei jedem Zug frisch gelesen
+    if (myRun !== runToken) return;
     posSnap = world.ok ? { ort: world.ort, ortId: world.ortId } : null;
     const t = buildTurn(choice);
     setStatus(t.full ? tx('status_thinking_full') : tx('status_thinking'));
-    out = await runTurn(t.prompt);
+    out = await runTurn(t.prompt, myRun);
     out.events = turnEvents.slice();
     addMemory(out, choice);
     // Erfolg: Unterhaltung der KI fortschreiben. Nach memoryresend Zügen wird sie gelöscht,
@@ -1596,6 +1615,7 @@ async function step(choice) {
     turn++;
     current = out;
   } catch (e) {
+    if (myRun !== runToken) return;    // Spiel wurde inzwischen neu gestartet oder geladen: nichts mehr anfassen
     st = JSON.parse(snap);
     turnEvents = []; turnXpGiven = false;
     await restorePosition(posSnap);
@@ -1675,7 +1695,7 @@ function checkQuiz() {
     quizItem = null;                     // weitere Klicks während der kurzen Pause ignorieren
     $('quizInput').disabled = true; $('quizGo').disabled = true;
     setQuizFeedback(tx('quiz_ok'), 'ok');
-    setTimeout(() => { resetQuiz(); go(); }, 800);
+    quizTimer = setTimeout(() => { resetQuiz(); go(); }, 800);
   } else {
     quizTries++;
     setQuizFeedback(quizTries >= 3 ? tx('quiz_reveal', upper(quizItem.wort)) : tx('quiz_wrong'), 'wrong');
@@ -1684,10 +1704,12 @@ function checkQuiz() {
   }
 }
 function resetQuiz() {                   // Abfrage beenden und die normale Auswahl wieder zeigen
+  const wasActive = quizActive;
+  clearTimeout(quizTimer);
   quizActive = false; quizItem = null; quizAfter = null;
   $('quiz').hidden = true; $('options').hidden = false;
   $('freeRow').hidden = !cfg || !cfg.freitext || !!(st && st.gameover);
-  if (st) renderPanels();
+  if (wasActive && st) renderPanels();
 }
 $('quizGo').onclick = checkQuiz;
 $('quizReplay').onclick = quizSpeak;
@@ -1754,7 +1776,8 @@ function showGame() {
 
 async function startGame() {
   if (!cfg || !chars.length) return setSetupStatus('The game is not loaded yet.', true);
-  if (!localStorage.getItem(LS_KEY)) { alert('Please save your Gemini API key first.'); return; }
+  runToken++; busy = false;
+  if (!lsGet(LS_KEY)) { alert('Please save your Gemini API key first.'); return; }
   await ensureMemDir(true);            // Ordner für die Erinnerungsdatei (nur wenn im Spiel eingestellt)
   speechSynthesis.cancel();
   $('log').innerHTML = '';
@@ -1797,12 +1820,13 @@ function saveProgress() {
 }
 async function resumeGame() {
   if (!cfg) return;
-  if (!localStorage.getItem(LS_KEY)) { alert('Please save your Gemini API key first.'); return; }
+  if (!lsGet(LS_KEY)) { alert('Please save your Gemini API key first.'); return; }
   await ensureMemDir(true);
   try {
     const d = JSON.parse(localStorage.getItem(saveSlot()));
     if (d.v !== SAVE_VERSION || !d.st || !d.ch) throw new Error('This save is from an older version.');
     speechSynthesis.cancel();
+    runToken++; busy = false;
     memory = d.memory; turn = d.turn; current = d.current; st = d.st; ch = d.ch;
     choiceCount = d.choiceCount || 0;
     LANG = d.lang === 'zh' ? 'zh' : (d.lang === 'de' ? 'de' : (/^zh/i.test(cfg.sprache || '') ? 'zh' : 'de'));
@@ -1826,19 +1850,18 @@ async function resumeGame() {
 }
 
 /* ---------- UI ---------- */
-$('key').value = localStorage.getItem(LS_KEY) || '';
+$('key').value = lsGet(LS_KEY) || '';
 $('saveKey').onclick = () => {
   const k = $('key').value.trim();
   if (!k) return;
-  localStorage.setItem(LS_KEY, k);
-  alert('Key saved.');
+  alert(lsSet(LS_KEY, k) ? 'Key saved.' : 'The browser blocks storage – the key could not be saved.');
 };
-$('clearKey').onclick = () => { localStorage.removeItem(LS_KEY); $('key').value = ''; };
+$('clearKey').onclick = () => { lsDel(LS_KEY); $('key').value = ''; };
 $('start').onclick = startGame;
 $('gameSel').onchange = selectGame;
 $('playerSel').onchange = () => {
   player = $('playerSel').value;
-  try { localStorage.setItem('adventure_player', player); } catch (e) { /* egal */ }
+  lsSet('adventure_player', player);
   $('resume').hidden = !hasSave();
 };
 $('charSel').onchange = showCharInfo;
@@ -1851,6 +1874,7 @@ $('memDir').onclick = async () => {
 $('resume').onclick = resumeGame;
 $('restart').onclick = () => {
   speechSynthesis.cancel();
+  runToken++; busy = false;          // laufende Anfrage verwerfen
   resetQuiz();
   $('game').hidden = true;
   $('setup').hidden = false;
@@ -1875,7 +1899,8 @@ $('file').onchange = async e => {
     alert(games.length + ' game(s) loaded.');
   } catch (err) { alert('Invalid JSON file: ' + err.message); }
 };
-if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
+loadVoices();
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = loadVoices;
 
 loadConfig().catch(e => {
   setSetupStatus(e.message + ' Tip: loading does not work via file:// – use a web server.', true);
