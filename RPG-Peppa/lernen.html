@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -99,38 +99,39 @@
   .quiz-feedback { min-height:1.5em; margin:10px 0 0; font-family:system-ui, sans-serif; }
   .quiz-feedback.ok { color:var(--ok); }
   .quiz-feedback.wrong { color:var(--err); }
+  :lang(zh) { font-family:"Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif; }
 </style>
 </head>
 <body>
 <main>
-  <h1 id="title">Lern-Rollenspiel</h1>
+  <h1 id="title">Learning Role-Play</h1>
 
   <section id="setup" class="card">
-    <label for="key">Gemini API-Key (wird nur lokal in deinem Browser gespeichert)</label>
+    <label for="key">Gemini API key (saved only in your browser)</label>
     <input id="key" type="password" autocomplete="off" placeholder="AIza...">
     <div class="row">
-      <button id="saveKey">Key speichern</button>
-      <button id="clearKey">Key löschen</button>
+      <button id="saveKey">Save key</button>
+      <button id="clearKey">Delete key</button>
     </div>
-    <label for="playerSel">Spieler</label>
+    <label for="playerSel">Player</label>
     <select id="playerSel"></select>
-    <label for="gameSel">Spiel auswählen</label>
+    <label for="gameSel">Choose game</label>
     <select id="gameSel"></select>
     <div id="gameInfo" class="info"></div>
     <div id="vokInfo" class="info"></div>
     <div id="charRow">
-      <label for="charSel">Charakter auswählen</label>
+      <label for="charSel">Choose character</label>
       <select id="charSel"></select>
     </div>
     <div id="charInfo" class="info"></div>
     <div id="memRow" hidden>
-      <label>Erinnerungsdatei auf diesem Gerät</label>
-      <div class="row"><button id="memDir" type="button">📁 Ordner wählen</button></div>
+      <label>Memory file on this device</label>
+      <div class="row"><button id="memDir" type="button">📁 Choose folder</button></div>
       <div id="memInfo" class="info"></div>
     </div>
-    <label for="file">Weitere Spiele laden (JSON-Datei mit eingebetteten Regeln, Welt und Charakteren)</label>
+    <label for="file">Load more games (JSON file with embedded rules, world and characters)</label>
     <input id="file" type="file" accept=".json,application/json">
-    <div class="row"><button id="start" disabled>Neues Spiel starten</button><button id="resume" hidden>Gespeicherten Stand laden</button></div>
+    <div class="row"><button id="start" disabled>Start new game</button><button id="resume" hidden>Load saved game</button></div>
     <div id="setupStatus"></div>
     <div id="fbInfo" class="info"></div>
   </section>
@@ -176,10 +177,10 @@
       </div>
 
       <aside class="side">
-        <section class="card"><h2>Stats</h2><div id="pStats"></div></section>
-        <section class="card"><h2>Skills</h2><div id="pSkills"></div></section>
-        <section class="card"><h2>Flaws</h2><div id="pFlaws"></div></section>
-        <section class="card"><h2>Inventar</h2><div id="pInv"></div></section>
+        <section class="card"><h2 id="hStats">Stats</h2><div id="pStats"></div></section>
+        <section class="card"><h2 id="hSkills">Skills</h2><div id="pSkills"></div></section>
+        <section class="card"><h2 id="hFlaws">Flaws</h2><div id="pFlaws"></div></section>
+        <section class="card"><h2 id="hInv">Inventar</h2><div id="pInv"></div></section>
       </aside>
 
     </div>
@@ -211,11 +212,151 @@ let busy = false;
 let muted = false;
 let levelupFlag = false;   // wurde in dieser Funktionsrunde ein Level erreicht?
 let loadToken = 0;
-let vokabeln = [];    // Wörter und Sätze aus Vokabel.json
+let vokabeln = [];
+let vokSprache = null;   // Sprache der Vokabelliste (z. B. "de-DE"), null = Sprache der Spieloberfläche    // Wörter und Sätze aus Vokabel.json
 let vokBag = [];      // gemischter Vorrat: jedes Wort kommt dran, bevor sich eines wiederholt
 let vokGlobal = '';   // optionaler Pfad aus game.json ("vokabeln")
 let choiceCount = 0;  // Anzahl bisheriger Auswahlen des Spielers (jede zweite löst die Wort-Abfrage aus)
 let quizActive = false, quizItem = null, quizTries = 0, quizAfter = null;
+let LANG = 'de';     // Sprache der Spielausgabe ('de' oder 'zh'); das Hauptmenü ist immer Englisch
+const TX = {
+  de: {
+    status_thinking: 'Der Erzähler denkt nach …',
+    status_thinking_full: 'Der Erzähler denkt nach … (Spielregeln und Gedächtnis werden neu gesendet)',
+    status_read_world: 'Lese die gemeinsame Welt …',
+    status_connect_world: 'Verbinde mit der Welt …',
+    status_retry: (a, m, n) => `Die KI antwortet nicht (${m}) – neuer Versuch ${a} von ${n} …`,
+    ai_gave_up: (n, m) => `Die KI hat nach ${n} Versuchen nicht geantwortet: ${m}.`,
+    no_conn: 'keine Verbindung zur KI',
+    timeout: s => `keine Antwort nach ${s} s`,
+    err: 'Fehler: ',
+    err_reset: ' Der Zug wurde zurückgesetzt, beim nächsten Versuch zählt alles nur einmal.',
+    retry_btn: 'Nochmal versuchen',
+    quiz_title: '🔊 Höre gut zu und schreibe das Wort!',
+    quiz_replay: '🔁 Nochmal hören',
+    quiz_go: 'Prüfen',
+    quiz_aria: 'Das Wort eintippen',
+    quiz_letters: n => `${n} Buchstaben: `,
+    quiz_ok: 'Richtig! Sehr gut! 🎉',
+    quiz_wrong: 'Das war noch nicht richtig. Hör nochmal genau hin!',
+    quiz_reveal: w => `Schau genau hin: Das Wort heißt ${w}.`,
+    free_ph: 'Eigene Aktion eingeben …', free_go: 'Los', world_sum: '📍 Welt',
+    stats: 'Stats', skills: 'Skills', flaws: 'Flaws', inv: 'Inventar',
+    mute_on: '🔊 Sprache an', mute_off: '🔇 Sprache aus', replay: '🔁 Nochmal vorlesen',
+    save: '💾 Fortschritt speichern', restart: 'Neu starten',
+    opt_speak: 'Option vorlesen', opt_speak_aria: n => `Option ${n} vorlesen`,
+    opt_word: 'Option', opts_word: 'Deine Optionen',
+    end: 'Das Abenteuer ist zu Ende. Über „Neu starten“ beginnst du eine neue Geschichte.',
+    use: 'Benutzen', empty: 'Leer', use_action: n => `Ich benutze: ${n}`,
+    level_lbl: n => `⭐ Level ${n}`, xp_to_next: (x, n) => `noch ${x} XP bis Level ${n}`,
+    up_open: (s, k) => `✨ Aufstieg offen: ${s} Stat-, ${k} Skillpunkte`,
+    ev_summary: n => `📋 Würfe & Änderungen (${n})`,
+    ev_level: n => `🎉 Level ${n} erreicht!`,
+    ev_up_open: (s, k) => `Aufstieg offen: ${s} Statpunkt(e), ${k} Skillpunkt(e)`,
+    ev_max: (r, i, n) => `${r}-Maximum +${i} (jetzt ${n})`, ev_refill: r => `${r} aufgefüllt`,
+    d_diff: d => `Schwierigkeit: ${d}`, d_skill: (n, v) => `Skill ${n}: +${v}`,
+    d_stat_half: (n, w, v) => `Stat ${n} ${w}: +${v} (halber Wert)`, d_stat: (n, v) => `Stat ${n}: +${v}`,
+    d_mod: (p, m, g) => `${p ? 'Bonus' : 'Malus'}: ${p ? '+' : ''}${m}${g ? ' (' + g + ')' : ''}`,
+    d_wurf: (W, w, k) => `Wurf W${W}: ${w}${k ? ' – ' + k : ''}`,
+    d_sum: (w, b, s, e) => `Summe: ${w} + ${b} = ${s} → ${e ? 'Erfolg' : 'Fehlschlag'}`,
+    ev_dice: (t, e, s, d) => `🎲 ${t}: ${e ? 'Erfolg' : 'Fehlschlag'} (${s} gegen ${d})`,
+    ev_xp: (m, g) => `⭐ +${m} XP${g ? ' (' + g + ')' : ''}`,
+    ev_zero: r => `⚠ ${r} ist auf 0 gefallen!`,
+    ev_aufstieg_wert: (n, a, b, L) => `📈 ${n}: ${a} → ${b} (Aufstieg Level ${L})`,
+    ev_aufstieg_done: L => `✅ Levelaufstieg ${L} abgeschlossen`,
+    ev_pos: (a, n) => `📍 Position: ${a} → ${n}`,
+    ev_info: (o, t) => `📝 Info (${o}): ${t}`, ev_info_del: (n, o) => `🗑 ${n} Info(s) entfernt (${o})`,
+    ev_item_add: (n, x) => `🎒 + ${n}× ${x}`, ev_item_del: (n, x) => `🎒 − ${n}× ${x}`,
+    ev_wert: (n, a, b, g) => `📈 ${n}: ${a} → ${b}${g ? ' (' + g + ')' : ''}`,
+    ev_flaw_del: f => `🩹 Flaw entfernt: ${f}`, ev_flaw_new: t => `🩸 Neuer Flaw: ${t}`,
+    general: 'allgemein',
+    save_ok: 'Fortschritt gespeichert ✔', save_nothing: 'Noch nichts zu speichern.',
+    save_busy: 'Bitte warten, bis der Erzähler fertig ist.', save_fail: 'Speichern fehlgeschlagen: ',
+    mem_write_fail: 'Erinnerungsdatei konnte nicht geschrieben werden: ', state_loaded: 'Stand geladen.',
+    del_fail: 'Löschen fehlgeschlagen: ', world_none: '📍 Welt nicht verfügbar',
+    world_no_conn: 'Kein Welt-Speicher verbunden. Das Spiel läuft ohne gemeinsame Welt.',
+    here_also: 'Hier auch: ', alone_here: 'allein hier', as: 'als', players_positions: 'Spieler und Positionen',
+    you: ' – du', none: '(keine)', infos_for: 'Infos zu', reload_world: '🔄 Welt neu laden',
+    confirm_del: 'Diese Info löschen?', ago_now: 'gerade eben aktiv',
+    ago_min: m => `zuletzt aktiv vor ${m} Min.`, ago_h: h => `zuletzt aktiv vor ${h} Std.`,
+    ago_d: d => `zuletzt aktiv vor ${d} Tagen`, from: ' (von ', from_close: ')'
+  },
+  zh: {
+    status_thinking: '讲述者正在思考……',
+    status_thinking_full: '讲述者正在思考……（规则和记忆会重新发送）',
+    status_read_world: '正在读取共同的世界……',
+    status_connect_world: '正在连接世界……',
+    status_retry: (a, m, n) => `AI 没有回应（${m}）– 第 ${a} 次尝试，共 ${n} 次……`,
+    ai_gave_up: (n, m) => `AI 在 ${n} 次尝试后仍无回应：${m}。`,
+    no_conn: '无法连接 AI',
+    timeout: s => `${s} 秒内没有回应`,
+    err: '错误：',
+    err_reset: ' 本回合已撤销，下次尝试时每项只计算一次。',
+    retry_btn: '再试一次',
+    quiz_title: '🔊 仔细听，然后写出这个单词！',
+    quiz_replay: '🔁 再听一次',
+    quiz_go: '检查',
+    quiz_aria: '输入单词',
+    quiz_letters: n => `${n} 个字母：`,
+    quiz_ok: '答对了！真棒！🎉',
+    quiz_wrong: '还不对，再仔细听一听！',
+    quiz_reveal: w => `仔细看看：这个单词是 ${w}。`,
+    free_ph: '输入你自己的行动……', free_go: '开始', world_sum: '📍 世界',
+    stats: '属性', skills: '技能', flaws: '缺点', inv: '物品',
+    mute_on: '🔊 朗读开', mute_off: '🔇 朗读关', replay: '🔁 再读一遍',
+    save: '💾 保存进度', restart: '重新开始',
+    opt_speak: '朗读选项', opt_speak_aria: n => `朗读选项 ${n}`,
+    opt_word: '选项', opts_word: '你的选项',
+    end: '冒险结束了。点击“重新开始”，就能开始一个新的故事。',
+    use: '使用', empty: '空', use_action: n => `我使用：${n}`,
+    level_lbl: n => `⭐ 等级 ${n}`, xp_to_next: (x, n) => `还差 ${x} XP 升到 ${n} 级`,
+    up_open: (s, k) => `✨ 可以升级：${s} 个属性点，${k} 个技能点`,
+    ev_summary: n => `📋 骰子与变化（${n}）`,
+    ev_level: n => `🎉 达到 ${n} 级！`,
+    ev_up_open: (s, k) => `可升级：${s} 个属性点，${k} 个技能点`,
+    ev_max: (r, i, n) => `${r} 上限 +${i}（现在 ${n}）`, ev_refill: r => `${r} 已补满`,
+    d_diff: d => `难度：${d}`, d_skill: (n, v) => `技能 ${n}：+${v}`,
+    d_stat_half: (n, w, v) => `属性 ${n} ${w}：+${v}（一半）`, d_stat: (n, v) => `属性 ${n}：+${v}`,
+    d_mod: (p, m, g) => `${p ? '加成' : '减值'}：${p ? '+' : ''}${m}${g ? '（' + g + '）' : ''}`,
+    d_wurf: (W, w, k) => `掷骰 W${W}：${w}${k ? ' – ' + k : ''}`,
+    d_sum: (w, b, s, e) => `总和：${w} + ${b} = ${s} → ${e ? '成功' : '失败'}`,
+    ev_dice: (t, e, s, d) => `🎲 ${t}：${e ? '成功' : '失败'}（${s} 对 ${d}）`,
+    ev_xp: (m, g) => `⭐ +${m} XP${g ? '（' + g + '）' : ''}`,
+    ev_zero: r => `⚠ ${r} 降到了 0！`,
+    ev_aufstieg_wert: (n, a, b, L) => `📈 ${n}：${a} → ${b}（升到 ${L} 级时）`,
+    ev_aufstieg_done: L => `✅ 升到 ${L} 级已完成`,
+    ev_pos: (a, n) => `📍 位置：${a} → ${n}`,
+    ev_info: (o, t) => `📝 信息（${o}）：${t}`, ev_info_del: (n, o) => `🗑 已删除 ${n} 条信息（${o}）`,
+    ev_item_add: (n, x) => `🎒 + ${n}× ${x}`, ev_item_del: (n, x) => `🎒 − ${n}× ${x}`,
+    ev_wert: (n, a, b, g) => `📈 ${n}：${a} → ${b}${g ? '（' + g + '）' : ''}`,
+    ev_flaw_del: f => `🩹 缺点已移除：${f}`, ev_flaw_new: t => `🩸 新缺点：${t}`,
+    general: '通用',
+    save_ok: '进度已保存 ✔', save_nothing: '还没有可保存的内容。',
+    save_busy: '请等讲述者讲完再保存。', save_fail: '保存失败：',
+    mem_write_fail: '无法写入记忆文件：', state_loaded: '已读取进度。',
+    del_fail: '删除失败：', world_none: '📍 世界不可用',
+    world_no_conn: '未连接世界存储。这个游戏在没有共同世界的情况下运行。',
+    here_also: '这里还有：', alone_here: '只有你在这里', as: '扮演', players_positions: '玩家与位置',
+    you: ' – 你', none: '（无）', infos_for: '关于', reload_world: '🔄 重新加载世界',
+    confirm_del: '删除这条信息吗？', ago_now: '刚刚在线',
+    ago_min: m => `${m} 分钟前在线`, ago_h: h => `${h} 小时前在线`,
+    ago_d: d => `${d} 天前在线`, from: ' （来自 ', from_close: '）'
+  }
+};
+const tx = (k, ...a) => { const v = (TX[LANG] || {})[k] ?? TX.de[k] ?? k; return typeof v === 'function' ? v(...a) : v; };
+// Setzt die Texte der Spieloberfläche auf die gewählte Sprache
+function applyGameLang() {
+  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : 'de';
+  const set = (id, k) => { const e = document.getElementById(id); if (e) e.textContent = tx(k); };
+  set('worldSum', 'world_sum'); set('hStats', 'stats'); set('hSkills', 'skills');
+  set('hFlaws', 'flaws'); set('hInv', 'inv'); set('freeGo', 'free_go'); set('quizReplay', 'quiz_replay');
+  set('quizGo', 'quiz_go'); set('save', 'save'); set('restart', 'restart'); set('replay', 'replay');
+  document.getElementById('free').placeholder = tx('free_ph');
+  document.getElementById('quizInput').setAttribute('aria-label', tx('quiz_aria'));
+  const qt = document.querySelector('.quiz-title'); if (qt) qt.textContent = tx('quiz_title');
+  document.getElementById('mute').textContent = muted ? tx('mute_off') : tx('mute_on');
+}
+
 let aiHistory = [];   // "KI-internes Gedächtnis": Unterhaltung, die das Spiel verwaltet und bei jeder Anfrage mitschickt
 let aiTurns = 0;      // Züge seit der letzten vollständigen Übertragung (Regeln, Welt, Gedächtnis)
 let turnXpGiven = false;   // XP gibt es pro Zug nur einmal
@@ -297,7 +438,7 @@ function normRegeln(obj) {
 }
 function normWelt(obj) {
   const o = lowerKeys(obj);
-  if (!o.instructions || !o.startconditions) throw new Error('Die Welt-Datei braucht "instructions" und "startconditions".');
+  if (!o.instructions || !o.startconditions) throw new Error('The world file needs "instructions" and "startconditions".');
   const orte = toList(o.orte).filter(i => i.name).map(i => ({ name: i.name, beschreibung: i.beschreibung || (typeof i.wert === 'string' ? i.wert : '') }));
   return {
     sprache: o.sprache || 'de-DE', instructions: o.instructions, startconditions: o.startconditions, freitext: o.freitext !== false,
@@ -327,13 +468,13 @@ function parseIndex(data) {
   const arr = Array.isArray(data) ? data : (data.spiele || data.games || [data]);
   return arr.map(g0 => {
     const g = lowerKeys(g0);
-    if (!g.regeln || !g.welt || !g.charaktere) throw new Error(`Spiel "${g.titel || '?'}": "regeln", "welt" und "charaktere" fehlen.`);
+    if (!g.regeln || !g.welt || !g.charaktere) throw new Error(`Game "${g.titel || '?'}": "regeln", "welt" and "charaktere" are missing.`);
     return g;
   });
 }
 async function fetchJson(path, base) {
   const res = await fetch(new URL(path, base), { cache: 'no-store' });
-  if (!res.ok) throw new Error(`Konnte ${path} nicht laden (HTTP ${res.status}).`);
+  if (!res.ok) throw new Error(`Could not load ${path} (HTTP ${res.status}).`);
   return res.json();
 }
 const part = (x, base) => typeof x === 'string' ? fetchJson(x, base) : Promise.resolve(x);
@@ -386,15 +527,17 @@ async function selectGame() {
   if (!g) return;
   const token = ++loadToken;
   $('start').disabled = true;
-  setSetupStatus('Lade Spiel …');
+  setSetupStatus('Loading game …');
   try {
-    const [r, w, c, v] = await Promise.all([part(g.regeln, g._base), part(g.welt, g._base), part(g.charaktere, g._base), loadVokabeln(g)]);
+    const [r, w, c] = await Promise.all([part(g.regeln, g._base), part(g.welt, g._base), part(g.charaktere, g._base)]);
+    const v = await loadVokabeln(g, lowerKeys(w));
     if (token !== loadToken) return;
-    vokabeln = v.liste; vokBag = [];
+    vokabeln = v.liste; vokSprache = v.sprache; vokBag = [];
     $('vokInfo').textContent = v.info;
     const newCfg = { titel: g.titel || g.title || 'Spiel', beschreibung: g.beschreibung || '', ...normRegeln(r), ...normWelt(w) };
     const newChars = normChars(c);
     cfg = newCfg; chars = newChars;
+    LANG = /^zh/i.test(cfg.sprache || '') ? 'zh' : 'de';   // Sprache steht in der Welt-Datei ("sprache")
     $('title').textContent = cfg.titel;
     document.title = cfg.titel;
     $('gameInfo').textContent = cfg.beschreibung;
@@ -411,7 +554,7 @@ async function selectGame() {
     if (token !== loadToken) return;
     cfg = null; chars = [];
     $('resume').hidden = true;
-    setSetupStatus('Fehler beim Laden: ' + e.message, true);
+    setSetupStatus('Loading error: ' + e.message, true);
   }
 }
 /* ---------- Vokabeln (Wort-Abfrage) ---------- */
@@ -434,25 +577,35 @@ function normVokabeln(data) {
   const strs = x => (Array.isArray(x) ? x : [x]).map(s => String(s ?? '').trim()).filter(Boolean);
   const out = [];
   arr.forEach(i => {
-    let wort = '', saetze = [];
+    let wort = '', saetze = [], saetze_zh = [];
     if (typeof i === 'string') wort = i.trim();
     else if (i && typeof i === 'object') {
       const o = lowerKeys(i);
       wort = String(o.wort ?? o.word ?? o.vokabel ?? '').trim();
       saetze = strs(o.satz ?? o.saetze ?? o.sätze ?? o.sentence ?? o.sentences ?? []);
+      saetze_zh = strs(o.satz_zh ?? o.satz_chinesisch ?? []);
     }
-    if (wort) out.push({ wort, saetze });
+    if (wort) out.push({ wort, saetze, saetze_zh });
   });
   return out;
 }
-async function loadVokabeln(g) {         // wirft nie: bei Problemen kommen ein paar eingebaute Wörter zum Einsatz
-  const path = g.vokabeln || vokGlobal || 'Vokabel.json';
+// Vokabellisten: Vorrang hat die RPG-Welt (peppa_welt.json: "vokabeln"), dann game.json (Spiel), dann global, dann Vokabel.json.
+// Der Wert darf sein: ein Dateipfad, eine Liste von Dateipfaden (werden zusammengefügt) oder die Liste direkt eingebettet.
+// Wirft nie: bei Problemen kommen ein paar eingebaute Wörter zum Einsatz.
+async function loadVokabeln(g, welt) {
+  const src0 = g.vokabeln || (welt && welt.vokabeln) || vokGlobal || 'Vokabel.json';
+  const label = typeof src0 === 'string' ? src0 : 'the world file';
   try {
-    const list = normVokabeln(await fetchJson(path, g._base));
-    if (!list.length) throw new Error('Die Datei enthält keine Wörter.');
-    return { liste: list, info: `📚 ${list.length} Wörter aus ${path} geladen.` };
+    const parts = typeof src0 === 'string' ? [await fetchJson(src0, g._base)]
+      : (Array.isArray(src0) && src0.length && src0.every(x => typeof x === 'string'))
+        ? await Promise.all(src0.map(path => fetchJson(path, g._base)))
+        : [src0];
+    const list = parts.flatMap(normVokabeln);
+    if (!list.length) throw new Error('The file contains no words.');
+    const sprache = parts.map(x => x && !Array.isArray(x) && typeof x === 'object' ? x.sprache : null).find(Boolean) || null;
+    return { liste: list, sprache, info: `📚 ${list.length} words loaded from ${label}.` };
   } catch (e) {
-    return { liste: normVokabeln(DEFAULT_VOK), info: `⚠ ${path} konnte nicht gelesen werden (${e.message}). Es werden ein paar eingebaute Wörter verwendet.` };
+    return { liste: normVokabeln(DEFAULT_VOK), sprache: null, info: `⚠ ${label} could not be read (${e.message}). A few built-in words are used.` };
   }
 }
 
@@ -506,8 +659,8 @@ function makeFirestoreStore(db, F) {
 }
 async function initFirebase() {
   const info = $('fbInfo');
-  if (!fbConfigPath) { info.textContent = 'Kein Welt-Speicher (Firebase) eingerichtet: Das Spiel läuft ohne gemeinsame Welt.'; return; }
-  info.textContent = 'Verbinde mit dem Welt-Speicher …';
+  if (!fbConfigPath) { info.textContent = 'No shared world storage (Firebase) set up: the game runs without a shared world.'; return; }
+  info.textContent = 'Connecting to world storage …';
   try {
     const conf = await fetchJson(fbConfigPath, fbBase);
     const root = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/`;
@@ -515,12 +668,12 @@ async function initFirebase() {
     fbConf = conf.firebaseConfig || conf;
     const app = A.initializeApp(fbConf);
     fb = makeFirestoreStore(F.getFirestore(app), F);
-    info.textContent = 'Prüfe die Verbindung zu Firestore …';
+    info.textContent = 'Checking the Firestore connection …';
     fbDiag = await diagnoseFirebase();
-    info.textContent = fbDiag ? '🔴 ' + fbDiag : '🟢 Welt-Speicher bereit (Firebase).';
+    info.textContent = fbDiag ? '🔴 ' + fbDiag : '🟢 World storage ready (Firebase).';
   } catch (e) {
     fb = null;
-    info.textContent = '🔴 Welt-Speicher nicht verfügbar: ' + e.message + ' – das Spiel läuft ohne gemeinsame Welt.';
+    info.textContent = '🔴 World storage unavailable: ' + e.message + ' – the game runs without a shared world.';
   }
 }
 
@@ -550,14 +703,14 @@ async function diagnoseFirebase() {
 
 const otherAt = ortId => Object.entries(world.players).filter(([id, p]) => id !== meId() && p.ortId === ortId);
 const knownPlaces = () => [...new Set([...cfg.orte.map(o => o.name), cfg.startort, ...Object.values(world.players).map(p => p.ort).filter(Boolean)])];
-const infoLine = e => `${e.text}${e.von ? ' (von ' + e.von + ')' : ''}`;
+const infoLine = e => `${e.text}${e.von ? tx('from') + e.von + tx('from_close') : ''}`;
 function ago(ms) {
   const m = Math.round((Date.now() - ms) / 60000);
   if (!(m >= 0)) return '';
-  if (m < 2) return 'gerade eben aktiv';
-  if (m < 60) return `zuletzt aktiv vor ${m} Min.`;
+  if (m < 2) return tx('ago_now');
+  if (m < 60) return tx('ago_min', m);
   const h = Math.round(m / 60);
-  return h < 48 ? `zuletzt aktiv vor ${h} Std.` : `zuletzt aktiv vor ${Math.round(h / 24)} Tagen`;
+  return h < 48 ? tx('ago_h', h) : tx('ago_d', Math.round(h / 24));
 }
 
 // Liest bei JEDEM Zug: alle Spielerpositionen, allgemeine Infos und die Infos des aktuellen Ortes
@@ -591,7 +744,7 @@ async function savePresence() {        // Charaktername, Level und Aktivität na
 }
 async function setStartPosition() {    // neues Spiel: Spieler beginnt am Startort
   if (!fb) return;
-  setStatus('Verbinde mit der Welt …');
+  setStatus(tx('status_connect_world'));
   try {
     const w = worldId(), id = slug(cfg.startort);
     await withTimeout((async () => {
@@ -623,22 +776,22 @@ function renderWorld() {
   const sum = $('worldSum'), body = $('worldBody');
   body.innerHTML = '';
   if (!world.ok) {
-    sum.textContent = '📍 Welt nicht verfügbar';
-    body.append(el('div', '', world.fehler || 'Kein Welt-Speicher verbunden. Das Spiel läuft ohne gemeinsame Welt.'));
+    sum.textContent = tx('world_none');
+    body.append(el('div', '', world.fehler || tx('world_no_conn')));
   } else {
     const here = otherAt(world.ortId);
-    sum.textContent = `📍 ${world.ort} · ${here.length ? 'Hier auch: ' + here.map(([, p]) => p.name).join(', ') : 'allein hier'} · ${player} als ${ch.name}`;
-    body.append(el('h3', '', 'Spieler und Positionen'));
+    sum.textContent = `📍 ${world.ort} · ${here.length ? tx('here_also') + here.map(([, p]) => p.name).join(', ') : tx('alone_here')} · ${player} ${tx('as')} ${ch.name}`;
+    body.append(el('h3', '', tx('players_positions')));
     const ul = el('ul');
     Object.entries(world.players).forEach(([id, p]) => {
       const me = id === meId();
-      ul.append(el('li', p.ortId === world.ortId ? 'here' : '', `${p.name || id} (${p.charakter || '?'}${p.level ? ', Level ' + p.level : ''}): ${p.ort || '?'}${me ? ' – du' : (p.zeit ? ' – ' + ago(p.zeit) : '')}`));
+      ul.append(el('li', p.ortId === world.ortId ? 'here' : '', `${p.name || id} (${p.charakter || '?'}${p.level ? ', Level ' + p.level : ''}): ${p.ort || '?'}${me ? tx('you') : (p.zeit ? ' – ' + ago(p.zeit) : '')}`));
     });
     body.append(ul);
     const infos = (title, list, bereich) => {
       body.append(el('h3', '', title));
       const l = el('ul');
-      if (!list.length) l.append(el('li', '', '(keine)'));
+      if (!list.length) l.append(el('li', '', tx('none')));
       list.forEach(e => {
         const li = el('li', '', infoLine(e));
         const b = el('button', '', '×');
@@ -651,34 +804,34 @@ function renderWorld() {
       body.append(l);
     };
     infos('Allgemeine Infos', world.allgemein, 'allgemein');
-    infos(`Infos zu „${world.ort}“`, world.ortInfos, 'ort');
+    infos(`${tx('infos_for')} „${world.ort}“`, world.ortInfos, 'ort');
   }
-  const rb = el('button', '', '🔄 Welt neu laden');
+  const rb = el('button', '', tx('reload_world'));
   rb.onclick = () => { fbDiag = ''; loadWorld(); };
   body.append(rb);
 }
 async function removeInfoUi(bereich, e) {
-  if (!fb || !confirm('Diese Info löschen?\n\n' + e.text)) return;
+  if (!fb || !confirm(tx('confirm_del') + '\n\n' + e.text)) return;
   try {
     await withTimeout(fb.removeInfo(worldId(), bereich, world.ortId, { zeit: e.zeit, text: e.text }), 8000, 'Löschen');
     await loadWorld();
-  } catch (err) { setStatus('Löschen fehlgeschlagen: ' + err.message, true); }
+  } catch (err) { setStatus(tx('del_fail') + err.message, true); }
 }
 
 /* ---------- Sprachausgabe ---------- */
-function speak(text, force, rate) {
+function speak(text, force, rate, lang) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   if ((muted && !force) || !text) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = cfg.sprache || 'de-DE';
+  u.lang = lang || (LANG === 'zh' ? 'zh-CN' : 'de-DE');
   if (rate) u.rate = rate;
   const v = speechSynthesis.getVoices().find(v => v.lang.replace('_', '-').startsWith(u.lang.slice(0, 2)));
   if (v) u.voice = v;
   speechSynthesis.speak(u);
 }
 function speechText(r) {
-  return r.story + ' ... Deine Optionen: ' + r.optionen.map((o, i) => `Option ${i + 1}: ${o}.`).join(' ');
+  return r.story + ' ... ' + tx('opts_word') + ': ' + r.optionen.map((o, i) => `${tx('opt_word')} ${i + 1}: ${o}.`).join(' ');
 }
 
 /* ---------- Spielzustand ---------- */
@@ -729,12 +882,12 @@ function applyAutoBonus() {            // automatische Teile: Maxima erhöhen, R
   const a = cfg.aufstieg, msgs = [];
   cfg.ressourcen.forEach(r => {
     const inc = a.ressourcen_max[r.id];
-    if (inc && st.max[r.id] != null) { st.max[r.id] += inc; msgs.push(`${r.name}-Maximum +${inc} (jetzt ${st.max[r.id]})`); }
+    if (inc && st.max[r.id] != null) { st.max[r.id] += inc; msgs.push(tx('ev_max', r.name, inc, st.max[r.id])); }
   });
   const refill = a.auffuellen === 'alle' ? cfg.ressourcen.map(r => r.id) : a.auffuellen;
   refill.forEach(id => {
     const r = cfg.ressourcen.find(x => x.id === id);
-    if (r && st.max[id] != null) { st.res[id] = st.max[id]; msgs.push(`${r.name} aufgefüllt`); }
+    if (r && st.max[id] != null) { st.res[id] = st.max[id]; msgs.push(tx('ev_refill', r.name)); }
   });
   return msgs;
 }
@@ -748,9 +901,9 @@ function registerLevelups() {          // nach jeder XP-Änderung: neue Level er
     const detail = [...msgs];
     if (aufstiegAktiv()) {
       st.offen.push(st.lvl);
-      detail.push(`Aufstieg offen: ${cfg.aufstieg.statpunkte} Statpunkt(e), ${cfg.aufstieg.skillpunkte} Skillpunkt(e)`);
+      detail.push(tx('ev_up_open', cfg.aufstieg.statpunkte, cfg.aufstieg.skillpunkte));
     }
-    addEvent(`🎉 Level ${st.lvl} erreicht!`, 'pos', detail);
+    addEvent(tx('ev_level', st.lvl), 'pos', detail);
   }
   if (levels.length) { levelupFlag = true; beginAufstieg(); }
   return { levels, auto };
@@ -783,13 +936,13 @@ const TOOLS = {
     const kritisch = wurf === W ? 'kritischer Erfolg' : wurf === 1 ? 'Patzer' : null;
     const erfolg = wurf === W ? true : wurf === 1 ? false : summe >= diff;
     const label = [sk && `${sk.name} ${sk.wert}`, sa && `${sa.name} ${sa.wert}`].filter(Boolean).join(' + ');
-    const detail = [`Schwierigkeit: ${diff}`];
-    if (sk) detail.push(`Skill ${sk.name}: +${skPart}`);
-    if (sa) detail.push(sk ? `Stat ${sa.name} ${sa.wert}: +${saPart} (halber Wert)` : `Stat ${sa.name}: +${saPart}`);
-    if (mod) detail.push(`${mod > 0 ? 'Bonus' : 'Malus'}: ${mod > 0 ? '+' : ''}${mod}${a.modifikator_grund ? ' (' + a.modifikator_grund + ')' : ''}`);
-    detail.push(`Wurf W${W}: ${wurf}${kritisch ? ' – ' + kritisch : ''}`);
-    detail.push(`Summe: ${wurf} + ${bonus} = ${summe} → ${erfolg ? 'Erfolg' : 'Fehlschlag'}`);
-    addEvent(`🎲 ${a.grund || label}: ${erfolg ? 'Erfolg' : 'Fehlschlag'} (${summe} gegen ${diff})`, erfolg ? 'pos' : 'neg', detail);
+    const detail = [tx('d_diff', diff)];
+    if (sk) detail.push(tx('d_skill', sk.name, skPart));
+    if (sa) detail.push(sk ? tx('d_stat_half', sa.name, sa.wert, saPart) : tx('d_stat', sa.name, saPart));
+    if (mod) detail.push(tx('d_mod', mod > 0, mod, a.modifikator_grund));
+    detail.push(tx('d_wurf', W, wurf, kritisch));
+    detail.push(tx('d_sum', wurf, bonus, summe, erfolg));
+    addEvent(tx('ev_dice', a.grund || label, erfolg, summe, diff), erfolg ? 'pos' : 'neg', detail);
     return { wurf, bonus, modifikator: mod, summe, schwierigkeit: diff, erfolg, kritisch, hinweis: 'Erzähle das Ergebnis ehrlich; berücksichtige passende Flaws.' };
   },
 
@@ -808,7 +961,7 @@ const TOOLS = {
     if (neu === 0 && d < 0) {
       out.null_erreicht = true;
       out.regel = r.bei_null || 'keine besondere Regel';
-      addEvent(`⚠ ${r.name} ist auf 0 gefallen!`, 'warn');
+      addEvent(tx('ev_zero', r.name), 'warn');
       if (r.ende) {
         st.gameover = true;
         out.spielende = true;
@@ -827,7 +980,7 @@ const TOOLS = {
     if (turnXpGiven) return { fehler: 'In diesem Zug wurden bereits XP vergeben. Es gibt pro Zug nur einmal XP.' };
     turnXpGiven = true;
     st.xp += m;
-    addEvent(`⭐ +${m} XP${a.grund ? ' (' + a.grund + ')' : ''}`, 'pos');
+    addEvent(tx('ev_xp', m, a.grund), 'pos');
     const out = { xp: st.xp, level: level() };
     const up = registerLevelups();
     if (up.levels.length) {
@@ -867,7 +1020,7 @@ const TOOLS = {
     it.wert = Math.min(max, alt + n);
     if (created) list.push(it);
     st.punkte[art] -= it.wert - alt;
-    addEvent(`📈 ${it.name}: ${alt} → ${it.wert} (Aufstieg Level ${st.offen[0]})`, 'pos');
+    addEvent(tx('ev_aufstieg_wert', it.name, alt, it.wert, st.offen[0]), 'pos');
     renderPanels();
     return { name: it.name, alt, neu: it.wert, uebrig: { ...st.punkte } };
   },
@@ -879,7 +1032,7 @@ const TOOLS = {
     const L = st.offen.shift();
     st.punkte = null;
     beginAufstieg();
-    addEvent(`✅ Levelaufstieg ${L} abgeschlossen`, 'pos');
+    addEvent(tx('ev_aufstieg_done', L), 'pos');
     renderPanels();
     const out = { ok: true, level: L, weitere_offen: st.offen.length };
     out.hinweis = st.offen.length ? 'Der nächste Aufstieg ist offen: ' + aufstiegText() : 'Setze die Geschichte fort.';
@@ -903,7 +1056,7 @@ const TOOLS = {
       })(), 8000, 'Position speichern');
     } catch (e) { return { fehler: e.message }; }
     world.ort = name; world.ortId = id;
-    addEvent(`📍 Position: ${alt || '?'} → ${name}`, 'info');
+    addEvent(tx('ev_pos', alt || '?', name), 'info');
     renderWorld();
     return {
       ort: name,
@@ -926,7 +1079,7 @@ const TOOLS = {
     const list = bereich === 'ort' ? world.ortInfos : world.allgemein;
     list.push(entry);
     while (list.length > MAX_INFOS) list.shift();
-    addEvent(`📝 Info (${bereich === 'ort' ? world.ort : 'allgemein'}): ${text}`, 'info');
+    addEvent(tx('ev_info', bereich === 'ort' ? world.ort : tx('general'), text), 'info');
     renderWorld();
     return { ok: true, bereich };
   },
@@ -942,7 +1095,7 @@ const TOOLS = {
     if (!n) return { fehler: 'Keine passende Info gefunden.' };
     const f = bereich === 'ort' ? 'ortInfos' : 'allgemein';
     world[f] = world[f].filter(e => !entryMatches(e, { contains: text }));
-    addEvent(`🗑 ${n} Info(s) entfernt (${bereich === 'ort' ? world.ort : 'allgemein'})`, 'info');
+    addEvent(tx('ev_info_del', n, bereich === 'ort' ? world.ort : tx('general')), 'info');
     renderWorld();
     return { ok: true, entfernt: n };
   },
@@ -954,7 +1107,7 @@ const TOOLS = {
     const ex = findByName(st.inv, name);
     if (ex && ex.name.toLowerCase() === name.toLowerCase()) { ex.menge += n; if (a.beschreibung) ex.beschreibung = a.beschreibung; }
     else st.inv.push({ name, menge: n, beschreibung: a.beschreibung || '' });
-    addEvent(`🎒 + ${n}× ${name}`, 'pos');
+    addEvent(tx('ev_item_add', n, name), 'pos');
     renderPanels();
     return { ok: true, name, menge_gesamt: findByName(st.inv, name).menge };
   },
@@ -966,7 +1119,7 @@ const TOOLS = {
     if (n > it.menge) return { fehler: `Nur ${it.menge}× ${it.name} vorhanden.` };
     it.menge -= n;
     if (it.menge === 0) st.inv.splice(st.inv.indexOf(it), 1);
-    addEvent(`🎒 − ${n}× ${it.name}`, 'neg');
+    addEvent(tx('ev_item_del', n, it.name), 'neg');
     renderPanels();
     return { ok: true, name: it.name, menge_uebrig: it.menge };
   },
@@ -984,7 +1137,7 @@ const TOOLS = {
     }
     const alt = it.wert;
     it.wert = clamp(alt + d, 0, 10);
-    addEvent(`📈 ${it.name}: ${alt} → ${it.wert}${a.grund ? ' (' + a.grund + ')' : ''}`, it.wert < alt ? 'neg' : 'pos');
+    addEvent(tx('ev_wert', it.name, alt, it.wert, a.grund), it.wert < alt ? 'neg' : 'pos');
     renderPanels();
     return { name: it.name, alt, neu: it.wert };
   },
@@ -995,11 +1148,11 @@ const TOOLS = {
     if (a.aktion === 'entfernen') {
       const i = st.flaws.findIndex(f => f.toLowerCase().includes(text.toLowerCase()));
       if (i < 0) return { fehler: 'Flaw nicht gefunden.', flaws: st.flaws };
-      addEvent(`🩹 Flaw entfernt: ${st.flaws[i]}`, 'pos');
+      addEvent(tx('ev_flaw_del', st.flaws[i]), 'pos');
       st.flaws.splice(i, 1);
     } else {
       st.flaws.push(text);
-      addEvent(`🩸 Neuer Flaw: ${text}`, 'neg');
+      addEvent(tx('ev_flaw_new', text), 'neg');
     }
     renderPanels();
     return { ok: true, flaws: st.flaws };
@@ -1076,6 +1229,7 @@ function systemText() {
   let t = cfg.instructions + '\n\n' + RPG_RULES;
   t += `\n- Würfel dieses Spiels: W${cfg.proben.wuerfel}. Schwierigkeitsstufen: ${stufen}.`;
   if (cfg.xpvergabe) t += `\n- XP-Vergabe in diesem Spiel: ${cfg.xpvergabe}`;
+  if (LANG === 'zh') t += `\n- SPRACHE: Schreibe alle Erzähltexte und Optionen auf Chinesisch (vereinfachte Schriftzeichen, kindgerecht). Namen aus den Daten bleiben unverändert.`;
   t += `\n\nSPIELERCHARAKTER: ${ch.name} (gespielt von ${player})` + (ch.background ? `\nHintergrund: ${ch.background}` : '');
   t += `\nStartort der Welt: ${cfg.startort}.`;
   if (cfg.orte.length) t += `\nBekannte Orte: ${cfg.orte.map(o => o.name + (o.beschreibung ? ' (' + o.beschreibung + ')' : '')).join('; ')}.`;
@@ -1085,7 +1239,7 @@ function systemText() {
 /* ---------- Gemini ---------- */
 // Die vollständige Spielanleitung (Regeln, Welt, Charakter) steht in der ersten Nachricht der Unterhaltung (siehe buildTurn);
 // die Systemanweisung bleibt deshalb kurz.
-const SYSTEM_SHORT = 'Du bist der Spielleiter dieses Rollenspiels. Die vollständige Spielanleitung, die Welt und der Spielercharakter stehen in der ersten Nachricht der Unterhaltung und gelten für jede Runde. Antworte immer nur über die bereitgestellten Funktionen, nie mit freiem Text.';
+const SYSTEM_SHORT_DE = 'Du bist der Spielleiter dieses Rollenspiels. Die vollständige Spielanleitung, die Welt und der Spielercharakter stehen in der ersten Nachricht der Unterhaltung und gelten für jede Runde. Antworte immer nur über die bereitgestellten Funktionen, nie mit freiem Text.';
 const API_ATTEMPTS = 4;          // Versuche pro Anfrage bei Netz- oder Serverproblemen
 const API_TIMEOUT_MS = 60000;    // so lange wartet das Spiel auf eine Antwort der KI
 const API_BACKOFF_MS = 1500;     // Pause vor dem 2. Versuch, danach jeweils doppelt so lang
@@ -1098,7 +1252,7 @@ async function callGemini(url, key, body) {
   let lastErr = null;
   for (let attempt = 1; attempt <= API_ATTEMPTS; attempt++) {
     if (attempt > 1) {
-      setStatus(`Die KI antwortet nicht (${lastErr.message}) – neuer Versuch ${attempt} von ${API_ATTEMPTS} …`);
+      setStatus(tx('status_retry', attempt, lastErr.message, API_ATTEMPTS));
       await sleep(API_BACKOFF_MS * 2 ** (attempt - 2));
     }
     const ctrl = new AbortController();
@@ -1122,12 +1276,12 @@ async function callGemini(url, key, body) {
       lastErr = new Error('keine verwertbare Antwort (' + why + ')');
     } catch (e) {
       if (e.fatal) throw e;
-      lastErr = new Error(e.name === 'AbortError' ? `keine Antwort nach ${API_TIMEOUT_MS / 1000} s` : 'keine Verbindung zur KI');
+      lastErr = new Error(e.name === 'AbortError' ? tx('timeout', API_TIMEOUT_MS / 1000) : tx('no_conn'));
     } finally {
       clearTimeout(timer);
     }
   }
-  throw new Error(`Die KI hat nach ${API_ATTEMPTS} Versuchen nicht geantwortet: ${lastErr.message}.`);
+  throw new Error(tx('ai_gave_up', API_ATTEMPTS, lastErr.message));
 }
 
 async function runTurn(prompt) {
@@ -1140,7 +1294,7 @@ async function runTurn(prompt) {
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const data = await callGemini(url, key, {
-      systemInstruction: { parts: [{ text: SYSTEM_SHORT }] },
+      systemInstruction: { parts: [{ text: SYSTEM_SHORT_DE + (LANG === 'zh' ? ' Antworte im Erzähltext und in den Optionen auf Chinesisch (简体中文).' : '') }] },
       contents,
       tools: [{ functionDeclarations }],
       toolConfig: { functionCallingConfig: { mode: 'ANY' } },
@@ -1219,14 +1373,14 @@ function renderPanels() {
   // XP und Level (fest eingebaut)
   const per = cfg.xpprolevel, inLvl = st.xp % per;
   const xrow = el('div', 'res'), xh = el('div', 'rh');
-  xh.append(el('span', '', `⭐ Level ${level()}`), el('b', '', `${st.xp} XP`));
+  xh.append(el('span', '', tx('level_lbl', level())), el('b', '', `${st.xp} XP`));
   const xbar = el('div', 'bar'), xfill = el('i');
   xfill.style.width = (inLvl / per * 100) + '%';
   xfill.style.background = 'var(--accent)';
   xbar.append(xfill);
-  xrow.append(xh, xbar, el('small', '', `noch ${per - inLvl} XP bis Level ${level() + 1}`));
+  xrow.append(xh, xbar, el('small', '', tx('xp_to_next', per - inLvl, level() + 1)));
   if (st.offen.length && st.punkte)
-    xrow.append(el('small', 'up', `✨ Aufstieg offen: ${st.punkte.stat} Stat-, ${st.punkte.skill} Skillpunkte`));
+    xrow.append(el('small', 'up', tx('up_open', st.punkte.stat, st.punkte.skill)));
   rp.append(xrow);
 
   valueRows($('pStats'), st.stats);
@@ -1239,14 +1393,14 @@ function renderPanels() {
 
   const ib = $('pInv');
   ib.innerHTML = '';
-  if (!st.inv.length) ib.append(el('div', 'empty', 'Leer'));
+  if (!st.inv.length) ib.append(el('div', 'empty', tx('empty')));
   st.inv.forEach(i => {
     const row = el('div', 'item');
     const nm = el('div', 'nm', i.menge > 1 ? `${i.name} ×${i.menge}` : i.name);
     if (i.beschreibung) nm.append(el('small', '', i.beschreibung));
-    const b = el('button', '', 'Benutzen');
+    const b = el('button', '', tx('use'));
     b.disabled = busy || quizActive || st.gameover || !current;
-    b.onclick = () => act('Ich benutze: ' + i.name);
+    b.onclick = () => act(tx('use_action', i.name));
     row.append(nm, b);
     ib.append(row);
   });
@@ -1370,7 +1524,7 @@ async function writeMemoryFile() {
     await w.write(memFileText());
     await w.close();
   } catch (e) {
-    if (!memWarned) { memWarned = true; setStatus('Erinnerungsdatei konnte nicht geschrieben werden: ' + e.message, true); }
+    if (!memWarned) { memWarned = true; setStatus(tx('mem_write_fail') + e.message, true); }
   }
 }
 async function readMemoryFile() {      // null, wenn es keine (lesbare) Datei gibt
@@ -1388,15 +1542,15 @@ async function updateMemInfo() {
   const info = $('memInfo'), btn = $('memDir');
   if (!memSupported()) {
     btn.hidden = true;
-    info.textContent = 'Dieser Browser kann keine Dateien in einen Ordner schreiben (möglich in Chrome oder Edge am Computer). Die Erinnerung wird nur im Spielstand im Browser gespeichert.';
+    info.textContent = 'This browser cannot write files to a folder (possible in Chrome or Edge on a computer). The memory is only kept in the saved game in the browser.';
     return;
   }
   btn.hidden = false;
   let h = memDir;
   if (!h) { try { h = await idbGet('dir'); } catch (e) { /* egal */ } }
   const sub = cfg.erinnerung.pfad ? ` / ${cfg.erinnerung.pfad}` : '';
-  info.textContent = h ? `Ordner: ${h.name}${sub} – beim Start wird ggf. die Berechtigung erneut abgefragt.`
-                       : `Noch kein Ordner gewählt.${sub ? ' Die Dateien kommen in den Unterordner „' + cfg.erinnerung.pfad + '“.' : ''}`;
+  info.textContent = h ? `Folder: ${h.name}${sub} – permission may be requested again at start.`
+                       : `No folder chosen yet.${sub ? ' The files go into the subfolder „' + cfg.erinnerung.pfad + '“.' : ''}`;
 }
 
 function lock(on) {
@@ -1424,11 +1578,11 @@ async function step(choice) {
   const snap = JSON.stringify(st);
   let posSnap = null, out;
   try {
-    setStatus('Lese die gemeinsame Welt …');
+    setStatus(tx('status_read_world'));
     await loadWorld();                 // Positionen und Infos werden bei jedem Zug frisch gelesen
     posSnap = world.ok ? { ort: world.ort, ortId: world.ortId } : null;
     const t = buildTurn(choice);
-    setStatus(t.full ? 'Der Erzähler denkt nach … (Spielregeln und Gedächtnis werden neu gesendet)' : 'Der Erzähler denkt nach …');
+    setStatus(t.full ? tx('status_thinking_full') : tx('status_thinking'));
     out = await runTurn(t.prompt);
     out.events = turnEvents.slice();
     addMemory(out, choice);
@@ -1445,8 +1599,8 @@ async function step(choice) {
     st = JSON.parse(snap);
     turnEvents = []; turnXpGiven = false;
     await restorePosition(posSnap);
-    setStatus('Fehler: ' + e.message + ' Der Zug wurde zurückgesetzt, beim nächsten Versuch zählt alles nur einmal.', true);
-    const b = el('button', '', 'Nochmal versuchen');
+    setStatus(tx('err') + e.message + tx('err_reset'), true);
+    const b = el('button', '', tx('retry_btn'));
     b.onclick = () => step(choice);
     $('options').appendChild(b);
     lock(false);
@@ -1489,19 +1643,23 @@ function nextVokabel() {
 }
 function quizSpeak() {                   // "Mama ... Ich mag meine Mama. ... Mama."
   if (!quizItem) return;
+  const lang = vokSprache || (LANG === 'zh' ? 'zh-CN' : 'de-DE');   // Sprache der Liste
+  const dot = /^zh/i.test(lang) ? '。' : '.';
   const w = spokenWord(quizItem.wort);
-  const s = quizItem.satz ? (/[.!?]$/.test(quizItem.satz) ? quizItem.satz : quizItem.satz + '.') : '';
-  speak([w + '.', s, w + '.'].filter(Boolean).join(' ... '), true, 0.85);   // force: auch bei "Sprache aus"
+  const s = quizItem.satz ? (/[.!?。！？]$/.test(quizItem.satz) ? quizItem.satz : quizItem.satz + dot) : '';
+  speak([w + dot, s, w + dot].filter(Boolean).join(' ... '), true, 0.85, lang);
 }
 function setQuizFeedback(msg, cls) { $('quizFeedback').textContent = msg || ''; $('quizFeedback').className = 'quiz-feedback' + (cls ? ' ' + cls : ''); }
 function startQuiz(after) {
   if (!vokabeln.length) { after(); return; }
   const v = nextVokabel();
-  quizItem = { wort: v.wort, satz: v.saetze.length ? v.saetze[Math.floor(Math.random() * v.saetze.length)] : '' };
+  const zhList = LANG === 'zh' && (!vokSprache || /^zh/i.test(vokSprache));   // chinesischer Satz nur bei chinesischen Listen
+  const pool = zhList && v.saetze_zh.length ? v.saetze_zh : v.saetze;   // zh: chinesischer Satz, falls vorhanden
+  quizItem = { wort: v.wort, satz: pool.length ? pool[Math.floor(Math.random() * pool.length)] : '' };
   quizTries = 0; quizAfter = after; quizActive = true;
   $('options').hidden = true; $('freeRow').hidden = true; $('quiz').hidden = false;
   const n = Array.from(normWord(quizItem.wort)).length;
-  $('quizHint').textContent = `${n} Buchstaben: ` + Array(n).fill('_').join(' ');
+  $('quizHint').textContent = tx('quiz_letters', n) + Array(n).fill('_').join(' ');
   $('quizInput').value = ''; $('quizInput').disabled = false; $('quizGo').disabled = false;
   setQuizFeedback('');
   renderPanels();
@@ -1516,11 +1674,11 @@ function checkQuiz() {
     const go = quizAfter;
     quizItem = null;                     // weitere Klicks während der kurzen Pause ignorieren
     $('quizInput').disabled = true; $('quizGo').disabled = true;
-    setQuizFeedback('Richtig! Sehr gut! 🎉', 'ok');
+    setQuizFeedback(tx('quiz_ok'), 'ok');
     setTimeout(() => { resetQuiz(); go(); }, 800);
   } else {
     quizTries++;
-    setQuizFeedback(quizTries >= 3 ? `Schau genau hin: Das Wort heißt ${upper(quizItem.wort)}.` : 'Das war noch nicht richtig. Hör nochmal genau hin!', 'wrong');
+    setQuizFeedback(quizTries >= 3 ? tx('quiz_reveal', upper(quizItem.wort)) : tx('quiz_wrong'), 'wrong');
     $('quizInput').value = '';
     $('quizInput').focus();
   }
@@ -1546,7 +1704,7 @@ function makeEventBox(events) {
   const d = document.createElement('details');
   d.className = 'evbox';
   d._ev = events;
-  d.append(el('summary', '', `📋 Würfe & Änderungen (${events.length})`));
+  d.append(el('summary', '', tx('ev_summary', events.length)));
   events.forEach(e => {
     const row = el('div', 'evl ' + e.k, e.t);
     (e.d || []).forEach(line => row.append(el('div', 'evd', line)));
@@ -1570,16 +1728,16 @@ function render(resume) {
   $('freeRow').hidden = !cfg.freitext || st.gameover;
   document.querySelectorAll('#freeRow button, #freeRow input').forEach(b => { b.disabled = busy; });
   if (st.gameover) {
-    box.append(el('p', 'end', 'Das Abenteuer ist zu Ende. Über „Neu starten“ beginnst du eine neue Geschichte.'));
+    box.append(el('p', 'end', tx('end')));
   } else {
     current.optionen.forEach((o, i) => {
       const row = el('div', 'opt');
       const b = el('button', '', `${i + 1}. ${o}`);
       b.onclick = () => act(o);
       const s = el('button', 'speak', '🔊');
-      s.title = 'Option vorlesen';
-      s.setAttribute('aria-label', `Option ${i + 1} vorlesen`);
-      s.onclick = () => speak(`Option ${i + 1}: ${o}`, true);
+      s.title = tx('opt_speak');
+      s.setAttribute('aria-label', tx('opt_speak_aria', i + 1));
+      s.onclick = () => speak(`${tx('opt_word')} ${i + 1}: ${o}`, true);
       row.append(b, s);
       box.appendChild(row);
     });
@@ -1595,13 +1753,14 @@ function showGame() {
 }
 
 async function startGame() {
-  if (!cfg || !chars.length) return setSetupStatus('Das Spiel ist noch nicht geladen.', true);
-  if (!localStorage.getItem(LS_KEY)) { alert('Bitte zuerst deinen Gemini API-Key speichern.'); return; }
+  if (!cfg || !chars.length) return setSetupStatus('The game is not loaded yet.', true);
+  if (!localStorage.getItem(LS_KEY)) { alert('Please save your Gemini API key first.'); return; }
   await ensureMemDir(true);            // Ordner für die Erinnerungsdatei (nur wenn im Spiel eingestellt)
   speechSynthesis.cancel();
   $('log').innerHTML = '';
   current = null; turn = 0; choiceCount = 0;
   aiHistory = []; aiTurns = 0;
+  applyGameLang();
   resetQuiz();
   $('free').value = '';
   initState(chars[+$('charSel').value || 0]);
@@ -1624,28 +1783,30 @@ function hasSave() {
   try { return !!cfg && !!localStorage.getItem(saveSlot()); } catch (e) { return false; }
 }
 function saveProgress() {
-  if (!current) return setStatus('Noch nichts zu speichern.', true);
-  if (busy) return setStatus('Bitte warten, bis der Erzähler fertig ist.', true);
+  if (!current) return setStatus(tx('save_nothing'), true);
+  if (busy) return setStatus(tx('save_busy'), true);
   const items = Array.from($('log').children).map(n => n._ev ? { c: 'evbox', ev: n._ev } : { c: n.className, t: n.textContent });
   const last = items.map(i => i.c).lastIndexOf('last');   // unbeantwortete Wahl nicht mitspeichern
   let end = last + 1;
   while (items[end] && items[end].c === 'evbox') end++;    // Ereignisfeld der letzten Geschichte mitnehmen
   try {
-    localStorage.setItem(saveSlot(), JSON.stringify({ v: SAVE_VERSION, memory, runId, turn, current, st, ch, choiceCount, log: items.slice(0, end) }));
+    localStorage.setItem(saveSlot(), JSON.stringify({ v: SAVE_VERSION, memory, runId, turn, current, st, ch, choiceCount, lang: LANG, log: items.slice(0, end) }));
     writeMemoryFile();
-    setStatus('Fortschritt gespeichert ✔');
-  } catch (e) { setStatus('Speichern fehlgeschlagen: ' + e.message, true); }
+    setStatus(tx('save_ok'));
+  } catch (e) { setStatus(tx('save_fail') + e.message, true); }
 }
 async function resumeGame() {
   if (!cfg) return;
-  if (!localStorage.getItem(LS_KEY)) { alert('Bitte zuerst deinen Gemini API-Key speichern.'); return; }
+  if (!localStorage.getItem(LS_KEY)) { alert('Please save your Gemini API key first.'); return; }
   await ensureMemDir(true);
   try {
     const d = JSON.parse(localStorage.getItem(saveSlot()));
-    if (d.v !== SAVE_VERSION || !d.st || !d.ch) throw new Error('Der Stand stammt aus einer älteren Version.');
+    if (d.v !== SAVE_VERSION || !d.st || !d.ch) throw new Error('This save is from an older version.');
     speechSynthesis.cancel();
     memory = d.memory; turn = d.turn; current = d.current; st = d.st; ch = d.ch;
     choiceCount = d.choiceCount || 0;
+    LANG = d.lang === 'zh' ? 'zh' : (d.lang === 'de' ? 'de' : (/^zh/i.test(cfg.sprache || '') ? 'zh' : 'de'));
+    applyGameLang();
     aiHistory = []; aiTurns = 0;      // erster Zug nach dem Laden sendet das Gedächtnis und alle Infos
     resetQuiz();
     player = $('playerSel').value;
@@ -1657,11 +1818,11 @@ async function resumeGame() {
     log.innerHTML = '';
     d.log.forEach(i => log.appendChild(i.c === 'evbox' ? makeEventBox(i.ev) : el('p', i.c, i.t)));
     showGame();
-    setStatus('Stand geladen.');
+    setStatus(tx('state_loaded'));
     render(true);
     loadWorld();
     writeMemoryFile();
-  } catch (e) { alert('Speicherstand nicht lesbar: ' + e.message); }
+  } catch (e) { alert('Save could not be read: ' + e.message); }
 }
 
 /* ---------- UI ---------- */
@@ -1670,7 +1831,7 @@ $('saveKey').onclick = () => {
   const k = $('key').value.trim();
   if (!k) return;
   localStorage.setItem(LS_KEY, k);
-  alert('Key gespeichert.');
+  alert('Key saved.');
 };
 $('clearKey').onclick = () => { localStorage.removeItem(LS_KEY); $('key').value = ''; };
 $('start').onclick = startGame;
@@ -1697,12 +1858,12 @@ $('restart').onclick = () => {
 };
 $('mute').onclick = () => {
   muted = !muted;
-  $('mute').textContent = muted ? '🔇 Sprache aus' : '🔊 Sprache an';
+  $('mute').textContent = muted ? tx('mute_off') : tx('mute_on');
   if (muted) speechSynthesis.cancel();
 };
 $('replay').onclick = () => {
   if (quizActive) return quizSpeak();
-  if (current) { muted = false; $('mute').textContent = '🔊 Sprache an'; speak(speechText(current)); }
+  if (current) { muted = false; $('mute').textContent = tx('mute_on'); speak(speechText(current)); }
 };
 $('freeGo').onclick = () => act($('free').value);
 $('free').onkeydown = e => { if (e.key === 'Enter') act($('free').value); };
@@ -1711,13 +1872,13 @@ $('file').onchange = async e => {
     const data = JSON.parse(await e.target.files[0].text());
     readMeta(data);
     await setGames(parseIndex(data), location.href);
-    alert(games.length + ' Spiel(e) geladen.');
-  } catch (err) { alert('Ungültige JSON-Datei: ' + err.message); }
+    alert(games.length + ' game(s) loaded.');
+  } catch (err) { alert('Invalid JSON file: ' + err.message); }
 };
 if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
 
 loadConfig().catch(e => {
-  setSetupStatus(e.message + ' Tipp: Lokal per file:// geht das Laden nicht – nutze einen Webserver.', true);
+  setSetupStatus(e.message + ' Tip: loading does not work via file:// – use a web server.', true);
 });
 </script>
 </body>

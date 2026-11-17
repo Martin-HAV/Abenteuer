@@ -12,14 +12,16 @@
       "beschreibung": "Ein freundliches Abenteuer für Kinder ab 5 Jahren.",
       "regeln": "peppa_regeln.json",
       "welt": "peppa_welt.json",
-      "charaktere": "peppa_charaktere.json"
+      "charaktere": "peppa_charaktere.json",
+      "vokabeln": "Vokabel.json"
     },
     {
-      "titel": "Die Ruinen von Kaldor",
-      "beschreibung": "Dark-Fantasy-Rollenspiel für Erwachsene mit echten Gefahren.",
-      "regeln": "kaldor_regeln.json",
-      "welt": "kaldor_welt.json",
-      "charaktere": "kaldor_charaktere.json"
+      "titel": "Harry Potter und der Stein der Weisen",
+      "beschreibung": "Ein ruhiges Zauberabenteuer auf Chinesisch für Kinder ab 9 Jahren.",
+      "regeln": "harry_regeln.json",
+      "welt": "harry_welt.json",
+      "charaktere": "harry_charaktere.json",
+      "vokabeln": "harry_vokabeln.json"
     }
   ]
 }

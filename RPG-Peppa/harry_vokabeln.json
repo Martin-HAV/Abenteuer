@@ -1,0 +1,205 @@
+{
+  "sprache": "de-DE",
+  "vokabeln": [
+    {
+      "wort": "BRIEF",
+      "satz": "Harry bekommt einen Brief aus Hogwarts."
+    },
+    {
+      "wort": "HUT",
+      "satz": "Der Sprechende Hut sitzt auf Harrys Kopf."
+    },
+    {
+      "wort": "FLIEGE",
+      "satz": "Ich fliege auf einem Besen."
+    },
+    {
+      "wort": "HEXE",
+      "satz": "Hermine ist eine sehr kluge Hexe."
+    },
+    {
+      "wort": "KESSEL",
+      "satz": "Im Kessel brodelt der Zaubertrank."
+    },
+    {
+      "wort": "STEIN",
+      "satz": "Der Stein der Weisen glänzt golden."
+    },
+    {
+      "wort": "LIEBE",
+      "satz": "Hagrid hat viel Liebe für seine Tiere."
+    },
+    {
+      "wort": "HERR",
+      "satz": "Herr Dumbledore ist ein weiser Zauberer."
+    },
+    {
+      "wort": "BALL",
+      "satz": "Der Quaffel ist ein roter Ball."
+    },
+    {
+      "wort": "HAUS",
+      "satz": "Gryffindor ist ein warmes Haus in Hogwarts."
+    },
+    {
+      "wort": "HEIMAT",
+      "satz": "Hogwarts wird für Harry zur neuen Heimat."
+    },
+    {
+      "wort": "BRILLE",
+      "satz": "Harry hat eine runde Brille."
+    },
+    {
+      "wort": "ZIEL",
+      "satz": "Das Ziel ist der goldene Schnatz."
+    },
+    {
+      "wort": "SCHNEE",
+      "satz": "Draußen liegt weißer Schnee."
+    },
+    {
+      "wort": "TEE",
+      "satz": "Hagrid trinkt einen heißen Tee."
+    },
+    {
+      "wort": "KISSEN",
+      "satz": "Das Kissen im Schlafsaal ist weich."
+    },
+    {
+      "wort": "ZIMMER",
+      "satz": "Der Gemeinschaftsraum ist ein gemütliches Zimmer."
+    },
+    {
+      "wort": "SONNE",
+      "satz": "Die Sonne scheint über dem Schloss."
+    },
+    {
+      "wort": "KANNE",
+      "satz": "Der Tee steht in einer großen Kanne."
+    },
+    {
+      "wort": "REIHE",
+      "satz": "Die Schüler stehen in einer langen Reihe."
+    },
+    {
+      "wort": "EIS",
+      "satz": "Ein Eis schmeckt im Sommer gut."
+    },
+    {
+      "wort": "EICHE",
+      "satz": "Im Wald steht eine alte Eiche."
+    },
+    {
+      "wort": "WEIT",
+      "satz": "Hogwarts liegt weit weg von zu Hause."
+    },
+    {
+      "wort": "ZEIT",
+      "satz": "Harry hat jetzt viel Zeit zum Lernen."
+    },
+    {
+      "wort": "EIMER",
+      "satz": "Hagrid trägt einen Eimer mit Wasser."
+    },
+    {
+      "wort": "SPIEL",
+      "satz": "Das Quidditch-Spiel macht viel Spaß."
+    },
+    {
+      "wort": "VIEL",
+      "satz": "Hermine lernt sehr viel."
+    },
+    {
+      "wort": "TIER",
+      "satz": "Hagrid liebt jedes Tier."
+    },
+    {
+      "wort": "SIEG",
+      "satz": "Der Sieg macht alle glücklich."
+    },
+    {
+      "wort": "LIED",
+      "satz": "Hagrid singt ein schönes Lied."
+    },
+    {
+      "wort": "BIENE",
+      "satz": "Eine Biene summt im Garten."
+    },
+    {
+      "wort": "HERZ",
+      "satz": "Harry hat ein mutiges Herz."
+    },
+    {
+      "wort": "HILFE",
+      "satz": "Ron bittet um Hilfe."
+    },
+    {
+      "wort": "HONIG",
+      "satz": "Hagrid mag Honig auf dem Brot."
+    },
+    {
+      "wort": "KLASSE",
+      "satz": "Die Klasse lernt heute Zaubertränke."
+    },
+    {
+      "wort": "PFEIL",
+      "satz": "Ein Pfeil fliegt durch die Luft."
+    },
+    {
+      "wort": "HAND",
+      "satz": "Harry streckt seine Hand aus."
+    },
+    {
+      "wort": "HALLE",
+      "satz": "Die große Halle ist voller Kerzen."
+    },
+    {
+      "wort": "BEINE",
+      "satz": "Mit den Beinen laufe ich schnell."
+    },
+    {
+      "wort": "SCHLÜSSEL",
+      "satz": "Hagrid hat einen großen Schlüssel."
+    },
+    {
+      "wort": "WASSER",
+      "satz": "Die Pflanze braucht frisches Wasser."
+    },
+    {
+      "wort": "SCHIFF",
+      "satz": "Ein großes Schiff bringt uns zum Schloss."
+    },
+    {
+      "wort": "SCHLAFSAAL",
+      "satz": "Der Schlafsaal liegt hoch oben im Turm."
+    },
+    {
+      "wort": "SCHULTASCHE",
+      "satz": "Harry packt seine Schultasche."
+    },
+    {
+      "wort": "TROLL",
+      "satz": "Ein Troll ist im Keller, aber er ist nur verwirrt."
+    },
+    {
+      "wort": "BESENSTIEL",
+      "satz": "Der Besenstiel ist glatt und schnell."
+    },
+    {
+      "wort": "HAARE",
+      "satz": "Hermines Haare sind ganz lockig."
+    },
+    {
+      "wort": "FAHRT",
+      "satz": "Die Fahrt im Zug ist lang."
+    },
+    {
+      "wort": "MITTAG",
+      "satz": "Zum Mittag gibt es warme Suppe."
+    },
+    {
+      "wort": "KUTSCHE",
+      "satz": "Die Kutsche fährt zum Schloss."
+    }
+  ]
+}
