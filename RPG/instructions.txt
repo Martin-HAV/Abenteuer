@@ -1,0 +1,289 @@
+ANLEITUNG: JSON-DATEIEN FÜR DAS KI-ROLLENSPIEL
+==============================================
+
+Diese Anleitung beschreibt, wie die JSON-Dateien des Spiels aufgebaut sein müssen, was jedes Feld bedeutet und was die Engine (index.html) damit macht. Wer (Mensch oder KI) sie liest, soll damit fehlerfreie Spieldateien erstellen können.
+
+Alle Dateien liegen flach im selben Ordner (GitHub Pages). Alle Texte für Spieler und KI sind auf Deutsch, sofern nicht anders gewünscht.
+
+
+0. ÜBERBLICK
+------------
+Ein Spiel besteht aus bis zu vier Dateien, die in game.json eingetragen werden:
+
+  game.json              Index: Spielerliste, Firebase-Verweis, Liste der Spiele (Pflicht)
+  <name>_regeln.json     Regeln: Ressourcen, Würfelproben, XP/Level, Gedächtnis, Modell (Pflicht)
+  <name>_welt.json       Welt: Anweisungen an den Spielleiter, Startsituation, Sprache (Pflicht)
+  <name>_charaktere.json Spielbare Charaktere (Pflicht)
+  <name>_karte.json      Karte mit Gebieten und Orten (OPTIONAL)
+  firebase.json          Firebase-Web-Konfiguration für die gemeinsame Welt (optional, einmal pro Projekt)
+
+Zusätzlich gilt für ALLE Dateien:
+- Gültiges JSON: doppelte Anführungszeichen, keine Kommentare, keine abschließenden Kommas, keine Zeilenumbrüche in Strings (stattdessen \n).
+- Schlüsselnamen sind unabhängig von Groß-/Kleinschreibung (Stärke/stärke egal bei Schlüsseln wie "Regeln"/"regeln"). Empfehlung: Schlüssel klein schreiben, so wie unten angegeben.
+- Namen werden zum Vergleichen in eine "id" umgewandelt (slug): Kleinbuchstaben, Umlaute und Akzente entfernt, alles außer a–z und 0–9 wird zu "_". Beispiel: "Stadttor von Kaldor" -> "stadttor_von_kaldor". Zwei Namen, die dieselbe id ergeben, gelten als derselbe Eintrag (also nicht doppelt vergeben).
+- Listen dürfen als Array angegeben werden (Strings oder Objekte) ODER als Objekt {"Name": Wert}. Die Beispiele unten zeigen die empfohlene Schreibweise.
+- Zahlen als echte Zahlen schreiben (6, nicht "6").
+
+
+1. game.json (Index)
+--------------------
+Aufbau:
+
+{
+  "spieler": ["Mama", "Papa", "Isabel", "Annika"],
+  "firebase": "firebase.json",
+  "spiele": [
+    {
+      "titel": "Die Ruinen von Kaldor",
+      "beschreibung": "Dark-Fantasy-Rollenspiel für Erwachsene mit echten Gefahren.",
+      "regeln": "kaldor_regeln.json",
+      "welt": "kaldor_welt.json",
+      "charaktere": "kaldor_charaktere.json",
+      "karte": "kaldor_karte.json"
+    }
+  ]
+}
+
+Felder:
+- spieler (optional): Liste der Menschen, die spielen (Strings oder {"name": "..."}). Jeder hat eigene Spielstände im Browser. Fehlt sie, gibt es einen Spieler namens "Spieler". Der Name wird auch in der gemeinsamen Welt als Spielername benutzt.
+- firebase (optional): Dateiname der Firebase-Konfiguration. Fehlt er, läuft die Welt nur lokal im Browser des Geräts.
+- spiele (Pflicht): Liste der Spiele. Jedes Spiel braucht "regeln", "welt" und "charaktere". "karte" ist optional.
+  - titel: Anzeigename. ACHTUNG: Der Titel ist Teil des Speicherschlüssels der Spielstände UND (wenn die Welt-Datei keine "weltid" hat) der Name der gemeinsamen Welt. Wer ihn ändert, verliert/trennt Spielstände und Welt.
+  - beschreibung: kurzer Text im Startfenster.
+  - regeln / welt / charaktere / karte: entweder ein Dateiname (String, relativ zu game.json) oder direkt das eingebettete JSON-Objekt.
+- Möglich ist auch, dass game.json direkt ein Array von Spielen ist (dann ohne spieler/firebase). Über die Adresse ?game=andere.json kann eine andere Index-Datei geladen werden.
+- Fehlt "regeln", "welt" oder "charaktere", erscheint ein Ladefehler. Eine nicht ladbare "karte" erzeugt nur einen Hinweis; das Spiel startet dann ohne Karte.
+
+
+2. firebase.json
+----------------
+Die Web-Konfiguration aus der Firebase-Konsole (Projekteinstellungen -> Web-App), entweder direkt oder unter dem Schlüssel "firebaseConfig":
+
+{
+  "apiKey": "...",
+  "authDomain": "<projekt>.firebaseapp.com",
+  "projectId": "<projekt>",
+  "storageBucket": "<projekt>.firebasestorage.app",
+  "messagingSenderId": "...",
+  "appId": "..."
+}
+
+Voraussetzung: In Firestore existiert die Datenbank "(default)" im Native-Modus, und die Regeln erlauben den Pfad welten/{welt}/...:
+
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /welten/{welt}/{document=**} { allow read, write: if true; }
+    }
+  }
+
+(Die Regeln sind bewusst offen. Keine privaten Daten in die Welt schreiben.) Ist Firebase nicht erreichbar, spielt die Engine mit einem lokalen Ersatz-Speicher auf dem Gerät weiter und zeigt das in der Welt-Leiste an. Der API-Schlüssel der Gemini-API gehört NICHT in eine Datei; der Spieler gibt ihn im Startfenster ein (wird nur im Browser gespeichert).
+
+
+3. REGELN-DATEI (<name>_regeln.json)
+------------------------------------
+Alle Felder sind optional und haben Vorgaben, aber sinnvolle Spiele definieren mindestens "ressourcen", "proben" und "xpvergabe".
+
+{
+  "model": "gemini-3.5-flash-lite",
+  "temperature": 1,
+  "memoryresend": 3,
+  "erinnerung": { "pro_zug": 350, "max": 8000, "kuerzen_auf": 6400, "lokal": false, "pfad": "" },
+  "xpprolevel": 100,
+  "xpvergabe": "Vergib 10 bis 20 XP für kleine Erfolge, 25 bis 50 XP für überwundene Gegner oder gelöste Rätsel und bis zu 100 XP für Meilensteine.",
+  "proben": { "wuerfel": 10, "stufen": { "leicht": 6, "mittel": 10, "schwer": 14, "extrem": 18 } },
+  "ressourcen": [ ... ],
+  "aufstieg": { ... }
+}
+
+3.1 Allgemein
+- model: Gemini-Modell (Vorgabe "gemini-3.5-flash-lite"). Alternative mit mehr Tageskontingent z. B. "gemini-2.5-flash-lite".
+- temperature: Kreativität, Vorgabe 1.
+- xpprolevel: XP pro Level (Vorgabe 100, mindestens 1). Level = 1 + abgerundet(XP / xpprolevel).
+- xpvergabe: Text für die KI, wie großzügig sie XP vergeben soll. Die KI bekommt ihn im vollen Zug. Tipp: Zahlenbereiche nennen und die Vergabe pro Handlung nur einmal erlauben.
+
+3.2 Gedächtnis (memoryresend und erinnerung)
+Das SPIEL verwaltet das Gedächtnis, nicht die KI:
+- memoryresend (Vorgabe 3, mindestens 1): Länge des Zyklus in Zügen. Im ersten Zug eines Zyklus ("voller Zug") schickt das Spiel ALLE Infos (Spielleiter-Vorgaben aus der Welt-Datei, Würfelregeln, XP-Vergabe, Charakter-Hintergrund, Startort, Gesamtkarte, Aufstiegsregeln und die gesammelte Erinnerung). Die weiteren Züge des Zyklus schicken nur Spielzustand, Welt, Karte der aktuellen Position und die Wahl des Spielers plus den kurzen Verlauf. Nach dem letzten Zug des Zyklus wird das KI-Gedächtnis (der mitgeschickte Verlauf) geleert; der nächste Zug ist wieder voll. Auch der erste Zug nach dem Laden eines Spielstands ist ein voller Zug. 1 = jeder Zug ist voll (teurer), größere Werte sparen Tokens, die KI "vergisst" dann aber zwischen den vollen Zügen eher Stilvorgaben.
+- erinnerung.pro_zug (Vorgabe 350): höchstens so viele Zeichen kommen pro Zug in die Erinnerung. Die KI darf eine Notiz mitliefern (Feld erinnerung); fehlt sie, schreibt das Spiel selbst eine (Spielerwahl + Anfang und Ende des Erzähltexts). Für kindgerechte Spiele reichen ca. 100–150.
+- erinnerung.max (Vorgabe 8000): ab dieser Länge kürzt das Spiel (ohne KI): ältere Notizen werden gekürzt, die ältesten verworfen. Kopfzeilen (Startbedingungen, Charakter) bleiben.
+- erinnerung.kuerzen_auf (Vorgabe 80 % von max): Zielgröße nach dem Kürzen; muss kleiner als max sein.
+- erinnerung.lokal (true/false, Vorgabe false): Wenn true, kann der Spieler im Startfenster einen Ordner wählen, in dem die Erinnerung zusätzlich als .md-Datei gespeichert wird (nur Browser mit Ordnerzugriff, z. B. Chrome/Edge).
+- erinnerung.pfad: Unterordner innerhalb des gewählten Ordners (z. B. "Abenteuer/Kaldor").
+(Als Schlüssel sind auch "gedaechtnis" oder "memory" statt "erinnerung" erlaubt.)
+
+3.3 Würfelproben (proben)
+- wuerfel: Seitenzahl des Würfels (4–100, Vorgabe 10).
+- stufen: Schwierigkeitsstufen als Name -> Zahl. Vorgabe leicht 6, mittel 10, schwer 14, extrem 18; eigene Stufen dürfen ergänzt oder überschrieben werden.
+Ablauf: Die KI ruft die Funktion probe mit einem Skill und/oder Stat, einer Schwierigkeit (1–25) und optional einem Modifikator (−10 bis +10, z. B. durch Flaws) auf. Die APP würfelt: Wurf + Skillwert + Statwert (wird zum halben Statwert abgerundet, wenn zusätzlich ein Skill benutzt wird) + Modifikator, verglichen mit der Schwierigkeit. Höchster Wurf = kritischer Erfolg (immer Erfolg), Wurf 1 = Patzer (immer Fehlschlag). Die Rechnung steht in einem aufklappbaren Feld unter dem Erzähltext. Die Stufen sollten zur Würfelgröße passen (bei W10: Werte bis etwa 18).
+
+3.4 Ressourcen (ressourcen)
+Liste von Objekten (Vorgabe-Farben werden automatisch vergeben):
+
+{
+  "id": "leben",
+  "name": "Leben",
+  "icon": "❤️",
+  "start": 20,
+  "max": 20,
+  "farbe": "#c8503c",
+  "bei_null": "Der Charakter stirbt. Erzähle ein würdiges, atmosphärisches Ende.",
+  "ende": true
+}
+
+- id: eindeutig, klein, ohne Leerzeichen (sonst wird sie aus dem Namen abgeleitet). Auf diese id beziehen sich Charakter-Dateien ("start"/"max") und der Block "aufstieg".
+- name: Anzeigename (die KI spricht Ressourcen über Namen oder id an).
+- icon: Emoji (optional).
+- start: Startwert (fehlt er: max, sonst 10). Wird auf max begrenzt.
+- max: Obergrenze (optional; ohne max ist die Ressource unbegrenzt, z. B. Geld). Beim Anzeigen als Balken wird max benutzt.
+- farbe: Hex-Farbe des Balkens (optional).
+- bei_null: Regel in Worten, die die KI umsetzen muss, wenn der Wert 0 erreicht (die App meldet es der KI). Pflicht für alle Ressourcen, bei denen 0 etwas bedeutet.
+- ende: true = das Spiel endet bei 0 (Spielende; die KI erzählt das Ende, Optionen werden ignoriert).
+Werte können nie unter 0 fallen oder über max steigen.
+
+3.5 Levelaufstieg (aufstieg)
+Der Aufstieg ist nur aktiv, wenn regeln, statpunkte oder skillpunkte angegeben sind. Fehlt der Block, steigen Level nur als Zahl.
+
+"aufstieg": {
+  "regeln": "Text für die KI: wie der Aufstieg im Dialog ablaufen soll (z. B. Verbesserungen als Optionen anbieten, bei akuter Gefahr vormerken, alle 3 Level einen Flaw mildern).",
+  "statpunkte": 1,
+  "skillpunkte": 2,
+  "maxwert": 10,
+  "ressourcen_max": { "leben": 2, "mana": 1 },
+  "auffuellen": ["leben", "mana"]
+}
+
+- statpunkte / skillpunkte: pro Aufstieg verteilbare Punkte.
+- maxwert: Höchstwert für Stats und Skills (1–10, Vorgabe 10).
+- ressourcen_max: AUTOMATISCH erhöhte Maxima pro Aufstieg, Schlüssel sind Ressourcen-ids.
+- auffuellen: Liste von Ressourcen-ids, die beim Aufstieg automatisch auf max aufgefüllt werden, oder "alle".
+- Die automatischen Teile wendet die App sofort an. Die Punkteverteilung führt die KI im Gespräch mit den Funktionen aufstieg_anwenden und aufstieg_abschliessen durch; der Aufstieg bleibt offen, bis die KI ihn abschließt. Mehrere Aufstiege werden nacheinander abgearbeitet. Die KI kann außerdem Flaws mit flaw_aendern mildern/entfernen, wenn die "regeln" das erlauben.
+
+
+4. WELT-DATEI (<name>_welt.json)
+--------------------------------
+{
+  "sprache": "de-DE",
+  "freitext": true,
+  "weltid": "kaldor",
+  "startort": "Brunnenfurt",
+  "startconditions": "Der Abenteurer erreicht bei Einbruch der Dunkelheit das Dorf ...",
+  "instructions": "Du bist ein erfahrener Spielleiter ... "
+}
+
+- instructions (PFLICHT): Anweisungen an die KI als Spielleiter: Genre, Ton, Perspektive ("Du ..."), Länge der Erzähltexte, Härte, Umgang mit NPCs, und Vorgaben zu den Optionen. Die Engine verlangt am Ende jeder Antwort immer genau 3 Optionen; Länge (z. B. "maximal 12 Wörter") und Art der Optionen gehören hierher. Nicht hierher gehören technische Dinge wie Würfeln, Ressourcen oder Funktionen; das erklärt die Engine selbst.
+- startconditions (PFLICHT): Ausgangssituation für den ersten Zug (und Kopfzeile der Erinnerung).
+- sprache: Sprachcode für die Sprachausgabe (Vorgabe "de-DE").
+- freitext: true (Vorgabe) = der Spieler darf zusätzlich zu den 3 Optionen frei eintippen. false = nur Optionen (z. B. für Kinder). Nur ein ausdrückliches false schaltet es aus.
+- weltid (optional): Name der gemeinsamen Welt in Firebase/lokalem Speicher. Fehlt er, wird der Spieltitel benutzt. Spiele mit gleicher weltid teilen sich die Welt; ein fester Wert macht die Welt unabhängig von Titeländerungen.
+- startort (OPTIONAL): Ort, an dem alle Charaktere starten. Fehlt er, nimmt die Engine ihn in dieser Reihenfolge: "startort" der Karte, erster globaler Ort der Karte, erster lokaler Ort der Karte, erster Eintrag von "orte" hier, sonst "Startort". Ist der Startort nicht in der Karte/den Orten, wird er als einfacher Ort angelegt.
+- orte (OPTIONAL): einfache Liste bekannter Orte ohne Wege: [{"name": "Brunnenfurt", "beschreibung": "Kleines Dorf"}, ...]. Gedacht für Spiele OHNE Karte. Gibt es eine Karte, sollten die Orte dort stehen (Einträge hier mit gleichem Namen ergänzen nur eine fehlende Beschreibung). Fehlt "orte" ganz, ist das in Ordnung.
+
+
+5. KARTEN-DATEI (<name>_karte.json) – OPTIONAL
+----------------------------------------------
+Die Karte beschreibt Gebiete (global) und einzelne Orte (lokal) samt Wegen. Sie wird in game.json mit "karte": "<datei>" eingetragen.
+
+{
+  "startort": "Brunnenfurt",
+  "global": [
+    { "name": "Brunnenfurt", "beschreibung": "Dorf am Rand der Ruinen.", "wege": ["Straße nach Kaldor"], "enthaelt": ["Taverne von Brunnenfurt", "Dorfbrunnen"] }
+  ],
+  "lokal": [
+    { "name": "Taverne von Brunnenfurt", "beschreibung": "Rauchige Schankstube.", "wege": ["Dorfbrunnen"] },
+    { "name": "Dorfbrunnen", "wege": ["Taverne von Brunnenfurt"] }
+  ]
+}
+
+Felder:
+- global: Liste globaler Orte (Gebiete, Regionen, Siedlungen, Wege zwischen Siedlungen).
+- lokal: Liste lokaler Orte (konkrete Stellen innerhalb eines Gebiets: Gebäude, Plätze, Räume).
+- Jeder Ort: name (Pflicht, eindeutig über global UND lokal hinweg), beschreibung (optional), wege (Liste der Orte, zu denen man von hier gehen kann; Namen von globalen oder lokalen Orten).
+- Nur globale Orte haben zusätzlich enthaelt: Liste der lokalen Orte, die in diesem Gebiet liegen. So wird jedem lokalen Ort sein Gebiet zugeordnet. Ein lokaler Ort kann in höchstens einem Gebiet liegen.
+- startort (optional): Startort, falls die Welt-Datei keinen nennt.
+- Wege gelten NUR in der eingetragenen Richtung. Zwei-Wege-Verbindungen müssen daher an beiden Orten eingetragen werden.
+- Jeder lokale Ort bekommt automatisch einen Ausgang zu seinem Gebiet, und aus einem Gebiet kann man in seine enthaltenen Orte. Diese müssen nicht extra in "wege" stehen.
+- Erlaubte Alternativnamen (nicht nötig): wege = verbindungen/gehen_zu/ziele/nachbarn; enthaelt = enthält/orte/lokale_orte/beinhaltet; global = globale/gebiete; lokal = lokale/orte.
+- Namen in wege/enthaelt, die keinen eigenen Eintrag haben, legt die Engine als einfachen Ort an und zeigt einen Hinweis im Startfenster. Das ist ein Zeichen für Tippfehler: Namen müssen (nach der id-Regel) exakt übereinstimmen.
+
+Was die Engine mit der Karte macht:
+- Position: Jeder Spieler hat eine aktuelle Position (Ort). Sie steht im Spielstand und in der gemeinsamen Welt.
+- Bei JEDEM Zug bekommt die KI: den aktuellen Ort (Beschreibung, Wege von hier), das zugehörige Gebiet (Beschreibung, Wege des Gebiets, alle Orte darin) und den Ausgang. Im vollen Zug zusätzlich die gesamte Karte.
+- Die KI wechselt die Position mit der Funktion position_setzen. Bekannte Orte werden erkannt (Groß-/Kleinschreibung und Akzente egal). Fehlt ein direkter Weg, bekommt die KI einen Hinweis und kann die Reise plausibel erzählen.
+- Die KI darf Orte erfinden. Sicherung: Ein unbekannter Ort wird angelegt, einem globalen Gebiet zugeordnet (Gebiet des Herkunftsorts, oder das von der KI genannte Gebiet, sonst das Gebiet des Startorts bzw. der Startort selbst), erhält einen Weg zurück zum Herkunftsort, und der Herkunftsort sowie das Gebiet führen ihn künftig auf. Die KI bekommt die Rückwege genannt ("Sicherer Rückweg: ..."). Erfundene Orte werden in der gemeinsamen Welt gespeichert und stehen damit auch anderen Spielern zur Verfügung. Sie ändern die Karten-Datei nicht.
+- Ohne Karte funktionieren Positionen und erfundene Orte trotzdem; Anker ist dann der Startort.
+
+Gestaltungstipps: Jedes Gebiet sollte mindestens einen Weg zu einem anderen Gebiet haben, damit die Welt zusammenhängt. Lokale Orte, die nur über einen Ort erreichbar sind (Sackgasse), brauchen trotzdem einen Rückweg in "wege" des Nachbarn. Keine Ortsnamen mit Sonderbedeutung wie "Ausgang" verwenden.
+
+
+6. CHARAKTER-DATEI (<name>_charaktere.json)
+-------------------------------------------
+Aufbau: ein Objekt mit "charaktere" (Liste), alternativ direkt eine Liste.
+
+{
+  "charaktere": [
+    {
+      "id": "brann",
+      "name": "Brann",
+      "beschreibung": "Narbiger Söldner: stark im Kampf, schwach bei Höhe und Menschenkenntnis.",
+      "background": "Brann diente zehn Jahre als Söldner ...",
+      "stats":  { "Stärke": 6, "Geschick": 5, "Intelligenz": 4, "Charisma": 3, "Willenskraft": 5 },
+      "skills": { "Kämpfen": 4, "Springen": 3, "Klettern": 3, "Schleichen": 2 },
+      "flaws": [ "Höhenangst: In großer Höhe lähmt die Angst, Proben fallen schwerer." ],
+      "inventar": [ { "name": "Rostiges Schwert", "menge": 1, "beschreibung": "Schlechte Klinge" } ],
+      "start": { "geld": 30 },
+      "max": { "leben": 14, "mana": 16 }
+    }
+  ]
+}
+
+- name (PFLICHT): Anzeigename. id (optional): wird sonst aus dem Namen gebildet; für Speicherdateien nützlich.
+- beschreibung: Kurztext in der Charakterauswahl (zeigt Stärken/Schwächen).
+- background (oder hintergrund): Vorgeschichte; geht im vollen Zug an die KI.
+- stats: feste Eigenschaften, Werte 0–10 (z. B. Stärke, Geschick). Alle Charaktere eines Spiels sollten dieselben Stats haben.
+- skills: Fertigkeiten, Werte 0–10. Charaktere dürfen unterschiedliche Skills haben (die KI kann neue Skills durch Training anlegen). Die KI darf nur Stats/Skills würfeln, die der Charakter hat.
+- flaws: Liste von Freitext-Nachteilen ("Name: Auswirkung"). Die KI lässt sie in die Geschichte und über Modifikatoren in Proben einfließen.
+- inventar: Gegenstände mit name, menge (Vorgabe 1) und beschreibung. Kurzform: { "Fackel": 3 }. Die Beschreibung erklärt der KI und dem Spieler die Wirkung (z. B. "Stellt Leben wieder her"); der Spieler kann Gegenstände über einen "Benutzen"-Button einsetzen.
+- start: optionale Startwerte einzelner Ressourcen (Schlüssel = Ressourcen-id aus der Regeln-Datei, z. B. "geld"). Fehlt ein Wert, gilt der Startwert aus den Regeln.
+- max: optionale Maximalwerte einzelner Ressourcen (z. B. schwächere Charaktere). Ersetzt das max der Regeln.
+- Ressourcen-ids in start/max müssen in der Regeln-Datei existieren; unbekannte werden ignoriert.
+- Mindestens ein Charakter ist Pflicht; bei nur einem entfällt die Auswahl.
+
+
+7. WIE DIE ENGINE DIE KI STEUERT (Zusammenhang)
+------------------------------------------------
+- Die KI (Gemini) antwortet ausschließlich über Funktionen. Ergebnis jeder Runde ist die Funktion antworten (story + genau 3 Optionen + optional erinnerung).
+- Änderungen am Charakter gehen nur über Funktionen der App: probe, ressource_aendern, xp_vergeben, item_hinzufuegen, item_entfernen, wert_aendern, flaw_aendern, aufstieg_anwenden, aufstieg_abschliessen. Die App prüft alles (Namen müssen existieren, Werte bleiben in Grenzen) und meldet Fehler an die KI zurück.
+- Gemeinsame Welt: position_setzen, info_speichern (bereich "ort" oder "allgemein"), info_entfernen. Bei jedem Zug liest die App alle Spielerpositionen und Infos neu und gibt sie der KI mit. Pro Ort und allgemein werden höchstens 30 Infos gehalten (die ältesten fallen heraus).
+- Scheitert ein Zug (KI antwortet nicht/falsch), nimmt die App alle Änderungen dieses Zuges zurück; "Nochmal versuchen" vergibt XP, Items usw. nur einmal.
+- Der Spielzustand (Ressourcen, XP, Stats, Skills, Flaws, Inventar) wird bei jedem Zug vollständig an die KI geschickt; die KI muss ihn nie erfinden.
+- Spielstände liegen im Browser (Speichern/Laden-Buttons). Der erste Zug nach dem Laden ist ein voller Zug.
+
+
+8. PRÜFLISTE VOR DEM HOCHLADEN
+------------------------------
+1. Alle Dateien sind gültiges JSON (Klammern, Kommas, Anführungszeichen).
+2. game.json: jedes Spiel hat titel, regeln, welt, charaktere; die Dateinamen stimmen exakt mit den hochgeladenen Dateien überein (Groß-/Kleinschreibung!).
+3. Welt: instructions und startconditions vorhanden und nicht leer.
+4. Regeln: jede Ressource hat eine eindeutige id; "ende": true nur für die Ressource, bei der das Spiel endet; bei_null bei allen wichtigen Ressourcen; Stufen und Würfel passen zusammen.
+5. Charaktere: jeder hat "name"; Stats/Skills 0–10; Ressourcen-ids in start/max existieren; Inventar-Beschreibungen sagen, was Gegenstände tun.
+6. Karte (falls vorhanden): jeder Ort hat einen eindeutigen Namen; alle Namen in wege/enthaelt existieren als Einträge; jedes Gebiet erreicht ein anderes Gebiet; Zwei-Wege-Verbindungen sind beidseitig eingetragen; der Startort existiert.
+7. Kinder-Spiele: freitext false, kurze Erinnerung (pro_zug klein), instructions mit klaren Vorgaben zu Sprache und Inhalt.
+8. Alle geänderten Dateien gemeinsam hochladen (GitHub Pages braucht kurz für das Deployment).
+
+
+9. MINIMALES LAUFFÄHIGES BEISPIEL
+---------------------------------
+game.json:
+{ "spiele": [ { "titel": "Mini", "regeln": "mini_regeln.json", "welt": "mini_welt.json", "charaktere": "mini_charaktere.json" } ] }
+
+mini_regeln.json:
+{ "ressourcen": [ { "id": "leben", "name": "Leben", "icon": "❤️", "start": 10, "max": 10, "bei_null": "Der Charakter stirbt.", "ende": true } ] }
+
+mini_welt.json:
+{ "instructions": "Du bist Spielleiter. Schreibe auf Deutsch in der zweiten Person, höchstens drei kurze Absätze. Gib genau 3 kurze Optionen.", "startconditions": "Du stehst vor einer alten Tür." }
+
+mini_charaktere.json:
+{ "charaktere": [ { "name": "Alex", "stats": { "Mut": 5 }, "skills": { "Klettern": 2 }, "inventar": [ { "name": "Fackel", "menge": 1 } ] } ] }
+
+Das Spiel läuft damit ohne Karte, ohne Orte, ohne Firebase (Welt lokal), mit Standardwerten für Würfel, XP und Gedächtnis.

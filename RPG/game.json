@@ -19,7 +19,8 @@
       "beschreibung": "Dark-Fantasy-Rollenspiel für Erwachsene mit echten Gefahren.",
       "regeln": "kaldor_regeln.json",
       "welt": "kaldor_welt.json",
-      "charaktere": "kaldor_charaktere.json"
+      "charaktere": "kaldor_charaktere.json",
+      "karte": "kaldor_karte.json"
     }
   ]
 }

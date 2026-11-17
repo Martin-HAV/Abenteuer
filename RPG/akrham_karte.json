@@ -1,0 +1,312 @@
+{
+  "startort": "Bahnhof Arkham",
+  "global": [
+    {
+      "name": "Northside",
+      "beschreibung": "Das ruhige, von alten Ulmen gesäumte Wohn- und Geschäftsviertel nördlich des Miskatonic River, geprägt von kolonialen Giebelhäusern und schwerem Herbstnebel.",
+      "wege": [
+        "Downtown und Easttown",
+        "Campus und Rivertown",
+        "Miskatonic River und Unbesuchte Insel",
+        "Die Nebelsümpfe im Westen"
+      ],
+      "enthaelt": [
+        "Bahnhof Arkham",
+        "Arkham Sanitarium",
+        "West Bridge"
+      ]
+    },
+    {
+      "name": "Downtown und Easttown",
+      "beschreibung": "Das geschäftige, rußgeschwärzte Herz Arkhams mit Banken, Behörden, Backsteinfabriken und den verwinkelten Arbeiterquartieren am Nordufer.",
+      "wege": [
+        "Northside",
+        "Campus und Rivertown",
+        "Miskatonic River und Unbesuchte Insel",
+        "Die Küstenstraße nach Innsmouth"
+      ],
+      "enthaelt": [
+        "Rathaus",
+        "Arkham Advertiser",
+        "First National Bank",
+        "Polizeihauptquartier",
+        "St. Mary's Hospital",
+        "Velma's Diner",
+        "Main Street Bridge",
+        "East Bridge"
+      ]
+    },
+    {
+      "name": "Campus und Rivertown",
+      "beschreibung": "Das ehrwürdige Gelände der Miskatonic-Universität mit seinen efeubewachsenen Steingebäuden, direkt angrenzend an die verfallenen Lagerhäuser der Docks am Südufer.",
+      "wege": [
+        "Northside",
+        "Downtown und Easttown",
+        "French Hill und Uptown",
+        "Miskatonic River und Unbesuchte Insel",
+        "Die Nebelsümpfe im Westen"
+      ],
+      "enthaelt": [
+        "Miskatonic-Universität",
+        "Orne-Bibliothek",
+        "Hafendocks von Rivertown"
+      ]
+    },
+    {
+      "name": "French Hill und Uptown",
+      "beschreibung": "Die verwinkelten, schattenreichen Gassen des verrufenen French Hill mit seinen windschiefen Hexenhäusern, flankiert von den vornehmen Villen und alten Friedhöfen in Uptown.",
+      "wege": [
+        "Campus und Rivertown",
+        "Hangman's Hill und die Wälder",
+        "Die Nebelsümpfe im Westen"
+      ],
+      "enthaelt": [
+        "Hexenhaus",
+        "Silver Twilight Lodge",
+        "Christ Church und Friedhof"
+      ]
+    },
+    {
+      "name": "Miskatonic River und Unbesuchte Insel",
+      "beschreibung": "Der dunkle, träge dahinfließende Fluss, der Arkham teilt und eine dicht bewaldete, von abergläubischen Bürgern gemiedene Felseninsel umspült.",
+      "wege": [
+        "Northside",
+        "Downtown und Easttown",
+        "Campus und Rivertown",
+        "Die Küstenstraße nach Innsmouth"
+      ],
+      "enthaelt": [
+        "Unbesuchte Insel"
+      ]
+    },
+    {
+      "name": "Die Nebelsümpfe im Westen",
+      "beschreibung": "Ein trostloses, von krüppligen Weiden und bodenlosem Moor durchzogenes Tiefland westlich der Stadt, über dem nachts fahle Irrlichter tanzen.",
+      "wege": [
+        "Northside",
+        "Campus und Rivertown",
+        "French Hill und Uptown"
+      ],
+      "enthaelt": [
+        "Versunkene Ruinen im Moor"
+      ]
+    },
+    {
+      "name": "Hangman's Hill und die Wälder",
+      "beschreibung": "Dichte, uralte Wälder südlich von Arkham, die zu einem kahlen, windgepeitschten Hügel ansteigen, auf dem einst Hexen gerichtet wurden.",
+      "wege": [
+        "French Hill und Uptown",
+        "Die Küstenstraße nach Innsmouth"
+      ],
+      "enthaelt": [
+        "Gipfel des Hangman's Hill"
+      ]
+    },
+    {
+      "name": "Die Küstenstraße nach Innsmouth",
+      "beschreibung": "Eine einsame, salzverkrustete Landstraße entlang der schroffen Neuengland-Küste nach Osten, wo der eisige Atlantik gegen schwarze Klippen brandet.",
+      "wege": [
+        "Downtown und Easttown",
+        "Miskatonic River und Unbesuchte Insel",
+        "Hangman's Hill und die Wälder"
+      ],
+      "enthaelt": [
+        "Verlassener Leuchtturm"
+      ]
+    }
+  ],
+  "lokal": [
+    {
+      "name": "Bahnhof Arkham",
+      "beschreibung": "305 North Garrison Street: Ein zugiges Backsteingebäude voller Ruß und Dampf, das Tor zur Außenwelt nach Boston.",
+      "wege": [
+        "Arkham Sanitarium",
+        "West Bridge",
+        "Rathaus",
+        "Arkham Advertiser"
+      ]
+    },
+    {
+      "name": "Arkham Sanitarium",
+      "beschreibung": "1091 West Street: Eine von hohen Steinmauern und eisernen Toren umgebene Nervenheilanstalt am nordwestlichen Stadtrand, aus deren Ostflügel manchmal Schreie dringen.",
+      "wege": [
+        "Bahnhof Arkham",
+        "West Bridge",
+        "Versunkene Ruinen im Moor"
+      ]
+    },
+    {
+      "name": "West Bridge",
+      "beschreibung": "Peabody Avenue: Eine alte Steinbogenbrücke über den dunklen Miskatonic River, die Northside direkt mit dem Campus verbindet.",
+      "wege": [
+        "Bahnhof Arkham",
+        "Arkham Sanitarium",
+        "Miskatonic-Universität",
+        "Hafendocks von Rivertown"
+      ]
+    },
+    {
+      "name": "Rathaus",
+      "beschreibung": "101 Federal Street: Ein ehrwürdiges Kolonialgebäude am Independence Square, das Grundbücher, Baupläne und vergilbte Stadtarchive beherbergt.",
+      "wege": [
+        "Bahnhof Arkham",
+        "Arkham Advertiser",
+        "First National Bank",
+        "Main Street Bridge"
+      ]
+    },
+    {
+      "name": "Arkham Advertiser",
+      "beschreibung": "212 Federal Street: Die Redaktion von Arkhams wichtigster Tageszeitung mit ratternden Druckerpressen und einem riesigen Zeitungsarchiv im Keller.",
+      "wege": [
+        "Bahnhof Arkham",
+        "Rathaus",
+        "First National Bank"
+      ]
+    },
+    {
+      "name": "First National Bank",
+      "beschreibung": "402 East Main Street: Ein massives Steingebäude mit schweren Messingtüren und tiefen Tresorräumen im Zentrum von Downtown.",
+      "wege": [
+        "Rathaus",
+        "Arkham Advertiser",
+        "Main Street Bridge",
+        "Polizeihauptquartier"
+      ]
+    },
+    {
+      "name": "Main Street Bridge",
+      "beschreibung": "Garrison Street / Federal Street: Die belebte Hauptbrücke über den Fluss, von der aus man die bewaldete Unbesuchte Insel im Nebel erkennen kann.",
+      "wege": [
+        "Rathaus",
+        "First National Bank",
+        "Miskatonic-Universität",
+        "Hafendocks von Rivertown"
+      ]
+    },
+    {
+      "name": "Polizeihauptquartier",
+      "beschreibung": "124 East Main Street: Ein nüchterner Zweckbau in Easttown mit Wachstube, Verhörräumen, Gefängniszellen und einer verschlossenen Asservatenkammer.",
+      "wege": [
+        "First National Bank",
+        "Velma's Diner",
+        "St. Mary's Hospital"
+      ]
+    },
+    {
+      "name": "Velma's Diner",
+      "beschreibung": "318 East Main Street: Ein spärlich beleuchtetes Lokal mit heißem Kaffee und abgewetzten Ledersitzen, in dem Arbeiter, Studenten und Ermittler Gerüchte austauschen.",
+      "wege": [
+        "Polizeihauptquartier",
+        "St. Mary's Hospital",
+        "East Bridge"
+      ]
+    },
+    {
+      "name": "St. Mary's Hospital",
+      "beschreibung": "510 Walnut Street: Ein weitläufiges Lehrkrankenhaus in Easttown mit Notaufnahme, Operationssälen und einer kühlen Pathologie im Untergeschoss.",
+      "wege": [
+        "Polizeihauptquartier",
+        "Velma's Diner",
+        "East Bridge"
+      ]
+    },
+    {
+      "name": "East Bridge",
+      "beschreibung": "Walnut Street / Derby Street: Eine eiserne Fachwerkbrücke am östlichen Rand des Zentrums, unter der das schwarze Wasser des Miskatonic gurgelt.",
+      "wege": [
+        "Velma's Diner",
+        "St. Mary's Hospital",
+        "Hafendocks von Rivertown",
+        "Verlassener Leuchtturm"
+      ]
+    },
+    {
+      "name": "Hafendocks von Rivertown",
+      "beschreibung": "Water Street: Modernde Holzpiere, verlassene Lagerhäuser und vertäute Fischerboote entlang des südlichen Flussufers.",
+      "wege": [
+        "West Bridge",
+        "Main Street Bridge",
+        "East Bridge",
+        "Miskatonic-Universität",
+        "Unbesuchte Insel"
+      ]
+    },
+    {
+      "name": "Miskatonic-Universität",
+      "beschreibung": "200-400 College Street: Das efeubewachsene Universitätsgelände mit Laboren, dem Naturkundemuseum voller Expeditionsartefakte und den Büros der Professoren.",
+      "wege": [
+        "West Bridge",
+        "Main Street Bridge",
+        "Hafendocks von Rivertown",
+        "Orne-Bibliothek",
+        "Hexenhaus"
+      ]
+    },
+    {
+      "name": "Orne-Bibliothek",
+      "beschreibung": "250 College Street: Ein stiller, nach altem Pergament riechender Lesesaal auf dem Campus, in dessen vergittertem Kellergewölbe verbotene Folianten ruhen.",
+      "wege": [
+        "Miskatonic-Universität",
+        "Silver Twilight Lodge"
+      ]
+    },
+    {
+      "name": "Hexenhaus",
+      "beschreibung": "214 Pickman Street: Ein baufälliges, spitzgiebeliges Kolonialhaus mit unnatürlichen Dachwinkeln auf dem French Hill, in dem einst die Hexe Keziah Mason lebte.",
+      "wege": [
+        "Miskatonic-Universität",
+        "Silver Twilight Lodge",
+        "Christ Church und Friedhof"
+      ]
+    },
+    {
+      "name": "Silver Twilight Lodge",
+      "beschreibung": "188 High Street: Ein prächtiges, aber abweisendes Herrenhaus auf dem French Hill, hinter dessen schweren Vorhängen sich ein einflussreicher Geheimbund trifft.",
+      "wege": [
+        "Orne-Bibliothek",
+        "Hexenhaus",
+        "Christ Church und Friedhof"
+      ]
+    },
+    {
+      "name": "Christ Church und Friedhof",
+      "beschreibung": "412 West High Street: Arkhams älteste Kirche in Uptown, umgeben von einem riesigen, von Moos und eingesunkenen Grabsteinen überwucherten Friedhof.",
+      "wege": [
+        "Hexenhaus",
+        "Silver Twilight Lodge",
+        "Gipfel des Hangman's Hill",
+        "Versunkene Ruinen im Moor"
+      ]
+    },
+    {
+      "name": "Unbesuchte Insel",
+      "beschreibung": "Miskatonic River: Eine nur per Boot erreichbare, von dichtem Gestrüpp überwucherte Flussinsel mit verwitterten, vorzeitlichen Steinkreisen.",
+      "wege": [
+        "Hafendocks von Rivertown"
+      ]
+    },
+    {
+      "name": "Versunkene Ruinen im Moor",
+      "beschreibung": "Nebelsümpfe im Westen: Halb im schwarzen Torf versunkene Grundmauern eines vergessenen Gehöfts, umgeben von abgestorbenen Bäumen und unnatürlicher Stille.",
+      "wege": [
+        "Arkham Sanitarium",
+        "Christ Church und Friedhof"
+      ]
+    },
+    {
+      "name": "Gipfel des Hangman's Hill",
+      "beschreibung": "Wälder südlich von Arkham: Eine kahle, von knorrigen Eichen umringte Hügelkuppe mit weitem Blick über die Dächer der Stadt und tiefen Felsspalten.",
+      "wege": [
+        "Christ Church und Friedhof"
+      ]
+    },
+    {
+      "name": "Verlassener Leuchtturm",
+      "beschreibung": "Küstenstraße nach Innsmouth: Ein vom Salzwind zerfressener Steinturm auf einer schwarzen Klippe über der tosenden Brandung des Atlantiks.",
+      "wege": [
+        "East Bridge"
+      ]
+    }
+  ]
+}

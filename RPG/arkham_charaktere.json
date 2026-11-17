@@ -1,0 +1,259 @@
+{
+  "charaktere": [
+    {
+      "id": "pendelton",
+      "name": "Dr. Arthur Pendelton",
+      "beschreibung": "Desillusionierter Archäologe: stark in Recherche und Okkultismus, schwach im Kampf und körperlich gebrechlich.",
+      "background": "Nach einer katastrophalen Ausgrabung in Ägypten, bei der zwei seiner Studenten spurlos verschwanden, wurde Arthur von seiner Universität in Boston beurlaubt. Er betäubt seine Albträume mit billigem Bourbon und hofft, in den verstaubten Archiven Arkhams eine rationale Erklärung für das zu finden, was er in der Wüste gesehen hat.",
+      "stats": {
+        "Stärke": 3,
+        "Geschick": 4,
+        "Intelligenz": 8,
+        "Charisma": 5,
+        "Willenskraft": 6
+      },
+      "skills": {
+        "Bibliotheksnutzung": 7,
+        "Okkultismus": 6,
+        "Spurensuche": 5,
+        "Überreden": 4,
+        "Schleichen": 2,
+        "Faustfeuerwaffen": 2,
+        "Kämpfen": 1,
+        "Cthulhu-Mythos": 1
+      },
+      "flaws": [
+        "Flachmann-Tröster: Greift unter Stress zur Flasche, was Geschick-Proben vorübergehend erschwert.",
+        "Akademische Besessenheit: Kann verbotenen Schriften und seltsamen Inschriften kaum widerstehen."
+      ],
+      "inventar": [
+        {
+          "name": "Silberner Flachmann",
+          "menge": 1,
+          "beschreibung": "Gefüllt mit Bourbon; beruhigt die Nerven und stellt 2 Geistige Stabilität wieder her, trübt aber die Sinne."
+        },
+        {
+          "name": "Vergrößerungsglas & Notizbuch",
+          "menge": 1,
+          "beschreibung": "Hilft beim Entziffern alter Schriften und Sichern feiner Hinweise."
+        },
+        {
+          "name": "Stabtaschenlampe",
+          "menge": 1,
+          "beschreibung": "Schweres Metallgehäuse, erhellt dunkle Keller und Gassen."
+        },
+        {
+          "name": "Alter .32er Taschenrevolver",
+          "menge": 1,
+          "beschreibung": "Kleine Selbstverteidigungswaffe, wenig Durchschlagskraft."
+        },
+        {
+          "name": "Bronzenes Astrolabium",
+          "menge": 1,
+          "beschreibung": "Seltsames Fundstück aus Ägypten mit unnatürlichen Sternbildern."
+        }
+      ],
+      "max": {
+        "leben": 10,
+        "stabilitaet": 12,
+        "magie": 12
+      },
+      "start": {
+        "leben": 10,
+        "stabilitaet": 12,
+        "magie": 12,
+        "geld": 40
+      }
+    },
+    {
+      "id": "vance",
+      "name": "Jack Vance",
+      "beschreibung": "Abgebrannter Privatdetektiv: stark mit Schusswaffen und beim Beschatten, schwach bei akademischem Wissen und chronisch pleite.",
+      "background": "Einst ein vielversprechender Inspektor in New York, flog Jack aus dem Polizeidienst, als er sich weigerte, die Machenschaften eines korrupten Stadtrats unter den Teppich zu kehren. Heute schlägt er sich in schäbigen Büros mit Scheidungsfällen und Inkasso-Aufträgen durch – und nimmt jeden Job an, solange die Bezahlung stimmt.",
+      "stats": {
+        "Stärke": 6,
+        "Geschick": 6,
+        "Intelligenz": 5,
+        "Charisma": 4,
+        "Willenskraft": 6
+      },
+      "skills": {
+        "Faustfeuerwaffen": 6,
+        "Spurensuche": 6,
+        "Schleichen": 5,
+        "Kämpfen": 5,
+        "Überreden": 4,
+        "Bibliotheksnutzung": 2,
+        "Okkultismus": 1,
+        "Cthulhu-Mythos": 0
+      },
+      "flaws": [
+        "Spielschulden: Schläger eines Syndikats suchen ihn; Geld ist bei ihm immer knapp.",
+        "Zynischer Dickkopf: Misstraut Autoritäten und weigert sich oft, rechtzeitig wegzulaufen."
+      ],
+      "inventar": [
+        {
+          "name": "Colt Detective Special (.38)",
+          "menge": 1,
+          "beschreibung": "Zuverlässiger Revolver für den Nah- und Mittelbereich."
+        },
+        {
+          "name": "Dietrich-Set",
+          "menge": 1,
+          "beschreibung": "Öffnet einfache Tür- und Schrankschlösser ohne Schlüssel."
+        },
+        {
+          "name": "Schlagring",
+          "menge": 1,
+          "beschreibung": "Verstärkt waffenlose Schläge im Handgemenge."
+        },
+        {
+          "name": "Zigarettenetui & Benzinfeuerzeug",
+          "menge": 1,
+          "beschreibung": "Spendet kurzes Licht und beruhigt in angespannten Momenten."
+        },
+        {
+          "name": "Schmerztabletten",
+          "menge": 2,
+          "beschreibung": "Stellen 3 Trefferpunkte wieder her und unterdrücken Wundschmerz."
+        }
+      ],
+      "max": {
+        "leben": 14,
+        "stabilitaet": 13,
+        "magie": 10
+      },
+      "start": {
+        "leben": 14,
+        "stabilitaet": 13,
+        "magie": 10,
+        "geld": 12
+      }
+    },
+    {
+      "id": "claire",
+      "name": "Clara Sterling",
+      "beschreibung": "Skrupellose Sensationsreporterin: stark beim Aushorchen und Schleichen, schwach im offenen Kampf und leichtsinnig bei Gefahren.",
+      "background": "Für eine Schlagzeile auf der Titelseite geht Clara über Leichen – notfalls auch über ihre eigene. Nachdem ihre Enthüllungsstory über einen Spiritistenzirkel in Boston als Schwindel abgetan wurde, steht ihre Karriere vor dem Aus. Das mysteriöse Telegramm aus Arkham ist ihre letzte Chance auf den großen Durchbruch.",
+      "stats": {
+        "Stärke": 3,
+        "Geschick": 7,
+        "Intelligenz": 7,
+        "Charisma": 7,
+        "Willenskraft": 4
+      },
+      "skills": {
+        "Überreden": 7,
+        "Schleichen": 6,
+        "Spurensuche": 6,
+        "Bibliotheksnutzung": 5,
+        "Okkultismus": 3,
+        "Faustfeuerwaffen": 2,
+        "Kämpfen": 1,
+        "Cthulhu-Mythos": 0
+      },
+      "flaws": [
+        "Sensationsgier: Bringt sich für einen Beweis oder ein Foto oft unnötig in Lebensgefahr.",
+        "Dünnes Nervenkostüm: Übernatürlicher Horror erschüttert ihre Geistige Stabilität schneller."
+      ],
+      "inventar": [
+        {
+          "name": "Presseausweis (Boston Globe)",
+          "menge": 1,
+          "beschreibung": "Öffnet Türen bei Polizei, Behörden und neugierigen Bürgern."
+        },
+        {
+          "name": "Faltkamera mit Blitzlichtpulver",
+          "menge": 1,
+          "beschreibung": "Hält Beweise fest; der helle Blitz kann Angreifer kurzzeitig blenden."
+        },
+        {
+          "name": "Stenoblock & Bleistift",
+          "menge": 1,
+          "beschreibung": "Für blitzschnelle Mitschriften von Aussagen und Hinweisen."
+        },
+        {
+          "name": "Beruhigungstropfen (Laudanum)",
+          "menge": 1,
+          "beschreibung": "Stellt 3 Geistige Stabilität wieder her, macht aber schläfrig."
+        },
+        {
+          "name": "Taschenmesser",
+          "menge": 1,
+          "beschreibung": "Kleines Klappmesser für Notfälle."
+        }
+      ],
+      "max": {
+        "leben": 11,
+        "stabilitaet": 11,
+        "magie": 11
+      },
+      "start": {
+        "leben": 11,
+        "stabilitaet": 11,
+        "magie": 11,
+        "geld": 30
+      }
+    },
+    {
+      "id": "moreau",
+      "name": "Dr. Evelyn Moreau",
+      "beschreibung": "Kriegsgezeichnete Chirurgin: stark in Medizin, Spurensuche und Nervenstärke, schwach im sozialen Umgang und bei okkulten Themen.",
+      "background": "In den Feldlazaretten Frankreichs hat Evelyn Dinge gesehen, die kein Mensch je vergessen kann. Zurück in Neuengland arbeitet sie in der Nachtschicht der Pathologie, weil sie lebende Patienten kaum noch erträgt. Sie glaubt nur an das, was ihr Skalpell freilegen kann – doch manche Leichen aus dem Miskatonic-Tal widersprechen jeder Anatomie.",
+      "stats": {
+        "Stärke": 4,
+        "Geschick": 7,
+        "Intelligenz": 7,
+        "Charisma": 3,
+        "Willenskraft": 7
+      },
+      "skills": {
+        "Erste Hilfe": 7,
+        "Spurensuche": 6,
+        "Bibliotheksnutzung": 4,
+        "Kämpfen": 4,
+        "Schleichen": 3,
+        "Überreden": 2,
+        "Okkultismus": 1,
+        "Cthulhu-Mythos": 0
+      },
+      "flaws": [
+        "Emotionale Kälte: Wirkt auf Fremde abweisend und gefühllos, was Überreden-Proben erschwert.",
+        "Kriegstrauma: Plötzlicher Lärm oder Blutbäder können Erinnerungen an die Front auslösen."
+      ],
+      "inventar": [
+        {
+          "name": "Arztkoffer mit Verbandszeug",
+          "menge": 2,
+          "beschreibung": "Versorgt schwere Wunden fachgerecht und stellt 4 Trefferpunkte wieder her."
+        },
+        {
+          "name": "Chirurgisches Skalpell",
+          "menge": 1,
+          "beschreibung": "Rasiermesserscharfes Präzisionsinstrument für Obduktionen und Notwehr."
+        },
+        {
+          "name": "Morphium-Ampullen",
+          "menge": 2,
+          "beschreibung": "Stellen 3 Trefferpunkte und 2 Geistige Stabilität wieder her."
+        },
+        {
+          "name": "Taschenlampe & Gummihandschuhe",
+          "menge": 1,
+          "beschreibung": "Unverzichtbar für die Untersuchung von Tatorten und Leichen."
+        }
+      ],
+      "max": {
+        "leben": 12,
+        "stabilitaet": 15,
+        "magie": 10
+      },
+      "start": {
+        "leben": 12,
+        "stabilitaet": 15,
+        "magie": 10,
+        "geld": 35
+      }
+    }
+  ]
+}

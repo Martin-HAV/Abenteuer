@@ -1,0 +1,59 @@
+{
+  "global": [
+    {
+      "name": "Brunnenfurt",
+      "beschreibung": "Kleines Dorf am Rand der Ruinen, letzter Halt vor Kaldor.",
+      "wege": ["Straße nach Kaldor"],
+      "enthaelt": ["Taverne von Brunnenfurt", "Händler von Brunnenfurt", "Dorfbrunnen"]
+    },
+    {
+      "name": "Straße nach Kaldor",
+      "beschreibung": "Ein verwahrloster Handelsweg zwischen dem Dorf und der versunkenen Stadt.",
+      "wege": ["Brunnenfurt", "Ruinen von Kaldor"],
+      "enthaelt": ["Alte Mühle"]
+    },
+    {
+      "name": "Ruinen von Kaldor",
+      "beschreibung": "Die versunkene Stadt: Trümmer, Schatten und ein Licht, das nachts leuchtet.",
+      "wege": ["Straße nach Kaldor"],
+      "enthaelt": ["Stadttor von Kaldor", "Marktplatz von Kaldor", "Katakomben"]
+    }
+  ],
+  "lokal": [
+    {
+      "name": "Taverne von Brunnenfurt",
+      "beschreibung": "Rauchige Schankstube, in der Gerüchte über verschwundene Schatzsucher kursieren.",
+      "wege": ["Händler von Brunnenfurt", "Dorfbrunnen"]
+    },
+    {
+      "name": "Händler von Brunnenfurt",
+      "beschreibung": "Kleiner Laden mit dem Nötigsten für Abenteurer.",
+      "wege": ["Taverne von Brunnenfurt", "Dorfbrunnen"]
+    },
+    {
+      "name": "Dorfbrunnen",
+      "beschreibung": "Der Dorfplatz mit dem alten Brunnen.",
+      "wege": ["Taverne von Brunnenfurt", "Händler von Brunnenfurt"]
+    },
+    {
+      "name": "Alte Mühle",
+      "beschreibung": "Verfallene Mühle am Weg nach Kaldor.",
+      "wege": ["Stadttor von Kaldor", "Brunnenfurt"]
+    },
+    {
+      "name": "Stadttor von Kaldor",
+      "beschreibung": "Eingestürztes Tor der versunkenen Stadt.",
+      "wege": ["Marktplatz von Kaldor", "Alte Mühle"]
+    },
+    {
+      "name": "Marktplatz von Kaldor",
+      "beschreibung": "Weiter Platz voller Trümmer und Schatten.",
+      "wege": ["Stadttor von Kaldor", "Katakomben"]
+    },
+    {
+      "name": "Katakomben",
+      "beschreibung": "Dunkle Gänge unter der Stadt.",
+      "wege": ["Marktplatz von Kaldor"]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "memoryresend": 3,
+  "xpprolevel": 100,
+  "xpvergabe": "Vergib 10 bis 20 XP für gefundene Hinweise und gelungene Recherchen, 25 bis 50 XP für überlebte Begegnungen oder gelöste Okkultismus-Rätsel und bis zu 100 XP für das Aufdecken großer Verschwörungen (pro Handlung nur einmal).",
+  "proben": {
+    "wuerfel": 10,
+    "stufen": {
+      "leicht": 7,
+      "mittel": 11,
+      "schwer": 15,
+      "extrem": 19
+    }
+  },
+  "ressourcen": [
+    {
+      "id": "leben",
+      "name": "Trefferpunkte",
+      "icon": "❤️",
+      "start": 12,
+      "max": 12,
+      "farbe": "#c8503c",
+      "bei_null": "Der Investigator erliegt seinen schweren Verletzungen. Erzähle ein düsteres, würdiges Ende.",
+      "ende": true
+    },
+    {
+      "id": "stabilitaet",
+      "name": "Geistige Stabilität",
+      "icon": "🧠",
+      "start": 14,
+      "max": 14,
+      "farbe": "#6a4c93",
+      "bei_null": "Der Verstand des Investigators zerbricht endgültig am kosmischen Grauen. Er verfällt unheilbarem Wahnsinn. Erzähle ein tragisches, atmosphärisches Ende.",
+      "ende": true
+    },
+    {
+      "id": "magie",
+      "name": "Magiepunkte",
+      "icon": "🕯️",
+      "start": 10,
+      "max": 10,
+      "farbe": "#3b6998",
+      "bei_null": "Der Investigator ist okkult völlig erschöpft: Keine Rituale mehr möglich und körperliche Proben fallen schwerer, bis er sich ausruht."
+    },
+    {
+      "id": "geld",
+      "name": "Dollar",
+      "icon": "💵",
+      "start": 25,
+      "bei_null": "Der Investigator ist mittellos: Bestechungen, teure Reisen, Ausrüstung und Unterkünfte sind nicht mehr bezahlbar."
+    }
+  ],
+  "aufstieg": {
+    "regeln": "In Call of Cthulhu werden Investigatoren erfahrener, aber nicht körperlich unverwundbarer (Trefferpunkte und maximale Stabilität steigen nicht). Biete dem Spieler beim Aufstieg im Gespräch an, 2 Punkte auf Skills zu verteilen, die er im Abenteuer erfolgreich genutzt hat (kein Statpunkt, da Grundeigenschaften unveränderlich sind). Befindet sich der Charakter in akuter Gefahr, merke den Aufstieg bis zur nächsten ruhigen Szene vor. Alle 3 Level darf durch Therapie oder Erholung ein Wahnsinns-Flaw gemildert werden (flaw_aendern).",
+    "statpunkte": 0,
+    "skillpunkte": 2,
+    "maxwert": 10,
+    "ressourcen_max": {
+      "leben": 0,
+      "stabilitaet": 0,
+      "magie": 0
+    },
+    "auffuellen": [
+      "magie"
+    ]
+  }
+}

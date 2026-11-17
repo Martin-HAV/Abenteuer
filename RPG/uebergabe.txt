@@ -1,0 +1,91 @@
+ÜBERGABE: KI-Rollenspiel (Textadventure mit Gemini API, GitHub Pages)
+==================================================================
+
+PROJEKT
+-------
+Browser-Rollenspiel, das über die Gemini API (Modell aus regeln.json, Standard gemini-3.5-flash-lite) eine Geschichte erzählt. Hosting: https://martin-hav.github.io/Abenteuer/RPG/ (GitHub Pages, flache Dateistruktur, alles im selben Ordner).
+
+Der genaue Aufbau aller JSON-Dateien steht in instructions.txt (damit können auch neue Spiele fehlerfrei erstellt werden). Diese Übergabe beschreibt Stand, Architektur und offene Punkte.
+
+DATEIEN (alle im selben Ordner)
+-------------------------------
+- index.html          Spiel-Engine (eine Datei, HTML/CSS/JS). Lädt game.json, Regeln, Welt, Charaktere und optional die Karte.
+- game.json           Index: Liste der Spiele, Spielerliste, Verweis auf firebase.json
+- firebase.json       Firebase-Web-Konfiguration (projectId github-3b0da)
+- peppa_regeln.json, peppa_welt.json, peppa_charaktere.json   Spiel "Peppa Wutz" (kindgerecht, freitext aus, keine Karte)
+- kaldor_regeln.json, kaldor_welt.json, kaldor_charaktere.json, kaldor_karte.json   Spiel "Die Ruinen von Kaldor" (Dark Fantasy, freitext an, mit Karte; kaldor_welt.json enthält keine "orte" mehr)
+- instructions.txt    Anleitung zum Erstellen der JSON-Dateien
+- uebergabe.txt       diese Datei
+
+Hinweis: Im Upload hießen die Dateien teils anders (game_1.json, index_1.html, kaldor_regeln_1.json). Im Repo müssen game.json und index.html heißen; die Spieldateien müssen den Namen aus game.json entsprechen. kaldor_regeln_1.json ist identisch mit kaldor_regeln.json und wird nicht gebraucht.
+
+ARCHITEKTUR (Stand dieser Version)
+----------------------------------
+1) Gedächtnis- und Kontextverwaltung (vom Spiel, nicht von der KI)
+- aiHistory = "KI-internes Gedächtnis": der kurze Gesprächsverlauf (Spielerwahl + Erzähltext je Zug), den das Spiel selbst mitschickt. Die Gemini-API ist zustandslos; das Spiel baut den Kontext jedes Mal neu.
+- Ist aiHistory leer, ist der Zug ein VOLLER Zug: Nachricht SPIELINFORMATIONEN (Spielleiter-Vorgaben aus welt.json, Würfel- und XP-Regeln, Charakter-Hintergrund, Startort, Gesamtkarte, Aufstiegsregeln, Erinnerung) + aktuelle Nachricht (Zustand, Welt, Karte, letzter Erzählabschnitt, Wahl). Voll ist: der erste Zug eines neuen Spiels, der erste Zug nach dem Laden eines Spielstands (aiHistory wird nicht gespeichert) und der Zug nach dem Leeren.
+- Leichte Züge: gespeicherter Verlauf + aktuelle Nachricht (Zustand, Welt, Karte des aktuellen Ortes, Wahl). Keine Erinnerung, keine JSON-Infos.
+- Nach dem letzten Zug eines Zyklus (memoryresend Züge, Standard 3) wird aiHistory geleert; der nächste Zug ist voll.
+- Die Systemanweisung enthält nur die technischen Engine-Regeln (RPG_RULES), keine Inhalte aus den JSON-Dateien.
+- Erinnerung (memory): pro Zug eine Notiz (optionales Feld erinnerung der KI, sonst vom Spiel aus Wahl + Anfang/Ende des Erzähltexts; bei Ortswechsel mit "[→ Ort]"). Ab erinnerung.max kürzt das Spiel selbst ohne KI-Anfrage (compactMemory: ältere Notizen kürzen, älteste verwerfen, Marker "Ältere Ereignisse wurden gekürzt", Kopfzeilen bleiben). Optional wird die Erinnerung als .md in einen lokalen Ordner gespeichert (erinnerung.lokal).
+- Die frühere KI-gestützte Kürzung (shrinkMemory) und die Pflicht zur KI-Notiz sind entfernt.
+- Anzeige: Zeile "🧠 ..." unter den Buttons zeigt Zykluszähler und Erinnerungslänge.
+
+2) Transaktionale Züge (Fehler "mehrfach 10 XP" behoben)
+- Vor jedem Zug wird ein Schnappschuss des Zustands (st) und der Position gemacht. Scheitert der Zug (API-Fehler, keine Antwort, Schemafehler), werden st, Ereignisse, Position (im Welt-Speicher zurückgesetzt) und in diesem Zug gespeicherte Infos zurückgenommen. "Nochmal versuchen" führt den Zug neu aus; XP, Items usw. werden dadurch nur einmal vergeben.
+- info_speichern ignoriert identische Texte (Doppelschutz).
+- Memory, Verlauf und Zugzähler werden erst bei Erfolg geändert.
+- Zusätzlich: ein stiller zweiter Versuch bei 5xx/Verbindungsabbruch und bei Antworten ohne Funktionsaufruf; klarere Fehlermeldungen (429 Kontingent, 400/403 Schlüssel, 5xx überlastet).
+
+3) Karte (optional) und Orte
+- game.json: "karte": "datei.json" pro Spiel. Aufbau: "global" (Gebiete, mit "wege" und "enthaelt") und "lokal" (Orte, mit "wege"). Details in instructions.txt.
+- "orte" und "startort" in welt.json sind optional. Alle Orte werden in einem Index (cfg.places) zusammengeführt; Startort-Fallback: welt.startort -> karte.startort -> erstes Gebiet -> erster lokaler Ort -> erster Eintrag in orte -> "Startort".
+- Fehlende Namen in wege/enthaelt werden als einfache Orte angelegt und als Hinweis im Startfenster gemeldet.
+- Pro Zug bekommt die KI Ort (lokal) und Gebiet (global) mit Wegen, Nachbarn und Ausgang. Im vollen Zug die Gesamtkarte.
+- Sicherung bei erfundenen Orten (position_setzen mit unbekanntem Namen): Ort wird als "erfunden" im Welt-Speicher angelegt, einem globalen Gebiet zugeordnet (Gebiet des Herkunftsorts / Parameter gebiet / Gebiet des Startorts), mit Rückweg zum Herkunftsort verlinkt (Hinweg und Gebiet verlinken ebenfalls zurück). Aus jedem lokalen/erfundenen Ort führt immer ein Ausgang ins Gebiet. Die KI bekommt "Sicherer Rückweg: ...". Fehlt ein direkter Weg zu einem bekannten Ziel, kommt ein Hinweis statt einer Ablehnung.
+- Position ist im Spielstand gespeichert (st.pos) und maßgeblich; der Welt-Speicher wird bei Abweichung angepasst.
+
+4) Welt-Speicher
+- Firestore (welten/{welt}/spieler, orte, allgemein) oder, wenn Firebase nicht eingerichtet/erreichbar ist, ein lokaler Ersatz im Browser (localStorage "adventure_world_<welt>") mit derselben Schnittstelle. Die Welt-Leiste zeigt "nur lokal". Firestore-Orte-Dokumente haben zusätzlich Felder: wege, enthaelt, erfunden, global, beschreibung, von.
+- Beim Wechsel von lokal zu Firestore gehen lokal erfundene Orte/Infos nicht nach Firestore (nur die Position kommt aus dem Spielstand).
+
+SPIELFUNKTIONEN (unverändert)
+-----------------------------
+Ressourcen mit Regel bei 0 und Spielende ("ende": true), Stats/Skills (0–10), Flaws, Inventar mit "Benutzen"-Button, XP und Level mit KI-geführtem Aufstieg (aufstieg_anwenden/aufstieg_abschliessen), Würfelproben (probe, App würfelt), aufklappbares Feld mit Würfen/Änderungen, Ressourcenleiste, Spieler Mama/Papa/Isabel/Annika mit eigenen Spielständen (localStorage adventure_save_<spieler>_<spiel>), Charakterauswahl pro Spiel, Sprachausgabe, Freitext-Eingabe, gemeinsame Welt (Positionen, Infos pro Ort, allgemeine Infos), Verbindungsdiagnose für Firestore.
+
+OFFENER PUNKT (Hauptproblem, weiterhin)
+---------------------------------------
+Die gemeinsame Welt über Firebase funktioniert nicht, weil Firestore antwortet mit:
+  404 NOT_FOUND: "The database (default) does not exist for project github-3b0da"
+Die Datenbank "(default)" existiert im Projekt github-3b0da nicht (laut Nutzer funktionierte die Welt früher; Ursache unklar).
+
+Nächster Schritt für den Nutzer:
+1. Unter https://console.firebase.google.com/project/github-3b0da/firestore "Datenbank erstellen": Firestore im Native-Modus (nicht Datastore), Edition Standard, Datenbank-ID (default), Standort eur3 oder europe-west3, Produktionsmodus.
+2. Regeln unter https://console.firebase.google.com/project/github-3b0da/firestore/rules setzen und veröffentlichen:
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /welten/{welt}/{document=**} {
+         allow read, write: if true;
+       }
+     }
+   }
+3. Spiel neu laden, in der Welt-Leiste "Welt neu laden". Das Startfenster sollte 🟢 zeigen.
+Bis dahin läuft das Spiel mit dem lokalen Ersatz-Speicher (nur dieses Gerät, keine anderen Spieler).
+
+Die Regeln sind bewusst offen (jeder mit der Adresse kann die Welt lesen/schreiben). Für ein Familienspiel vertretbar, aber keine privaten Daten speichern. Absicherung wäre über anonyme Anmeldung und angepasste Regeln möglich, wurde nicht umgesetzt.
+
+WICHTIGE HINWEISE FÜR DIE WEITERARBEIT
+--------------------------------------
+- Firebase-Projekt: github-3b0da. Der API-Schlüssel ist ein Browser-Schlüssel ohne Website-Einschränkung; die Web-Konfiguration ist öffentlich (bei Firebase üblich).
+- Der Assistent hat keinen Zugriff auf firestore.googleapis.com (nur GitHub und Paketquellen). Fehler müssen über Antworten des Nutzers analysiert werden. Keinen API-Schlüssel anfordern oder verwenden.
+- Ein früherer Gemini-Kontingent-Engpass wurde besprochen. Alternative: gemini-2.5-flash-lite mit mehr Tageskontingent, einstellbar über "model" in regeln.json. Jede Funktionsrunde und jeder stille Wiederholungsversuch zählt als Anfrage.
+- Die KI-Antworten werden per Funktionsaufruf erzeugt; antworten beendet die Runde. Wird es im selben Schritt wie probe, ressource_aendern, xp_vergeben (nur bei Levelaufstieg) oder position_setzen aufgerufen, weist die App es zurück.
+- Der Spielstand eines Spielers liegt nur im Browser des Geräts. Nur die Welt (Positionen, Infos, erfundene Orte) liegt auf Firebase (oder lokal als Ersatz).
+- Spielstände von früheren Versionen bleiben ladbar (SAVE_VERSION 2); st.pos fehlt dann und wird aus dem Welt-Speicher bzw. dem Startort ergänzt.
+- Technische Details für Änderungen an index.html: Top-Level-Variablen world, store, aiHistory, cycleTurns, turnWorld, turnMoved; Zug: step() -> loadWorld() -> buildContents() -> runTurn() -> bei Erfolg addMemory/commitHistory, bei Fehler rollbackTurn(). Karte: normKarte(), buildPlaces(), placeView(), exitsOf(), mapLines()/mapText()/mapOverviewText(). Speicher: makeFirestoreStore(), makeLocalStore().
+- Alle Ausgaben an den Nutzer auf Deutsch. Nach Änderungen die neue index.html speichern und alle geänderten Dateien gemeinsam hochladen (Deployment-Staus auf GitHub Pages vermeiden).
+
+TESTS
+-----
+Automatisierter Test mit jsdom (simulierte Gemini-Antworten, lokaler Welt-Speicher, Fake-Firestore-SDK), 72 Prüfungen, alle bestanden: voller/leichter Zug, Zyklus und Leeren, Laden, XP-Rücknahme und Wiederholung, Info-Doppelschutz, Karte lokal/global, erfundene Orte mit Rückweg, Kürzen ohne KI, Karten-Warnungen, Spiel ohne Karte/Orte, Firestore-Adapter. Das Testskript liegt nur im Arbeitsverzeichnis des Assistenten (/home/claude/work/test.js) und ist nicht Teil des Repos. Nicht getestet: echte Gemini-API, echtes Firestore, echter Browser (Sprachausgabe, Ordnerzugriff).
