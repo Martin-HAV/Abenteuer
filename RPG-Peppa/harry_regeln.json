@@ -8,7 +8,7 @@
     "pfad": "Erinnerungen/Harry"
   },
   "xpprolevel": 50,
-  "xpvergabe": "Vergib 5 bis 10 XP für Mut, Freundlichkeit, Hilfsbereitschaft und Neugier. Es gibt nie Abzüge.",
+  "xpvergabe": "为勇敢、友好、乐于助人和好奇心奖励5到10点经验值。永远不要扣分。",
   "proben": {
     "wuerfel": 10,
     "stufen": {
@@ -28,10 +28,11 @@
     }
   ],
   "aufstieg": {
-    "regeln": "Feiere das Aufsteigen fröhlich und kindgerecht, zum Beispiel mit einem Festessen in der Großen Halle. Halte es kurz und spielerisch.",
+    "regeln": "用开心又适合孩子的方式庆祝升级，比如在霍格沃茨大礼堂举办一场美味的庆祝大餐。保持内容简短、好玩。",
     "statpunkte": 0,
     "skillpunkte": 0,
     "maxwert": 10,
     "auffuellen": "alle"
   }
 }
+
