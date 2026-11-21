@@ -26,9 +26,9 @@
     {
       "titel": "Harry Potter und der Stein der Weisen (babydeutsch)",
       "beschreibung": "Ein ruhiges Zauberabenteuer auf Chinesisch für Kinder ab 9 Jahren.",
-      "regeln": "harry_deutsch_regeln.json",
-      "welt": "harry_deutsch_welt.json",
-      "charaktere": "harry_deutsch_charaktere.json",
+      "regeln": "Harry_deutsch_regeln.json",
+      "welt": "Harry_deutsch_welt.json",
+      "charaktere": "Harry_deutsch_charaktere.json",
       "vokabeln": "harry_vokabeln.json"
     }
   ]
