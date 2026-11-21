@@ -1,0 +1,37 @@
+{
+  "memoryresend": 3,
+  "erinnerung": {
+    "pro_zug": 100,
+    "max": 10000,
+    "kuerzen_auf": 8000,
+    "lokal": false,
+    "pfad": "Erinnerungen/Harry_deutsch"
+  },
+  "xpprolevel": 50,
+  "xpvergabe": "Vergib 5 bis 10 XP für Mut, Freundlichkeit, Hilfsbereitschaft und Neugier. Es gibt nie Abzüge.",
+  "proben": {
+    "wuerfel": 10,
+    "stufen": {
+      "leicht": 5,
+      "mittel": 8,
+      "schwer": 12,
+      "extrem": 16
+    }
+  },
+  "ressourcen": [
+    {
+      "id": "hauspunkte",
+      "name": "Hauspunkte",
+      "icon": "🏆",
+      "start": 0,
+      "max": 1000
+    }
+  ],
+  "aufstieg": {
+    "regeln": "Feiere den Aufstieg fröhlich und kindgerecht, zum Beispiel mit einem leckeren Festessen in der Großen Halle von Hogwarts. Halte es kurz und spielerisch.",
+    "statpunkte": 0,
+    "skillpunkte": 0,
+    "maxwert": 10,
+    "auffuellen": "alle"
+  }
+}

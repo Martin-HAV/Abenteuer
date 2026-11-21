@@ -1,0 +1,35 @@
+{
+  "charaktere": [
+    {
+      "id": "ni",
+      "name": "Ni",
+      "beschreibung": "Du bist ein neuer Schüler in Hogwarts.",
+      "background": "Du bist gerade in Hogwarts angekommen und hast einen Brief mit einem Siegel bekommen. Du weißt noch nicht, zu welchem Haus du gehören wirst.",
+      "stats": {
+        "Mut": 3,
+        "Neugier": 6,
+        "Freundlichkeit": 5
+      },
+      "skills": {
+        "Fliegen": 2,
+        "Zaubern": 2,
+        "Suchen": 3
+      },
+      "flaws": [
+        "Ist manchmal etwas ungeduldig"
+      ],
+      "inventar": [
+        {
+          "name": "Zauberstab",
+          "menge": 1,
+          "beschreibung": "Dein neuer Zauberstab"
+        },
+        {
+          "name": "Schulbuch",
+          "menge": 1,
+          "beschreibung": "Das Buch der Zaubersprüche"
+        }
+      ]
+    }
+  ]
+}
