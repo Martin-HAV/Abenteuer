@@ -48,6 +48,7 @@
   #log { position:relative; max-height:calc(100vh - 400px); min-height:240px; overflow-y:auto; padding-right:6px; }
   #log p { margin:0 0 14px; color:var(--dim); }
   #log p.last { color:var(--text); }
+  #log p.memout { white-space:pre-wrap; color:var(--text); background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; font-family:system-ui, sans-serif; font-size:.85rem; }
   .evbox { margin:0 0 16px; padding:4px 12px; background:var(--panel2); border:1px solid var(--line); border-radius:6px; font-family:system-ui, sans-serif; font-size:.85rem; color:var(--dim); }
   .evbox summary { cursor:pointer; color:var(--accent); padding:4px 0; }
   .evbox .evl { padding:6px 0; border-top:1px solid var(--line); color:var(--text); }
@@ -1650,9 +1651,20 @@ async function step(choice, retry) {
   savePresence();
 }
 
+// Gibt man im Freitext "Memory" ein, zeigt das Spiel das gespeicherte Gedächtnis (kein Zug, keine Anfrage an die KI)
+function showMemory() {
+  const rest = cfg.memoryresend - cycleTurns;
+  const ki = aiHistory.length === 0
+    ? 'Der nächste Zug schickt es dem Spielleiter.'
+    : `Der Spielleiter bekommt es mit dem nächsten vollen Zug, nach noch ${rest} ${rest === 1 ? 'Zug' : 'Zügen'}.`;
+  const log = $('log');
+  log.appendChild(el('p', 'memout', `🧠 Gedächtnis (${memory.length} von ${cfg.erinnerung.max} Zeichen)\n${ki}\n\n${memory}`));
+  log.scrollTop = log.scrollHeight;
+}
 function act(text) {
   text = String(text || '').trim();
   if (busy || !text || !current || st.gameover) return;
+  if (/^\/?memory$/i.test(text)) { $('free').value = ''; showMemory(); return; }
   speechSynthesis.cancel();
   $('log').appendChild(el('p', '', '➤ ' + text));
   $('free').value = '';
